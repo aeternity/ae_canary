@@ -13,11 +13,33 @@ defmodule AeCanaryWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # Our pipeline implements "maybe" authenticated. We'll use the `:ensure_auth` below for when we need to make sure someone is logged in.
+  pipeline :auth do
+    plug AeCanaryWeb.Accounts.Pipeline
+  end
+
+  # We use ensure_auth to fail if there is no one logged in
+  pipeline :ensure_auth do
+    plug Guardian.Plug.EnsureAuthenticated
+  end
+
+
+  # Maybe logged in routes
   scope "/", AeCanaryWeb do
-    pipe_through :browser
+    pipe_through [:browser, :auth]
 
     get "/", PageController, :index
+    get "/login", SessionController, :new
+    post "/login", SessionController, :login
+    get "/logout", SessionController, :logout
+
     resources "/users", UserController
+    # Definitely logged in scope
+    scope "/"  do
+      pipe_through [:ensure_auth]
+
+      get "/protected", PageController, :protected
+    end
   end
 
   # Other scopes may use custom stacks.

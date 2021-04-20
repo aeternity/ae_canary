@@ -5,8 +5,8 @@ defmodule AeCanary.Accounts do
 
   import Ecto.Query, warn: false
   alias AeCanary.Repo
-
   alias AeCanary.Accounts.User
+  alias Argon2
 
   @doc """
   Returns the list of users.
@@ -100,5 +100,20 @@ defmodule AeCanary.Accounts do
   """
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
+  end
+
+  def authenticate_user(email, plain_text_password) do
+      query = from u in User, where: u.email == ^email
+      case Repo.one(query) do
+        nil ->
+          Argon2.no_user_verify()
+          {:error, :invalid_credentials}
+        user ->
+          if Argon2.verify_pass(plain_text_password, user.pass_hash) do
+            {:ok, user}
+          else
+            {:error, :invalid_credentials}
+          end
+      end
   end
 end

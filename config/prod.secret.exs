@@ -11,6 +11,13 @@ database_url =
     For example: ecto://USER:PASS@HOST/DATABASE
     """
 
+guardian_secret_key =
+  System.get_env("GUARDIAN_SECRET_KEY") ||
+    raise """
+    environment variable GUARDIAN_SECRET_KEY is missing.
+    Please run mix guardian.gen.secret
+    """
+
 config :ae_canary, AeCanary.Repo,
   # ssl: true,
   url: database_url,
@@ -29,6 +36,10 @@ config :ae_canary, AeCanaryWeb.Endpoint,
     transport_options: [socket_opts: [:inet6]]
   ],
   secret_key_base: secret_key_base
+
+config :ae_canary, AeCanary.Accounts.Guardian,
+  secret_key: guardian_secret_key 
+
 
 # ## Using releases (Elixir v1.9+)
 #

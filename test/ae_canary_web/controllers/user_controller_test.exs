@@ -3,8 +3,8 @@ defmodule AeCanaryWeb.UserControllerTest do
 
   alias AeCanary.Accounts
 
-  @create_attrs %{comment: "some comment", email: "some email", name: "some name", pass_hash: "some pass_hash", role: "some role"}
-  @update_attrs %{comment: "some updated comment", email: "some updated email", name: "some updated name", pass_hash: "some updated pass_hash", role: "some updated role"}
+  @create_attrs %{comment: "some comment", email: "some email", name: "some name", pass_hash: "some pass_hash", role: "admin"}
+  @update_attrs %{comment: "some updated comment", email: "some updated email", name: "some updated name", pass_hash: "some updated pass_hash", role: "user"}
   @invalid_attrs %{comment: nil, email: nil, name: nil, pass_hash: nil, role: nil}
 
   def fixture(:user) do
