@@ -4,7 +4,18 @@ defmodule AeCanaryWeb.Accounts.CheckAdmin do
   def init(opts), do: opts
   def call(conn, _opts) do
     current_user = Guardian.Plug.current_resource(conn)
-    if current_user.role == :admin do
+
+    is_admin =
+      case current_user do
+        nil -> false
+        _ ->
+          if current_user.role == :admin do
+            true
+          else
+            false
+          end
+      end
+    if is_admin do
       conn
     else
       conn
