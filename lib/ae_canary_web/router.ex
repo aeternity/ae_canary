@@ -23,6 +23,10 @@ defmodule AeCanaryWeb.Router do
     plug Guardian.Plug.EnsureAuthenticated
   end
 
+  pipeline :ensure_admin do
+    plug AeCanaryWeb.Accounts.CheckAdmin
+  end
+
 
   # Maybe logged in routes
   scope "/", AeCanaryWeb do
@@ -33,12 +37,18 @@ defmodule AeCanaryWeb.Router do
     post "/login", SessionController, :login
     get "/logout", SessionController, :logout
 
-    resources "/users", UserController
     # Definitely logged in scope
-    scope "/"  do
+    scope "/" do
       pipe_through [:ensure_auth]
 
       get "/protected", PageController, :protected
+    end
+
+    # administrator pages 
+    scope "/" do
+      pipe_through [:ensure_auth, :ensure_admin]
+
+      resources "/users", UserController
     end
   end
 
