@@ -19,7 +19,7 @@ defmodule AeCanary.Accounts.User do
     user
     |> cast(attrs, [:email, :password, :pass_hash, :name, :role, :comment])
     |> put_password_hash()
-    |> validate_required([:email, :pass_hash, :name, :role, :comment])
+    |> validate_required([:email, :pass_hash, :name, :role])
     |> unique_constraint(:email)
 
   end

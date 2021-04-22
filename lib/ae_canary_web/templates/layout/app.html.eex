@@ -9,25 +9,64 @@
     <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </head>
   <body>
-    <header>
-      <section class="container">
-        <nav role="navigation">
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
-            <% end %>
-          </ul>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
-        </a>
-      </section>
-    </header>
-    <main role="main" class="container">
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-      <%= @inner_content %>
+    <main>
+      <div class="container py-3">
+        <div class="py-2 border-bottom mb-3">
+          <div class="d-flex flex-wrap justify-content-center">
+            <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto">
+              <h3>Ae Canary</h3>
+            </div>
+            <div class="text-end">
+              <%= if  assigns[:current_user] do %>
+                <div class="dropdown">
+                  <button class="btn btn-light dropdown-toggle" type="button" id="accountDropdownMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <%= @current_user.email %>
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="accountDropdownMenu">
+                    <li><a class="dropdown-item" href="#">My account</a></li>
+                    <%= if @current_user.role == :admin do %>
+                      <li><%= link "All accounts", to: Routes.user_path(@conn, :index), class: "dropdown-item" %></li>
+                    <% end %>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><%= link "Log out", to: Routes.session_path(@conn, :logout), class: "dropdown-item" %></li>
+                  </ul>
+                </div>
+              <% else %>
+                <%= link "Login", to: Routes.session_path(@conn, :new), class: "btn btn-primary" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        <%= @inner_content %>
+      </div>
     </main>
+
+    <div class="container py-3">
+      <footer class="pt-4 my-md-5 pt-md-5 border-top">
+        <div class="row">
+          <div class="col-6 col-md">
+            <h5>AeCanary</h5>
+            <ul class="list-unstyled text-small">
+              <li class="mb-1"><a class="link-secondary text-decoration-none" href="https://github.com/aeternity/ae_canary">GitHub repo</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-md">
+            <h5>About Aeternity</h5>
+            <ul class="list-unstyled text-small">
+              <li class="mb-1"><a class="link-secondary text-decoration-none" href="https://aeternity.com">Aeternity</a></li>
+              <li class="mb-1"><a class="link-secondary text-decoration-none" href="https://www.aeternity-foundation.org">Aeternity Crypto Foundation</a></li>
+              <li class="mb-1"><a class="link-secondary text-decoration-none" href="https://forum.aeternity.com">Official forum</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-md">
+            <h5>Explorers</h5>
+            <ul class="list-unstyled text-small">
+              <li class="mb-1"><a class="link-secondary text-decoration-none" href="https://explorer.mainnet.aeternity.io">MDW based explorer</a></li>
+              <li class="mb-1"><a class="link-secondary text-decoration-none" href="https://www.aeknow.org">AEKnow</a></li>
+            </ul>
+          </div>
+        </div>
+      </footer>
+    </div>
   </body>
 </html>

@@ -1,3 +1,4 @@
+<div class="row g-3">
 <%= form_for @changeset, @action, fn f -> %>
   <%= if @changeset.action do %>
     <div class="alert alert-danger">
@@ -5,29 +6,45 @@
     </div>
   <% end %>
 
-  <%= label f, :email %>
-  <%= text_input f, :email %>
-  <%= error_tag f, :email %>
+  <div class="row g-3 mb-3">
+    <div class="col-sm-4">
+      <%= label f, :email, class: "form-label" %>
+      <%= email_input f, :email, class: "form-control", placeholder: "joe@doe.com", maxlength: 254 %>
+      <%= error_tag f, :email %>
+    </div>
 
+    <div class="col-sm-4">
+      <%= label f, :name, class: "form-label"  %>
+      <%= text_input f, :name, class: "form-control", maxlength: 254 %>
+      <%= error_tag f, :name %>
+    </div>
+    <div class="col-sm-4">
+      <% role = case @changeset.data.role do nil -> "user"; r -> r end %>
+      <%= label f, :role, class: "form-label"  %>
+      <%= select f, :role, ["Admin": "admin", "User": "user", "Archived user": "archived"], class: "form-select", selected: role %>
+    </div>
+  </div>
   <%= if assigns[:new_user] do %>
-    <%= label f, :password %>
-    <%= text_input f, :password %>
-    <%= error_tag f, :password %>
-  <% end %>
+    <div class="row g-3 mb-3">
+      <div class="col-sm-4">
+        <%= label f, :password, class: "form-label" %>
+        <%= password_input f, :password, class: "form-control", maxlength: 254 %>
+        <%= error_tag f, :password %>
+      </div>
+    </div>
+    <% end %>
 
-  <%= label f, :name %>
-  <%= text_input f, :name %>
-  <%= error_tag f, :name %>
 
-  <%= label f, :role %>
-  <%= text_input f, :role %>
-  <%= error_tag f, :role %>
+  <div class="row g-3 mb-3">
+    <div class="col-sm-12">
+      <%= label f, :comment, "Comment (Optional, a maximum of 254 chars)", class: "form-label" %>
+      <%= textarea f, :comment, class: "form-control", maxlength: 254 %>
+      <%= error_tag f, :comment %>
+    </div>
+  </div>
 
-  <%= label f, :comment %>
-  <%= text_input f, :comment %>
-  <%= error_tag f, :comment %>
-
-  <div>
-    <%= submit "Save" %>
+  <div class="mb-3">
+    <%= submit "Save", class: "btn btn-primary" %>
   </div>
 <% end %>
+</div>

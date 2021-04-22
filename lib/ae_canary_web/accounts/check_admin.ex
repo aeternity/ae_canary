@@ -1,5 +1,4 @@
 defmodule AeCanaryWeb.Accounts.CheckAdmin do
-  import Phoenix.Controller
   import Plug.Conn
   def init(opts), do: opts
   def call(conn, _opts) do
