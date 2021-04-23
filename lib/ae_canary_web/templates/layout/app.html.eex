@@ -23,7 +23,7 @@
                     <%= @current_user.email %>
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="accountDropdownMenu">
-                    <li><a class="dropdown-item" href="#">My account</a></li>
+                    <li><%= link "My account", to: Routes.user_path(@conn, :show_my), class: "dropdown-item" %></li>
                     <%= if @current_user.role == :admin do %>
                       <li><%= link "All accounts", to: Routes.user_path(@conn, :index), class: "dropdown-item" %></li>
                     <% end %>
@@ -35,6 +35,20 @@
                 <%= link "Login", to: Routes.session_path(@conn, :new), class: "btn btn-primary" %>
               <% end %>
             </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <%
+            info = get_flash(@conn, :info)
+            error = get_flash(@conn, :error)
+            %>
+            <%= if info do %>
+              <div class="alert alert-info" role="alert"><%= info %></div>
+            <% end %>
+            <%= if error do %>
+              <div class="alert alert-danger" role="alert"><%= error %></div>
+            <% end %>
           </div>
         </div>
         <%= @inner_content %>

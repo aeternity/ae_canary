@@ -96,3 +96,20 @@ By default the `priv/repo/seeds.exs` inserts the following *test* accounts:
 As you can see, their email addressed are not valid and should be used in
 tests only. Please do not use them in production.
 
+# TODO
+
+- [x] Account management: accounts can be created, updated and deleted. Only
+  admins can create accounts. Every account can change their name, email
+  address and password.
+
+- [ ] Pool support for fetching data from MDW. MDW address is configurable.
+
+- [ ] Introduce tainted addresses. Track their balances on a regular basis.
+
+- [ ] Introduce exchange accounts. Track their exposure on a regular basis.
+
+- [ ] Revisit the index page and dashboard
+
+- [ ] Log events.
+
+- [ ] Send alerts via email/Telegram bot.

@@ -1,4 +1,9 @@
+<% my_account = if assigns[:my_account] do true else false end  %>
+<%= if my_account do %>
+<h4>My account</h4>
+<% else %>
 <h4>Show User</h4>
+<% end %>
 
 <ul>
 
@@ -17,12 +22,19 @@
     <%= @user.role %>
   </li>
 
+  <%= if not my_account do %>
   <li>
     <strong>Comment:</strong>
     <%= @user.comment %>
   </li>
+  <% end %>
 
 </ul>
-
-<span><%= link "Edit", to: Routes.user_path(@conn, :edit, @user) %></span>
-<span><%= link "Back", to: Routes.user_path(@conn, :index) %></span>
+<%= if my_account do %>
+<%= link "Edit", to: Routes.user_path(@conn, :edit_my), class: "btn btn-light" %>
+<%= link "Change password", to: Routes.user_path(@conn, :edit_my_password), class: "btn btn-light" %>
+<% else %>
+<%= link "Edit", to: Routes.user_path(@conn, :edit, @user), class: "btn btn-light" %>
+<%= link "Change password", to: Routes.user_path(@conn, :edit_password, @user), class: "btn btn-light" %>
+<div class="mt-3"><%= link "Back", to: Routes.user_path(@conn, :index) %></div>
+<% end %>

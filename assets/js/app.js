@@ -11,5 +11,6 @@
 //     import {Socket} from "phoenix"
 //     import socket from "./socket"
 //
+import "phoenix_html"
 import 'bootstrap'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';

@@ -1,50 +1,57 @@
+<% my_account = if assigns[:my_account] do true else false end  %>
 <div class="row g-3">
-<%= form_for @changeset, @action, fn f -> %>
-  <%= if @changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
-    </div>
-  <% end %>
+  <%= form_for @changeset, @action, fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger">
+        <p>Oops, something went wrong! Please check the errors below.</p>
+      </div>
+    <% end %>
 
-  <div class="row g-3 mb-3">
-    <div class="col-sm-4">
-      <%= label f, :email, class: "form-label" %>
-      <%= email_input f, :email, class: "form-control", placeholder: "joe@doe.com", maxlength: 254 %>
-      <%= error_tag f, :email %>
-    </div>
-
-    <div class="col-sm-4">
-      <%= label f, :name, class: "form-label"  %>
-      <%= text_input f, :name, class: "form-control", maxlength: 254 %>
-      <%= error_tag f, :name %>
-    </div>
-    <div class="col-sm-4">
-      <% role = case @changeset.data.role do nil -> "user"; r -> r end %>
-      <%= label f, :role, class: "form-label"  %>
-      <%= select f, :role, ["Admin": "admin", "User": "user", "Archived user": "archived"], class: "form-select", selected: role %>
-    </div>
-  </div>
-  <%= if assigns[:new_user] do %>
     <div class="row g-3 mb-3">
       <div class="col-sm-4">
-        <%= label f, :password, class: "form-label" %>
-        <%= password_input f, :password, class: "form-control", maxlength: 254 %>
-        <%= error_tag f, :password %>
+        <%= label f, :email, class: "form-label" %>
+        <%= email_input f, :email, class: "form-control", placeholder: "joe@doe.com", maxlength: 254 %>
+        <%= error_tag f, :email %>
       </div>
+
+      <div class="col-sm-4">
+        <%= label f, :name, class: "form-label"  %>
+        <%= text_input f, :name, class: "form-control", maxlength: 254 %>
+        <%= error_tag f, :name %>
+      </div>
+      <%= if not my_account do %>
+      <div class="col-sm-4">
+        <% role = case @changeset.data.role do nil -> "user"; r -> r end %>
+        <%= label f, :role, class: "form-label"  %>
+        <%= select f, :role, ["Admin": "admin", "User": "user", "Archived user": "archived"], class: "form-select", selected: role %>
+      </div>
+      <% end %>
     </div>
+    <%= if not my_account do %>
+      <%= if assigns[:new_user] do %>
+        <div class="row g-3 mb-3">
+          <div class="col-sm-4">
+            <%= label f, :password, class: "form-label" %>
+            <%= password_input f, :password, class: "form-control", maxlength: 254 %>
+            <%= error_tag f, :password %>
+          </div>
+        </div>
+      <% end %>
     <% end %>
 
 
-  <div class="row g-3 mb-3">
-    <div class="col-sm-12">
-      <%= label f, :comment, "Comment (Optional, a maximum of 254 chars)", class: "form-label" %>
-      <%= textarea f, :comment, class: "form-control", maxlength: 254 %>
-      <%= error_tag f, :comment %>
-    </div>
-  </div>
+    <%= if not my_account do %>
+      <div class="row g-3 mb-3">
+        <div class="col-sm-12">
+          <%= label f, :comment, "Comment (Optional, a maximum of 254 chars)", class: "form-label" %>
+          <%= textarea f, :comment, class: "form-control", maxlength: 254 %>
+          <%= error_tag f, :comment %>
+        </div>
+      </div>
+    <% end %>
 
-  <div class="mb-3">
-    <%= submit "Save", class: "btn btn-primary" %>
-  </div>
-<% end %>
+    <div class="mb-3">
+      <%= submit "Save", class: "btn btn-primary" %>
+    </div>
+  <% end %>
 </div>

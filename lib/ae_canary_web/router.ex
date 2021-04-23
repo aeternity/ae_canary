@@ -42,6 +42,15 @@ defmodule AeCanaryWeb.Router do
       pipe_through [:ensure_auth]
 
       get "/protected", PageController, :protected
+
+      ## current user account management
+      scope "/account" do
+        get "/", UserController, :show_my
+        get "/edit", UserController, :edit_my
+        put "/", UserController, :update_my
+        get "/password", UserController, :edit_my_password
+        post "/password", UserController, :set_my_password
+      end
     end
 
     # administrator pages 
@@ -49,6 +58,8 @@ defmodule AeCanaryWeb.Router do
       pipe_through [:ensure_auth, :ensure_admin]
 
       resources "/users", UserController
+      get "/users/:id/password", UserController, :edit_password
+      post "/users/:id/password", UserController, :set_password
     end
   end
 
