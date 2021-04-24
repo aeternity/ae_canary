@@ -1,6 +1,4 @@
 defmodule AeCanary.Mdw.Api do
-  ## TODO: make the MDW url configurable
-  @mdw "http://18.156.189.185/mdw/"
 
   @spec status() :: {:ok, %{mdw_version: String.t,
                             node_version: String.t,
@@ -12,7 +10,8 @@ defmodule AeCanary.Mdw.Api do
   end
 
   defp get(uri, expected_fields) do
-    case HTTPoison.get(@mdw <> uri) do
+    mdw = Application.fetch_env!(:ae_canary, :mdw_url)
+    case HTTPoison.get(mdw <> uri) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, parse_body(body, expected_fields)} 
       {:ok, %HTTPoison.Response{status_code: 404}} ->

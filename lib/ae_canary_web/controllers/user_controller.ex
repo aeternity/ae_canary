@@ -53,7 +53,7 @@ defmodule AeCanaryWeb.UserController do
 
     sanitized_params = Map.take(user_params, ["name", "email"])
     case Accounts.update_user(user, sanitized_params) do
-      {:ok, user} ->
+      {:ok, _user} ->
         conn
         |> put_flash(:info, "User updated successfully.")
         |> redirect(to: Routes.user_path(conn, :show_my))
@@ -117,7 +117,7 @@ defmodule AeCanaryWeb.UserController do
     user = current_user(conn)
 
     case Accounts.update_user(user, %{password: password}) do
-      {:ok, user} ->
+      {:ok, _user} ->
         conn
         |> put_flash(:info, "Your account had been updated successfully.")
         |> redirect(to: Routes.user_path(conn, :show_my))

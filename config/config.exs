@@ -8,7 +8,8 @@
 use Mix.Config
 
 config :ae_canary,
-  ecto_repos: [AeCanary.Repo]
+  ecto_repos: [AeCanary.Repo],
+  mdw_url: "http://18.156.189.185/mdw/"
 
 # Configures the endpoint
 config :ae_canary, AeCanaryWeb.Endpoint,

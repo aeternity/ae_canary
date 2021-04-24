@@ -14,7 +14,7 @@ defmodule AeCanary.Mdw do
     :poolboy.transaction(
       :mdw_worker,
       fn pid ->
-        res = AeCanary.Mdw.Worker.exec(pid, fetch_fun)
+        AeCanary.Mdw.Worker.exec(pid, fetch_fun)
       end,
       @timeout)
   end

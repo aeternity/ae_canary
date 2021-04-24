@@ -3,8 +3,6 @@ defmodule AeCanary.Application do
   # for more information on OTP Applications
   @moduledoc false
 
-  import Supervisor.Spec
-
   use Application
 
   def start(_type, _args) do
