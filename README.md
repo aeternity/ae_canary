@@ -102,7 +102,7 @@ tests only. Please do not use them in production.
   admins can create accounts. Every account can change their name, email
   address and password.
 
-- [ ] Pool support for fetching data from MDW. MDW address is configurable.
+- [x] Pool support for fetching data from MDW. MDW address is configurable.
 
 - [ ] Introduce tainted addresses. Track their balances on a regular basis.
 

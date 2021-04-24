@@ -1,5 +1,5 @@
 <% my_account = if assigns[:my_account] do true else false end  %>
-<% if my_account do %>
+<%= if my_account do %>
 <h4>Edit my account</h4>
 <% else %>
 <h4>Edit User</h4>

@@ -3,6 +3,8 @@ defmodule AeCanary.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  import Supervisor.Spec
+
   use Application
 
   def start(_type, _args) do
@@ -14,14 +16,17 @@ defmodule AeCanary.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: AeCanary.PubSub},
       # Start the Endpoint (http/https)
-      AeCanaryWeb.Endpoint
+      AeCanaryWeb.Endpoint,
       # Start a worker by calling: AeCanary.Worker.start_link(arg)
       # {AeCanary.Worker, arg}
+      :poolboy.child_spec(:worker, AeCanary.Mdw.poolboy_spec()),
+      AeCanary.Mdw.Cache
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: AeCanary.Supervisor]
+    HTTPoison.start
     Supervisor.start_link(children, opts)
   end
 

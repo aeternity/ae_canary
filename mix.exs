@@ -20,7 +20,7 @@ defmodule AeCanary.MixProject do
   def application do
     [
       mod: {AeCanary.Application, []},
-      extra_applications: [:logger, :runtime_tools, :guardian]
+      extra_applications: [:logger, :runtime_tools, :guardian, :httpoison]
     ]
   end
 
@@ -46,7 +46,10 @@ defmodule AeCanary.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:guardian, "~> 2.0"},
-      {:argon2_elixir, "~> 2.0"}
+      {:argon2_elixir, "~> 2.0"},
+      {:poolboy, "~> 1.5.2"},
+      {:httpoison, "~> 1.8"},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
     ]
   end
 
