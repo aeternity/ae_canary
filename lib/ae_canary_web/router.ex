@@ -41,8 +41,6 @@ defmodule AeCanaryWeb.Router do
     scope "/" do
       pipe_through [:ensure_auth]
 
-      get "/protected", PageController, :protected
-
       ## current user account management
       scope "/account" do
         get "/", UserController, :show_my

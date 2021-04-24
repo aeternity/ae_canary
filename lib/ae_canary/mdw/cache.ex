@@ -56,6 +56,9 @@ defmodule AeCanary.Mdw.Cache do
     data = struct(Data, mdw_data)
     {:noreply, %{state | data: data}}
   end
+  def handle_info({:update_data, :failed}, state) do
+    {:noreply, %{state | data: nil}}
+  end
 
   # API
   def get() do
@@ -65,11 +68,13 @@ defmodule AeCanary.Mdw.Cache do
   def update_data({:ok, data}) do
     send(__MODULE__, {:update_data, data})
   end
-  def update_data(:not_found) do
+  def update_data({:error_code, _}) do
     ## TODO: log this event
+    send(__MODULE__, {:update_data, :failed})
   end
   def update_data({:error, _reason}) do
     ## TODO: log this event
+    send(__MODULE__, {:update_data, :failed})
   end
 
   # Internal

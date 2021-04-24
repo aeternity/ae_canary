@@ -1,3 +1,15 @@
-<h2>Protected Page</h2>
-<p>You can only see this page if you are logged in</p>
-<p>You're logged in as <%= @current_user.name %></p>
+<h2>Internal dashboard</h2>
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">MDW</h5>
+    <% mdw = AeCanary.Mdw.Cache.get %>
+    <%= if mdw do %>
+    <h6 class="card-subtitle mb-2 text-success">connected</h6>
+    <p class="text-muted">version <%= mdw.mdw_version %>, sync<%= if mdw.mdw_synced do %>ed<% else %>ing<% end %></p>
+    <p class="text-muted">node version <%= mdw.node_version %>, sync<%= if mdw.node_syncing do %>ing<% else %>ed<% end %></p>
+    <% else %>
+    <h6 class="card-subtitle mb-2 text-danger">disconnected</h6>
+    <% end %>
+    <a href="#" class="card-link">More</a>
+  </div>
+</div>

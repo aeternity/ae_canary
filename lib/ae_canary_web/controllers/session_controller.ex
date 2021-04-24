@@ -8,7 +8,7 @@ defmodule AeCanaryWeb.SessionController do
     changeset = Accounts.change_user(%User{})
     maybe_user = Guardian.Plug.current_resource(conn)
     if maybe_user do
-      redirect(conn, to: "/protected")
+      redirect(conn, to: Routes.page_path(conn, :index))
     else
       render(conn, "new.html", changeset: changeset, action: Routes.session_path(conn, :login))
     end
@@ -33,9 +33,9 @@ defmodule AeCanaryWeb.SessionController do
   defp login_reply({:ok, user}, conn) do
     conn
     |> put_flash(:info, "Welcome back, #{user.name}!")
-    |> Guardian.Plug.sign_in(user)   #This module's full name is AeCanaryWeb.Accounts.Guardian.Plug,
-    |> redirect(to: "/protected")    #and the arguments specified in the Guardian.Plug.sign_in()
-  end                                #docs are not applicable here.
+    |> Guardian.Plug.sign_in(user)                        #This module's full name is AeCanaryWeb.Accounts.Guardian.Plug,
+    |> redirect(to: Routes.page_path(conn, :index))   #and the arguments specified in the Guardian.Plug.sign_in()
+  end                                                     #docs are not applicable here.
   defp login_reply({:error, reason}, conn) do
     conn
     |> put_flash(:error, to_string(reason))

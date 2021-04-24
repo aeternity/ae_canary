@@ -14,9 +14,9 @@ defmodule AeCanaryWeb.SessionControllerTest do
 
     test "Successful login", %{conn: conn, user: user} do
       conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: Helper.default_password})
-      assert redirected_to(conn) == Routes.page_path(conn, :protected)
-      conn = get(conn, Routes.page_path(conn, :protected))
-      assert html_response(conn, 200) =~ "Protected Page"
+      assert redirected_to(conn) == Routes.page_path(conn, :index)
+      conn = get(conn, Routes.page_path(conn, :index))
+      assert html_response(conn, 200) =~ "Internal dashboard"
     end
 
     test "Unsuccessful login", %{conn: conn, user: user} do
@@ -46,9 +46,9 @@ defmodule AeCanaryWeb.SessionControllerTest do
 
     test "Successful login", %{conn: conn, user: user} do
       conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: Helper.default_password})
-      assert redirected_to(conn) == Routes.page_path(conn, :protected)
-      conn = get(conn, Routes.page_path(conn, :protected))
-      assert html_response(conn, 200) =~ "Protected Page"
+      assert redirected_to(conn) == Routes.page_path(conn, :index)
+      conn = get(conn, Routes.page_path(conn, :index))
+      assert html_response(conn, 200) =~ "Internal dashboard"
     end
 
     test "Unsuccessful login", %{conn: conn, user: user} do
