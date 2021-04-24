@@ -113,3 +113,5 @@ tests only. Please do not use them in production.
 - [ ] Log events.
 
 - [ ] Send alerts via email/Telegram bot.
+
+- [ ] Add docker support.
