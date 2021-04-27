@@ -52,8 +52,7 @@ defmodule AeCanary.Mdw.Cache do
     refresh_data()
     {:noreply, start_refresh_timer(state)}
   end
-  def handle_info({:update_data, mdw_data}, state) do
-    data = struct(Data, mdw_data)
+  def handle_info({:update_data, data}, state) do
     {:noreply, %{state | data: data}}
   end
   def handle_info({:update_data, :failed}, state) do

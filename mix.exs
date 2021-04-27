@@ -50,6 +50,7 @@ defmodule AeCanary.MixProject do
       {:poolboy, "~> 1.5.2"},
       {:httpoison, "~> 1.8"},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:poison, "~> 3.1"},
     ]
   end
 
