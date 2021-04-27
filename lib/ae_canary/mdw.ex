@@ -20,7 +20,7 @@ defmodule AeCanary.Mdw do
   end
 
   def async_fetch(fetch_fun, callback) do
-    spawn(
+    Task.start_link(
       fn ->
         res = fetch(fetch_fun)
         callback.(res)
