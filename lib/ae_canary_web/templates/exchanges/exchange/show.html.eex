@@ -1,0 +1,18 @@
+<h4>Show Exchange</h4>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @exchange.name %>
+  </li>
+
+  <li>
+    <strong>Comment:</strong>
+    <%= @exchange.comment %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.exchanges_exchange_path(@conn, :edit, @exchange) %></span>
+<span><%= link "Back", to: Routes.exchanges_exchange_path(@conn, :index) %></span>

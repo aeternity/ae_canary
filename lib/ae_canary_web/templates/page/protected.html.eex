@@ -1,4 +1,5 @@
 <h2>Internal dashboard</h2>
+<h4 class="mt-4">System health</h4>
 <div class="card" style="width: 18rem;">
   <div class="card-body">
     <h5 class="card-title">MDW</h5>
@@ -11,5 +12,13 @@
     <h6 class="card-subtitle mb-2 text-danger">disconnected</h6>
     <% end %>
     <a href="#" class="card-link">More</a>
+  </div>
+</div>
+<h4 class="mt-4">Services</h4>
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">Exchanges exposure</h5>
+    <%= link "more", to: "#", class: "card-link" %>
+    <%= link "All exchanges", to: Routes.exchanges_exchange_path(@conn, :index), class: "card-link" %>
   </div>
 </div>

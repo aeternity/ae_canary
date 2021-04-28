@@ -55,9 +55,14 @@ defmodule AeCanaryWeb.Router do
     scope "/" do
       pipe_through [:ensure_auth, :ensure_admin]
 
+      ## user management
       resources "/users", UserController
       get "/users/:id/password", UserController, :edit_password
       post "/users/:id/password", UserController, :set_password
+
+      scope "/exchanges", Exchanges, as: :exchanges do
+        resources "/exchanges", ExchangeController
+      end
     end
   end
 

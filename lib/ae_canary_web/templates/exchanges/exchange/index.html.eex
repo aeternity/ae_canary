@@ -1,0 +1,29 @@
+<h4>Listing Exchanges</h4>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Comment</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% max_comment_length = 30 %>
+    <%= for exchange <- @exchanges do %>
+    <tr>
+      <td><%= exchange.name %></td>
+      <td><%= String.slice(exchange.comment, 0, max_comment_length)%><%= if exchange.comment != nil and String.length(exchange.comment) > max_comment_length do %>...<% end %></td>
+
+      <td>
+        <span><%= link "Show", to: Routes.exchanges_exchange_path(@conn, :show, exchange), class: "btn btn-light btn-sm" %></span>
+        <span><%= link "Edit", to: Routes.exchanges_exchange_path(@conn, :edit, exchange), class: "btn btn-light btn-sm" %></span>
+        <span><%= link "Delete", to: Routes.exchanges_exchange_path(@conn, :delete, exchange), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-light btn-sm" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Exchange", to: Routes.exchanges_exchange_path(@conn, :new), class: "btn btn-primary" %></span>

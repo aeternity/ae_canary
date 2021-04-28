@@ -13,7 +13,7 @@
   </thead>
   <tbody>
     <% max_comment_length = 30 %>
-<%= for user <- @users do %>
+    <%= for user <- @users do %>
     <tr>
       <td><%= user.email %></td>
       <td><%= user.name %></td>
