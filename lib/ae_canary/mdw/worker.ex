@@ -13,5 +13,5 @@ defmodule AeCanary.Mdw.Worker do
     {:reply, fun.(), state}
   end
 
-  def exec(pid, fun), do: GenServer.call(pid, {:exec, fun})
+  def exec(pid, fun), do: GenServer.call(pid, {:exec, fun}, :infinity)
 end

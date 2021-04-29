@@ -1,0 +1,5 @@
+<h4>Edit Address</h4>
+
+<%= render "form.html", Map.put(assigns, :action, Routes.exchanges_address_path(@conn, :update, @address)) %>
+
+<span><%= link "All addresses", to: Routes.exchanges_address_path(@conn, :index) %></span>

@@ -27,7 +27,7 @@ defmodule AeCanaryWeb.Exchanges.ExchangeController do
   end
 
   def show(conn, %{"id" => id}) do
-    exchange = Exchanges.get_exchange!(id)
+    exchange = Exchanges.get_exchange_and_preload!(id)
     render(conn, "show.html", exchange: exchange)
   end
 
@@ -58,5 +58,9 @@ defmodule AeCanaryWeb.Exchanges.ExchangeController do
     conn
     |> put_flash(:info, "Exchange deleted successfully.")
     |> redirect(to: Routes.exchanges_exchange_path(conn, :index))
+  end
+
+  def dashboard(conn, _) do
+    render(conn, "big_dashboard.html")
   end
 end

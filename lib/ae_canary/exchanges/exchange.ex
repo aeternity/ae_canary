@@ -7,6 +7,7 @@ defmodule AeCanary.Exchanges.Exchange do
   schema "exchanges" do
     field :comment, :string
     field :name, :string
+    has_many :addresses, AeCanary.Exchanges.Address 
 
     timestamps()
   end

@@ -1,0 +1,29 @@
+<h4>Listing on-chain addresses</h4>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Addr</th>
+      <th>Comment</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<% max_comment_length = 30 %>
+<%= for address <- @addresses do %>
+    <tr>
+      <td><%= address.addr %></td>
+      <td><%= String.slice(address.comment, 0, max_comment_length)%><%= if address.comment != nil and String.length(address.comment) > max_comment_length do %>...<% end %></td>
+
+      <td>
+        <span><%= link "Show", to: Routes.exchanges_address_path(@conn, :show, address), class: "btn btn-light" %></span>
+        <span><%= link "Edit", to: Routes.exchanges_address_path(@conn, :edit, address), class: "btn btn-light" %></span>
+        <span><%= link "Delete", to: Routes.exchanges_address_path(@conn, :delete, address), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-light" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Address", to: Routes.exchanges_address_path(@conn, :new), class: "btn btn-light" %></span>

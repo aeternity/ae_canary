@@ -1,0 +1,18 @@
+<h4>Address</h4>
+<p>This is a <%= link @address.exchange.name, to: Routes.exchanges_exchange_path(@conn, :show, @address.exchange), class: "text-primary text-decoration-none" %> address.
+
+<ul>
+
+  <li>
+    <strong>Addr:</strong>
+    <%= @address.addr %>
+  </li>
+
+  <li>
+    <strong>Comment:</strong>
+    <%= @address.comment %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.exchanges_address_path(@conn, :edit, @address), class: "btn btn-light" %></span>

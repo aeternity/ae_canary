@@ -62,6 +62,9 @@ defmodule AeCanaryWeb.Router do
 
       scope "/exchanges", Exchanges, as: :exchanges do
         resources "/exchanges", ExchangeController
+        resources "/addresses", AddressController
+        get "/addresses/new/:exchange_id", AddressController, :new_by_exchange
+        get "/dashboard", ExchangeController, :dashboard
       end
     end
   end

@@ -43,8 +43,22 @@ defmodule AeCanary.Mdw.Api do
     paged_get("txs/backward?spend.sender_id=#{sender_id}&limit=#{@limit}", %{"data" => [%Tx{tx: %Tx.Spend{}}]})
   end
 
+  def outgoing_spend_txs(sender_id, from, to) when from > to do
+    outgoing_spend_txs(sender_id, to, from)
+  end
+  def outgoing_spend_txs(sender_id, from, to) do
+    paged_get("txs/gen/#{to}-#{from}?spend.sender_id=#{sender_id}&limit=#{@limit}", %{"data" => [%Tx{tx: %Tx.Spend{}}]})
+  end
+
   def incoming_spend_txs(sender_id) do
     paged_get("txs/backward?spend.recipient_id=#{sender_id}&limit=#{@limit}", %{"data" => [%Tx{tx: %Tx.Spend{}}]})
+  end
+
+  def incoming_spend_txs(sender_id, from, to) when from > to do
+    incoming_spend_txs(sender_id, to, from)
+  end
+  def incoming_spend_txs(sender_id, from, to) do
+    paged_get("txs/gen/#{to}-#{from}?spend.recipient_id=#{sender_id}&limit=#{@limit}", %{"data" => [%Tx{tx: %Tx.Spend{}}]})
   end
 
   defp paged_get(uri, expected_fields, accum \\ []) do

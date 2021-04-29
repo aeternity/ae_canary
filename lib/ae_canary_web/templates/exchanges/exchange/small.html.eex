@@ -1,0 +1,53 @@
+<div class="card" style="width: 50rem;">
+  <div class="card-body">
+    <h5 class="card-title">Exchanges exposure</h5>
+    <% data = AeCanary.Mdw.Cache.get_exchanges %>
+    <%= if data == nil do %>
+      <div>
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    <% else %>
+      <%= if length(data.exchanges) == 0 do %>
+      <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
+      <% else %>
+      <table class="table">
+        <thead>
+        </thead>
+          <tr>
+            <th>Exchange</th>
+            <th><%= data.buckets["1"].name %></th>
+            <th><%= data.buckets["2"].name %></th>
+            <th><%= data.buckets["3"].name %></th>
+            <th><%= data.buckets["4"].name %></th>
+            <th><%= data.buckets["5"].name %></th>
+            <th><%= data.buckets["6"].name %></th>
+            <th><%= data.buckets["7"].name %></th>
+            <th>avg(<%= data.buckets["30"].name %>)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for e <- data.exchanges do %>
+          <%= if exposure(e.aggregated["1"]) != 0 do %>
+          <tr>
+            <td><%= e.name %></td>
+            <td><%= exposure(e.aggregated["1"]) %></td>
+            <td><%= exposure(e.aggregated["2"]) %></td>
+            <td><%= exposure(e.aggregated["3"]) %></td>
+            <td><%= exposure(e.aggregated["4"]) %></td>
+            <td><%= exposure(e.aggregated["5"]) %></td>
+            <td><%= exposure(e.aggregated["6"]) %></td>
+            <td><%= exposure(e.aggregated["7"]) %></td>
+            <td><%= round(exposure(e.aggregated["30"])/30) %></td>
+          </tr>
+          <% end %>
+          <% end %>
+        </tbody>
+      </table>
+      <% end %>
+    <% end %>
+    <%= link "More", to: Routes.exchanges_exchange_path(@conn, :dashboard), class: "btn btn-primary" %>
+    <%= link "All exchanges", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
+  </div>
+</div>
