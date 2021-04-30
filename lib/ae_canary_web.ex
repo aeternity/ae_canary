@@ -69,6 +69,13 @@ defmodule AeCanaryWeb do
       import AeCanaryWeb.ErrorHelpers
       import AeCanaryWeb.Gettext
       alias AeCanaryWeb.Router.Helpers, as: Routes
+
+      def format_time_diff(timex_tmst) do
+        Timex.now()
+        |> Timex.diff(timex_tmst, :second)
+        |> Timex.Duration.from_seconds()
+        |> Timex.Format.Duration.Formatters.Humanized.format
+      end
     end
   end
 

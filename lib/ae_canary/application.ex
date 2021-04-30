@@ -18,7 +18,8 @@ defmodule AeCanary.Application do
       # Start a worker by calling: AeCanary.Worker.start_link(arg)
       # {AeCanary.Worker, arg}
       :poolboy.child_spec(:worker, AeCanary.Mdw.poolboy_spec()),
-      AeCanary.Mdw.Cache
+      AeCanary.Mdw.Cache,
+      AeCanary.Mdw.Cache.Service.Supervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

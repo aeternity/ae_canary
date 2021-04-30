@@ -51,6 +51,7 @@ defmodule AeCanary.MixProject do
       {:httpoison, "~> 1.8"},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:poison, "~> 3.1"},
+      {:timex, "~> 3.7"}
     ]
   end
 

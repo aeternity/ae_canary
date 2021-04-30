@@ -1,7 +1,9 @@
-<div class="card" style="width: 50rem;">
+<div class="card">
+  <div class="card-header">
+    Exchanges exposure
+  </div>
   <div class="card-body">
-    <h5 class="card-title">Exchanges exposure</h5>
-    <% data = AeCanary.Mdw.Cache.get_exchanges %>
+    <% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
     <%= if data == nil do %>
       <div>
         <div class="spinner-border" role="status">

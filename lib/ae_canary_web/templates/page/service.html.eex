@@ -1,0 +1,20 @@
+<div class="card">
+  <div class="card-header">
+    <%= @service.name %>
+  </div>
+  <% stats = @service.stats %>
+  <div class="card-body">
+    <p>Status <span class="text-success">OK</span></p>
+    <%= if stats.last_refresh_length do%>
+      <p class="text-muted">Last update took <%= Elixir.Timex.Format.Duration.Formatters.Humanized.format(stats.last_refresh_length) %></p>
+    <% end %>
+  </div>
+  <div class="card-footer">
+    <%= if stats.ongoing_update do%>
+      <small class="text-muted">Updating data.</small>
+    <% end %>
+    <%= if stats[:refresh_end_tmst]do%>
+      <small class="text-muted">Last updated <%= format_time_diff(stats.refresh_end_tmst) %> ago</small>
+    <% end %>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 <h2 class="card-title">Detailed exchanges exposure</h2>
-<% data = AeCanary.Mdw.Cache.get_exchanges %>
+<% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
 <%= if data == nil do %>
   <div>
     <div class="spinner-border" role="status">

@@ -1,18 +1,34 @@
 <h2>Internal dashboard</h2>
-<h4 class="mt-4">System health</h4>
-<div class="card" style="width: 18rem;">
-  <div class="card-body">
-    <h5 class="card-title">MDW</h5>
-    <% mdw = AeCanary.Mdw.Cache.get %>
-    <%= if mdw do %>
-    <h6 class="card-subtitle mb-2 text-success">connected</h6>
-    <p class="text-muted">version <%= mdw.mdw_version %>, sync<%= if mdw.mdw_synced do %>ed<% else %>ing<% end %></p>
-    <p class="text-muted">node version <%= mdw.node_version %>, sync<%= if mdw.node_syncing do %>ing<% else %>ed<% end %></p>
-    <% else %>
-    <h6 class="card-subtitle mb-2 text-danger">disconnected</h6>
-    <% end %>
-    <a href="#" class="btn disabled">More</a>
+<h4 class="mt-4">Services</h4>
+<div class="row">
+  <div class="col-sm-3">
+    <div class="card">
+      <div class="card-header">
+        <%= AeCanary.Mdw.Cache.Service.Status.name %>
+      </div>
+      <% mdw_stats = AeCanary.Mdw.Cache.Service.Status.stats %>
+      <div class="card-body">
+        <% mdw = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Status.cache_handle) %>
+        <%= if mdw do %>
+        <p class="text-muted">version <%= mdw.mdw_version %>, sync<%= if mdw.mdw_synced do %>ed<% else %>ing<% end %></p>
+        <p class="text-muted">node version <%= mdw.node_version %>, sync<%= if mdw.node_syncing do %>ing<% else %>ed<% end %></p>
+        <% else %>
+        <h6 class="card-subtitle mb-2 text-danger">disconnected</h6>
+        <% end %>
+        <a href="#" class="btn disabled">More</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-9">
+  <%= render AeCanaryWeb.Exchanges.ExchangeView, "small.html", assigns %>
   </div>
 </div>
-<h4 class="mt-4">Services</h4>
-<%= render AeCanaryWeb.Exchanges.ExchangeView, "small.html", assigns %>
+<h4 class="mt-4">System health</h4>
+<div class="row">
+  <% services = [AeCanary.Mdw.Cache.Service.Status, AeCanary.Mdw.Cache.Service.Exchange] %>
+  <%= for service <- services do %>
+    <div class="col-sm-3">
+      <%= render "service.html", Map.put(assigns, :service, service)  %>
+    </div>
+  <% end %>
+</div>

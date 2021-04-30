@@ -73,13 +73,14 @@ defmodule AeCanary.Mdw.Api do
       err -> err
     end
   end
+
   defp get(uri, expected_fields) do
     mdw = Application.fetch_env!(:ae_canary, :mdw_url)
     case HTTPoison.get(mdw <> uri) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, parse_body(body, expected_fields)} 
-      {:ok, %HTTPoison.Response{status_code: status_code}} ->
-        {:error_code, status_code}
+      {:ok, %HTTPoison.Response{status_code: status_code, body: reason}} ->
+        {:error_code, status_code, reason}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end
