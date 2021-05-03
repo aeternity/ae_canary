@@ -106,7 +106,7 @@ tests only. Please do not use them in production.
 
 - [ ] Introduce tainted addresses. Track their balances on a regular basis.
 
-- [ ] Introduce exchange accounts. Track their exposure on a regular basis.
+- [x] Introduce exchange accounts. Track their exposure on a regular basis.
 
 - [ ] Revisit the index page and dashboard
 

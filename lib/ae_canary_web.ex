@@ -76,6 +76,12 @@ defmodule AeCanaryWeb do
         |> Timex.Duration.from_seconds()
         |> Timex.Format.Duration.Formatters.Humanized.format
       end
+
+      def format_milliseconds(milliseconds) do
+        milliseconds
+        |> Timex.Duration.from_milliseconds()
+        |> Timex.Format.Duration.Formatters.Humanized.format
+      end
     end
   end
 
