@@ -66,6 +66,11 @@ defmodule AeCanaryWeb.Router do
         get "/addresses/new/:exchange_id", AddressController, :new_by_exchange
         get "/dashboard", ExchangeController, :dashboard
       end
+
+    scope "/tainted", TaintedAccounts, as: :tainted_accounts do
+      resources "/accounts", AccountController
+    end
+
     end
   end
 

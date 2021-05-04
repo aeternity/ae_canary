@@ -36,7 +36,7 @@
   <p class="mb-2 text-muted"><strong><%= data.buckets["1"].name %></strong> is the timeframe for the past 24 hours measured in generations. <strong><%= data.buckets["2"].name %></strong> is the previous time frame and so on. There is one special one: <strong><%= data.buckets["30"].name %></strong> - this is the aggregated amount for the past 30 days. It is often showed as an averaged value for comparison.</p>
   <p class="mb-2 text-muted">The actual block intervals that correspond to those intervals are:</p>
   <dl class="row">
-    <%= for {idx, bucket} <- Map.delete(data.buckets, "30") do %>
+    <%= for {_idx, bucket} <- Map.delete(data.buckets, "30") do %>
     <dt class="col-sm-2"><%= bucket.name %></dt>
     <dd class="col-sm-9">from: <%= bucket.from %>, to: <%= bucket.to %></dd>
     <% end %>

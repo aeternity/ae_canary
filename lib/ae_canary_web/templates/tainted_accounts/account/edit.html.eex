@@ -1,0 +1,5 @@
+<h4>Edit tainted account</h4>
+
+<%= render "form.html", Map.put(assigns, :action, Routes.tainted_accounts_account_path(@conn, :update, @account)) %>
+
+<span><%= link "Back", to: Routes.tainted_accounts_account_path(@conn, :index) %></span>

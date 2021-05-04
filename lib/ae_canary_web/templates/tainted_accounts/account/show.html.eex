@@ -1,0 +1,38 @@
+<h1>Show Account</h1>
+
+<ul>
+
+  <li>
+    <strong>Addr:</strong>
+    <%= @account.addr %>
+  </li>
+
+  <li>
+    <strong>From height:</strong>
+    <%= @account.from_height %>
+  </li>
+
+  <li>
+    <strong>Amount:</strong>
+    <%= @account.amount %>
+  </li>
+
+  <li>
+    <strong>Last tx height:</strong>
+    <%= @account.last_tx_height %>
+  </li>
+
+  <li>
+    <strong>White listed:</strong>
+    <%= @account.white_listed %>
+  </li>
+
+  <li>
+    <strong>Comment:</strong>
+    <%= @account.comment %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.tainted_accounts_account_path(@conn, :edit, @account) %></span>
+<span><%= link "Back", to: Routes.tainted_accounts_account_path(@conn, :index) %></span>

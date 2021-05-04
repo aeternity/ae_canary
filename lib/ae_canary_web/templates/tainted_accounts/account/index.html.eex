@@ -1,0 +1,37 @@
+<h4>Listing tainted accounts</h4>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Addr</th>
+      <th>From height</th>
+      <th>Amount</th>
+      <th>Last tx height</th>
+      <th>White listed</th>
+      <th>Comment</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% max_comment_length = 30 %>
+    <%= for account <- @accounts do %>
+    <tr>
+      <td><%= account.addr %></td>
+      <td><%= account.from_height %></td>
+      <td><%= account.amount %></td>
+      <td><%= account.last_tx_height %></td>
+      <td><%= account.white_listed %></td>
+      <td><%= String.slice(account.comment, 0, max_comment_length)%><%= if account.comment != nil and String.length(account.comment) > max_comment_length do %>...<% end %></td>
+
+      <td>
+        <span><%= link "Show", to: Routes.tainted_accounts_account_path(@conn, :show, account), class: "btn btn-light btn-sm" %></span>
+        <span><%= link "Edit", to: Routes.tainted_accounts_account_path(@conn, :edit, account), class: "btn btn-light btn-sm" %></span>
+        <span><%= link "Delete", to: Routes.tainted_accounts_account_path(@conn, :delete, account), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-light btn-sm" %></span>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= link "New tainted account", to: Routes.tainted_accounts_account_path(@conn, :new), class: "btn btn-primary" %></span>

@@ -1,0 +1,52 @@
+<div class="row g-3">
+  <%= form_for @changeset, @action, fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger">
+        <p>Oops, something went wrong! Please check the errors below.</p>
+      </div>
+    <% end %>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-4">
+        <%= label f, :addr, class: "form-label" %>
+        <%= text_input f, :addr, class: "form-control", placeholder: "ak_..." %>
+        <%= error_tag f, :addr %>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-3">
+        <%= label f, :from_height, class: "form-label" %>
+        <%= number_input f, :from_height, class: "form-control" %>
+        <%= error_tag f, :from_height %>
+      </div>
+      <div class="col-sm-3">
+        <%= label f, :amount, "Amount (calculated)", class: "form-label" %>
+        <%= number_input f, :amount, class: "form-control", disabled: true %>
+        <%= error_tag f, :amount %>
+      </div>
+      <div class="col-sm-3">
+        <%= label f, :last_tx_height, "Last transaction block height (calculated)", class: "form-label" %>
+        <%= number_input f, :last_tx_height, class: "form-control", disabled: true %>
+        <%= error_tag f, :last_tx_height %>
+      </div>
+      <div class="col-sm-3">
+        <%= label f, :white_listed, class: "form-label" %>
+        <%= select f, :white_listed, [true, false], class: "form-select" %>
+        <%= error_tag f, :white_listed %>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-12">
+        <%= label f, :comment, "Comment (Optional, a maximum of 254 chars)", class: "form-label" %>
+        <%= textarea f, :comment, class: "form-control", maxlength: 254 %>
+        <%= error_tag f, :comment %>
+      </div>
+    </div>
+
+    <div>
+      <%= submit "Save", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>
