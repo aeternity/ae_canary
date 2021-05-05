@@ -27,7 +27,7 @@ defmodule AeCanary.Mdw.Cache.Service.Status do
   @impl true
   def refresh() do
     case Mdw.Api.status() do
-      {:ok, data} -> %{data | __struct__: Data}
+      {:ok, data} -> Map.put(data, :__struct__, Data)
       _failed -> nil
     end
   end

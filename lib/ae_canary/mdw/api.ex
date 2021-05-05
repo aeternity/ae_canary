@@ -1,5 +1,8 @@
 defmodule AeCanary.Mdw.Api do
 
+  alias AeCanary.Transactions
+  alias AeCanary.Transactions.Tx
+
   @limit 50
 
   defmodule Status do
@@ -13,72 +16,94 @@ defmodule AeCanary.Mdw.Api do
       mdw_synced: boolean()}
   end
 
-  defmodule Tx do
-    defmodule Spend do
-      @derive [Poison.Encoder]
-      defstruct [:amount, :fee, :type, :sender_id, :recipient_id]
-      @type t() :: %__MODULE__{
-        amount: integer(),
-        fee: integer(),
-        type: String.t,
-        sender_id: String.t,
-        recipient_id: String.t}
-    end
-    @derive [Poison.Encoder]
-    defstruct [:block_hash, :block_height, :hash, :micro_time, :tx]
-    @type t() :: %__MODULE__{
-      block_hash: String.t,
-      block_height: String.t,
-      hash: String.t,
-      micro_time: integer(),
-      tx: Spend.t}
-  end
-
   @spec status() :: {:ok, %Status{}} | :not_found | {:error, String.t}
   def status() do
-    get("status", %Status{})
+    get("status")
   end
 
   def outgoing_spend_txs(sender_id) do
-    paged_get("txs/backward?spend.sender_id=#{sender_id}&limit=#{@limit}", %{"data" => [%Tx{tx: %Tx.Spend{}}]})
+    paged_get_all("txs/backward?spend.sender_id=#{sender_id}&limit=#{@limit}", &Tx.decode/1)
   end
 
   def outgoing_spend_txs(sender_id, from, to) when from > to do
     outgoing_spend_txs(sender_id, to, from)
   end
   def outgoing_spend_txs(sender_id, from, to) do
-    paged_get("txs/gen/#{to}-#{from}?spend.sender_id=#{sender_id}&limit=#{@limit}", %{"data" => [%Tx{tx: %Tx.Spend{}}]})
+    old_locations = Transactions.list_locations_of_spend_txs_by(%{sender_id: sender_id, select: :location, from: from, to: to})
+    maybe_insert =
+      fn(new_batch) -> Transactions.maybe_insert_list(new_batch, old_locations) end
+    delete_old =
+      fn() -> Enum.each(old_locations, &Transactions.delete_tx_by_location/1) end
+    paged_update_db("txs/gen/#{to}-#{from}?spend.sender_id=#{sender_id}&limit=#{@limit}", &Tx.decode/1, maybe_insert, delete_old)
+    Transactions.list_locations_of_spend_txs_by(%{sender_id: sender_id, select: :tx_and_location, from: from, to: to})
   end
 
-  def incoming_spend_txs(sender_id) do
-    paged_get("txs/backward?spend.recipient_id=#{sender_id}&limit=#{@limit}", %{"data" => [%Tx{tx: %Tx.Spend{}}]})
+  def incoming_spend_txs(recipient_id) do
+    old_locations = Transactions.list_locations_of_spend_txs_by(%{recipient_id: recipient_id, select: :location})
+    maybe_insert =
+      fn(new_batch) -> Transactions.maybe_insert_list(new_batch, old_locations) end
+    delete_old =
+      fn() -> Enum.each(old_locations, &Transactions.delete_tx_by_location/1) end
+    paged_update_db("txs/backward?spend.recipient_id=#{recipient_id}&limit=#{@limit}", &Tx.decode/1, maybe_insert, delete_old)
+    Transactions.list_txs_of_spend_txs_by(%{recipient_id: recipient_id, select: :tx_and_location})
   end
 
   def incoming_spend_txs(sender_id, from, to) when from > to do
     incoming_spend_txs(sender_id, to, from)
   end
-  def incoming_spend_txs(sender_id, from, to) do
-    paged_get("txs/gen/#{to}-#{from}?spend.recipient_id=#{sender_id}&limit=#{@limit}", %{"data" => [%Tx{tx: %Tx.Spend{}}]})
+  def incoming_spend_txs(recipient_id, from, to) do
+    old_locations = Transactions.list_locations_of_spend_txs_by(%{recipient_id: recipient_id, select: :location, from: from, to: to})
+    maybe_insert =
+      fn(new_batch) -> Transactions.maybe_insert_list(new_batch, old_locations) end
+    delete_old =
+      fn() -> Enum.each(old_locations, &Transactions.delete_tx_by_location/1) end
+    paged_update_db("txs/gen/#{to}-#{from}?spend.recipient_id=#{recipient_id}&limit=#{@limit}", &Tx.decode/1, maybe_insert, delete_old)
+    Transactions.list_locations_of_spend_txs_by(%{recipient_id: recipient_id, select: :tx_and_location, from: from, to: to})
   end
 
-  defp paged_get(uri, expected_fields, accum \\ []) do
-    case get(uri, expected_fields) do
-      {:ok, %{"data" => data, "next" => nil}} ->
-        [data | accum]
+  defp paged_get_all(uri, decode, accum \\ []) do
+    case get(uri) do
+      {:ok, %{data: data, next: nil}} ->
+        [Enum.map(data, decode) | accum]
         |> Enum.reverse()
         |> List.flatten()
         |> (fn res -> {:ok, res} end).()
-      {:ok, %{"data" => data, "next" => next_uri}} ->
-        paged_get(next_uri, expected_fields, [data, accum])
+      {:ok, %{data: data, next: next_uri}} ->
+        paged_get_all(next_uri, decode, [Enum.map(data, decode) | accum])
       err -> err
     end
   end
 
-  defp get(uri, expected_fields) do
+  defp paged_update_db(uri, decode, maybe_insert, delete_old) do
+    case get(uri) do
+      {:ok, %{data: data, next: nil}} ->
+        res =
+          Enum.map(data, decode)
+          |> maybe_insert.()
+        case res do
+          :inserted_all -> ## forked all records
+            delete_old.()
+          :ok -> :ok
+        end
+      {:ok, %{data: data, next: next_uri}} ->
+        res =
+          Enum.map(data, decode)
+          |> maybe_insert.()
+        case res do
+          :inserted_all -> ## all records are new, read next batch
+            paged_update_db(next_uri, decode, maybe_insert, delete_old)
+          :ok -> ## we found previous tx, abort fetching more txs
+            :ok
+        end
+      err -> err
+    end
+  end
+
+  defp get(uri) do
     mdw = Application.fetch_env!(:ae_canary, :mdw_url)
     case HTTPoison.get(mdw <> uri) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        {:ok, parse_body(body, expected_fields)} 
+        {:ok, parse_body(body)} 
       {:ok, %HTTPoison.Response{status_code: status_code, body: reason}} ->
         {:error_code, status_code, reason}
       {:error, %HTTPoison.Error{reason: reason}} ->
@@ -86,9 +111,9 @@ defmodule AeCanary.Mdw.Api do
     end
   end
 
-  defp parse_body(body, schema) do
+  defp parse_body(body) do
     body
-    |> Poison.decode!(as: schema)
+    |> Poison.decode!(%{keys: :atoms})
   end
 
 end

@@ -1,0 +1,28 @@
+<h1>Show Location</h1>
+
+<ul>
+
+  <li>
+    <strong>Block hash:</strong>
+    <%= @location.block_hash %>
+  </li>
+
+  <li>
+    <strong>Block height:</strong>
+    <%= @location.block_height %>
+  </li>
+
+  <li>
+    <strong>Micro time:</strong>
+    <%= @location.micro_time %>
+  </li>
+
+  <li>
+    <strong>Tx hash:</strong>
+    <%= @location.tx_hash %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.transactions_location_path(@conn, :edit, @location) %></span>
+<span><%= link "Back", to: Routes.transactions_location_path(@conn, :index) %></span>

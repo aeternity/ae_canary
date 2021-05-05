@@ -1,7 +1,8 @@
 defmodule AeCanary.Mdw.Cache.Service.Exchange do
   use AeCanary.Mdw.Cache.Service, name: "Exchanges exposure"
 
-  alias AeCanary.Mdw.Api.{Tx}
+  alias AeCanary.Transactions
+  alias AeCanary.Transactions.{Tx, Location, Spend}
   alias AeCanary.Exchanges.{Exchange, Address}
   alias AeCanary.Exchanges
 
@@ -72,12 +73,12 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
     Map.put(mk_intervals.(top_height, 7, interval), "30", %{thirty_days | name: "last 30 days"})
   end
 
-  defp aetto_to_ae(amt), do: amt / :math.pow(10, 18)
-
   defp sum_amounts({:ok, txs}) do
+    sum_amounts(txs)
+  end
+  defp sum_amounts(txs) do
     txs
-    |> Enum.map(fn %Tx{tx: %Tx.Spend{amount: amount}} -> amount end)
+    |> Enum.map(fn %Tx{tx: %Spend{amount: amount}} -> amount end)
     |> Enum.sum()
-    |> aetto_to_ae()
   end
 end

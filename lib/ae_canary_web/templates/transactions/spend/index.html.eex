@@ -1,0 +1,36 @@
+<h1>Listing Spend txs</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Hash</th>
+      <th>Sender</th>
+      <th>Recipient</th>
+      <th>Nonce</th>
+      <th>Amount</th>
+      <th>Fee</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for spend <- @spend_txs do %>
+    <tr>
+      <td><%= spend.hash %></td>
+      <td><%= spend.sender_id %></td>
+      <td><%= spend.recipient_id %></td>
+      <td><%= spend.nonce %></td>
+      <td><%= spend.amount %></td>
+      <td><%= spend.fee %></td>
+
+      <td>
+        <span><%= link "Show", to: Routes.transactions_spend_path(@conn, :show, spend) %></span>
+        <span><%= link "Edit", to: Routes.transactions_spend_path(@conn, :edit, spend) %></span>
+        <span><%= link "Delete", to: Routes.transactions_spend_path(@conn, :delete, spend), method: :delete, data: [confirm: "Are you sure?"] %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Spend", to: Routes.transactions_spend_path(@conn, :new) %></span>
