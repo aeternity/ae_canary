@@ -8,7 +8,7 @@
   </div>
 <% else %>
   <h3>Summary</h3>
-    <%= if length(data.exchanges) == 0 do %>
+    <%= if map_size(data.exchanges) == 0 do %>
     <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
     <% else %>
       <% last_7_days = alerts_for_past_7_days(data.exchanges) %>

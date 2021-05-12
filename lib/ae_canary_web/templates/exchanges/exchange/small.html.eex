@@ -11,7 +11,7 @@
         </div>
       </div>
     <% else %>
-      <%= if length(data.exchanges) == 0 do %>
+      <%= if map_size(data.exchanges) == 0 do %>
       <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
       <% else %>
       <table class="table">
@@ -31,7 +31,7 @@
         </thead>
         <tbody>
           <%= for e <- data.exchanges do %>
-          <%= if exposure(e.aggregated["1"]) != 0 do %>
+          <%= if exposure(Enum.at(e, 0)) != 0 do %>
           <tr>
             <td><%= e.name %></td>
             <td><%= exposure(e.aggregated["1"]) %></td>

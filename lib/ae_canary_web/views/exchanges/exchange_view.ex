@@ -1,7 +1,7 @@
 defmodule AeCanaryWeb.Exchanges.ExchangeView do
   use AeCanaryWeb, :view
 
-  def exposure(aggregated), do: round(aggregated.deposit - aggregated.withdrawal)
+  def exposure(aggregated), do: round(aggregated.deposits.sum - aggregated.withdrawals.sum)
 
   def alerts_for_past_7_days(exchanges) do
     Enum.filter(exchanges,
