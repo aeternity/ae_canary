@@ -11,42 +11,47 @@
         </div>
       </div>
     <% else %>
-      <%= if map_size(data.exchanges) == 0 do %>
+      <%= if length(data.exchanges) == 0 do %>
       <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
       <% else %>
-      <table class="table">
-        <thead>
-        </thead>
-          <tr>
-            <th>Exchange</th>
-            <th><%= data.buckets["1"].name %></th>
-            <th><%= data.buckets["2"].name %></th>
-            <th><%= data.buckets["3"].name %></th>
-            <th><%= data.buckets["4"].name %></th>
-            <th><%= data.buckets["5"].name %></th>
-            <th><%= data.buckets["6"].name %></th>
-            <th><%= data.buckets["7"].name %></th>
-            <th>avg(<%= data.buckets["30"].name %>)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for e <- data.exchanges do %>
-          <%= if exposure(Enum.at(e, 0)) != 0 do %>
-          <tr>
-            <td><%= e.name %></td>
-            <td><%= exposure(e.aggregated["1"]) %></td>
-            <td><%= exposure(e.aggregated["2"]) %></td>
-            <td><%= exposure(e.aggregated["3"]) %></td>
-            <td><%= exposure(e.aggregated["4"]) %></td>
-            <td><%= exposure(e.aggregated["5"]) %></td>
-            <td><%= exposure(e.aggregated["6"]) %></td>
-            <td><%= exposure(e.aggregated["7"]) %></td>
-            <td><%= round(exposure(e.aggregated["30"])/30) %></td>
-          </tr>
-          <% end %>
-          <% end %>
-        </tbody>
-      </table>
+        <canvas id="myChart" width="400" height="200"></canvas>
+        <script>
+        var ctx = document.getElementById('myChart');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                datasets: [{
+                    label: '# of Votes',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        </script>
       <% end %>
     <% end %>
     <%= link "More", to: Routes.exchanges_exchange_path(@conn, :dashboard), class: "btn btn-primary" %>
