@@ -146,7 +146,7 @@
                         <tr>
                           <td><%= Timex.format!(tx.location.micro_time, "%Y-%b-%d %H:%M", :strftime) %></td>
                           <td><%= tx.location.tx_hash %></td>
-                          <td><%= tx.tx.amount %></td>
+                          <td><%= round(tx.tx.amount) %></td>
                           <td>
                             <span><%= link "explorer.aeternity.io", to: "https://explorer.aeternity.io/transactions/#{tx.location.tx_hash}", class: "btn btn-sm btn-light" %></span>
                             <span><%= link "AEKnow", to: "https://www.aeknow.org/block/transaction/#{tx.location.tx_hash}", class: "btn btn-sm btn-light" %></span>

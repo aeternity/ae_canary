@@ -82,7 +82,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
             |> Enum.map(
               fn(a) ->
                 %{data: data, has_txs: has_txs} = Map.fetch!(addresses_and_data, a.addr)
-                suspicious_deposits = Transactions.list_locations_of_spend_txs_by(%{select: :tx_and_location, recipient_id: a.addr, date_from: update_start, amount_at_least: 100_000})
+                suspicious_deposits = Transactions.list_locations_of_spend_txs_by(%{select: :tx_and_location, recipient_id: a.addr, date_from: Timex.shift(update_start, days: -1 * show_period_in_days()), amount_at_least: 500_000})
                 Map.merge(a, %{data: data, has_txs: has_txs, big_deposits: suspicious_deposits})
               end)
           aggregated =
