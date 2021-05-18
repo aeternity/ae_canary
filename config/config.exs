@@ -9,7 +9,8 @@ use Mix.Config
 
 config :ae_canary,
   ecto_repos: [AeCanary.Repo],
-  mdw_url: "http://18.156.189.185/mdw/"
+  mdw_url: "http://18.156.189.185/mdw/",
+  suspicious_deposits_threshold: 500_000
 
 # Configures the endpoint
 config :ae_canary, AeCanaryWeb.Endpoint,
