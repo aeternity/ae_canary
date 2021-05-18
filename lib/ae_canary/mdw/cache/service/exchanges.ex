@@ -19,11 +19,11 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
   def refresh() do
     ## update DB
     {:ok, %{node_height: top_height}} = Mdw.Api.status()
-    update_from = top_height - refresh_period_in_blocks()
-    update_to = top_height
+    update_to = 370000
+    update_from = update_to - refresh_period_in_blocks()
     all_exchanges_and_addresses = Exchanges.list_exchanges_and_addresses()
     update_DB(update_from, update_to, all_exchanges_and_addresses)
-    update_start = DateTime.utc_now() |> DateTime.to_date()
+    update_start = Date.from_erl!({2021, 1, 10})
     refresh_from_db(update_start, all_exchanges_and_addresses)
   end
 
