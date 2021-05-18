@@ -82,6 +82,8 @@ defmodule AeCanaryWeb do
         |> Timex.Duration.from_milliseconds()
         |> Timex.Format.Duration.Formatters.Humanized.format
       end
+
+      def is_admin(user), do: user.role == :admin
     end
   end
 

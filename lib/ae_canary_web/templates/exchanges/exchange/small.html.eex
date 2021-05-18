@@ -1,60 +1,65 @@
+<% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
+<%= if data == nil do %>
 <div class="card">
   <div class="card-header">
     Exchanges exposure
   </div>
   <div class="card-body">
-    <% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
-    <%= if data == nil do %>
-      <div>
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    <% else %>
+  <div>
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+<% else %>
+<% last_7_days = data.alerts_for_past_7_days %>
+<div class="card<%= if length(last_7_days) > 0 do %> border-danger<% end %>">
+  <div class="card-header<%= if length(last_7_days) > 0 do %> alert-danger border-danger<% end %>">
+    Exchanges exposure
+  </div>
+  <div class="card-body">
       <%= if length(data.exchanges) == 0 do %>
       <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
       <% else %>
-        <canvas id="myChart" width="400" height="200"></canvas>
-        <script>
-        var ctx = document.getElementById('myChart');
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 3],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-        </script>
+        <%= if length(last_7_days) > 0 do %>
+        <div class="alert alert-dange1r">
+          <p>Please check the activity for the past <strong>7 days</strong> of the following exchanges:</p>
+            <%= for e <- last_7_days do %>
+              <h6><%= e.name %> (<%= link "link", to: "#{Routes.exchanges_exchange_path(@conn, :dashboard)}##{e.name}" %>)</h6>
+            <% end %>
+        </div>
+        <% end %>
+        <% exchanges = Enum.filter(data.exchanges, &(&1.has_txs_past_7_days)) %>
+        <%= if length(exchanges) == 0 do %>
+          <p>No transactions to or from exchanges for the past 7 days.</p>
+        <% else %>
+        <% labels = hd(exchanges) |> (&(&1.aggregated)).() |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) %>
+        <% data_sets_txs = Enum.map(exchanges,
+          fn(e) -> %{name: e.name,
+                     data: Enum.map(e.aggregated, &(&1.txs))}
+          end) %>
+        <% data_sets_exposure = Enum.map(exchanges,
+          fn(e) -> %{name: e.name,
+                     data: Enum.map(e.aggregated, &(&1.deposits - &1.withdrawals))}
+          end) %>
+        <div class="mb-3 row">
+          <div class="col-lg-6">
+            <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transactions by date',
+                                                                                labels: labels, 
+                                                                                data_sets: data_sets_txs}) %>
+          </div>
+          <div class="col-lg-6">
+            <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Exposure by date',
+                                                                                labels: labels, 
+                                                                                data_sets: data_sets_exposure}) %>
+          </div>
+        </div>
+        <% end %>
       <% end %>
-    <% end %>
     <%= link "More", to: Routes.exchanges_exchange_path(@conn, :dashboard), class: "btn btn-primary" %>
-    <%= link "All exchanges", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
+    <%= if is_admin(@current_user) do %>
+      <%= link "Settings", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
+    <% end %>
   </div>
 </div>
+<% end %>

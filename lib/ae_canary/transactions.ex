@@ -47,8 +47,12 @@ defmodule AeCanary.Transactions do
         dynamic([spend: s], ^dynamic and s.recipient_id == ^value)
       {:sender_id, value}, dynamic ->
         dynamic([spend: s], ^dynamic and s.sender_id == ^value)
+      {:amount_at_least, value}, dynamic ->
+        dynamic([spend: s], ^dynamic and s.amount >= ^value)
       {:from, value}, dynamic ->
         dynamic([location: l], ^dynamic and l.block_height >= ^value)
+      {:date_from, value}, dynamic ->
+        dynamic([location: l], ^dynamic and fragment("date(?)", l.micro_time) >= ^value)
       {:to, value}, dynamic ->
         dynamic([location: l], ^dynamic and l.block_height <= ^value)
       {_, _}, dynamic ->

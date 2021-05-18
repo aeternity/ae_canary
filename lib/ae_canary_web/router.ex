@@ -21,6 +21,7 @@ defmodule AeCanaryWeb.Router do
   # We use ensure_auth to fail if there is no one logged in
   pipeline :ensure_auth do
     plug Guardian.Plug.EnsureAuthenticated
+    plug AeCanaryWeb.Accounts.AddCurrentUser
   end
 
   pipeline :ensure_admin do
@@ -49,6 +50,10 @@ defmodule AeCanaryWeb.Router do
         get "/password", UserController, :edit_my_password
         post "/password", UserController, :set_my_password
       end
+
+      scope "/exchanges", Exchanges, as: :exchanges do
+        get "/dashboard", ExchangeController, :dashboard
+      end
     end
 
     # administrator pages 
@@ -64,7 +69,6 @@ defmodule AeCanaryWeb.Router do
         resources "/exchanges", ExchangeController
         resources "/addresses", AddressController
         get "/addresses/new/:exchange_id", AddressController, :new_by_exchange
-        get "/dashboard", ExchangeController, :dashboard
       end
 
     scope "/tainted", TaintedAccounts, as: :tainted_accounts do

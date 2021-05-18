@@ -13,8 +13,4 @@
 //
 import "phoenix_html"
 import 'bootstrap'
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
-
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
-
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css'

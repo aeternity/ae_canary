@@ -16,3 +16,5 @@
 </ul>
 
 <span><%= link "Edit", to: Routes.exchanges_address_path(@conn, :edit, @address), class: "btn btn-light" %></span>
+<span><%= link "explorer.aeternity.io", to: "https://explorer.aeternity.io/account/transactions/#{@address.addr}", class: "btn btn-light" %></span>
+<span><%= link "AEKnow", to: "https://www.aeknow.org/address/wallet/#{@address.addr}", class: "btn btn-light" %></span>
