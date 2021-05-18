@@ -1,4 +1,7 @@
 <h2 class="card-title">Detailed exchanges exposure</h2>
+<%= if is_admin(@current_user) do %>
+  <%= link "Settings", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
+<% end %>
 <% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
 <%= if data == nil do %>
   <div>
@@ -7,116 +10,165 @@
     </div>
   </div>
 <% else %>
+  <% last_7_days = data.alerts_for_past_7_days %>
   <h3>Summary</h3>
     <%= if length(data.exchanges) == 0 do %>
     <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
     <% else %>
-      <% last_7_days = alerts_for_past_7_days(data.exchanges) %>
       <%= if length(last_7_days) == 0 do %>
         <p class="alert alert-success">No alert for the past 7 days.</p>
       <% else %>
-        <div class="alert alert-danger">
+      <div class="alert alert-danger">
         <h4 class="alert-heading">Past 7 days</h4>
         <p>Please check the activity for the past <strong>7 days</strong> of the following exchanges:</p>
-        <ul>
           <%= for e <- last_7_days do %>
-            <li><%= e.name %></li>
+            <h5><%= e.name %></h5>
+            <ul>
+              <%= for a <- e.addresses do %>
+                <li><%= a.addr %> has received <%= Enum.count(a.big_deposits) %> deposits with a total amount of <%= Enum.map(a.big_deposits, &(&1.tx.amount)) |> Enum.sum() |> round() %> AE. (<a href="#<%= a.addr %>">link</a>)</li> 
+              <% end %>
+            </ul>
           <% end %>
         </ul>
-        <hr>
-        <p>They have accounts that have had an exposure more than 1 000 000 AE in a given day.</p>
       </div>
       <% end %>
     <% end %>
 
   <h3>Description</h3>
   <p class="mb-2 text-muted">This is amount of tokens at risk if there is a 51% attack now. Sudden spikes can be a symptom for a future attack.</p>
-  <p class="mb-2 text-muted">Positive numbers indicate the amount of tokens an exchange could lose and negative numbers - the amount they would gain.</p>
-  <p class="mb-2 text-muted">Hours are calculated in block heights: a new generation is being produced roughly every 3 minutes, so 24h would be a span of 20 * 24 generations. Note that there could be some small diviations.</p>
-  <p class="mb-2 text-muted"><strong><%= data.buckets["1"].name %></strong> is the timeframe for the past 24 hours measured in generations. <strong><%= data.buckets["2"].name %></strong> is the previous time frame and so on. There is one special one: <strong><%= data.buckets["30"].name %></strong> - this is the aggregated amount for the past 30 days. It is often showed as an averaged value for comparison.</p>
-  <p class="mb-2 text-muted">The actual block intervals that correspond to those intervals are:</p>
-  <dl class="row">
-    <%= for {_idx, bucket} <- Map.delete(data.buckets, "30") do %>
-    <dt class="col-sm-2"><%= bucket.name %></dt>
-    <dd class="col-sm-9">from: <%= bucket.from %>, to: <%= bucket.to %></dd>
-    <% end %>
-    <dt class="col-sm-2"><%= data.buckets["30"].name %></dt>
-    <dd class="col-sm-9">from: <%= data.buckets["30"].from %>, to: <%= data.buckets["30"].to %></dd>
-  </dl>
   <%= if length(data.exchanges) != 0 do %>
-  <h3>Exchanges</h3>
   <%= for e <- data.exchanges do %>
-  <div class="mb-5">
-    <h4><%= e.name %></h4>
-    <% thirty_balance = round(e.aggregated["30"].deposit - e.aggregated["30"].withdrawal) %>
-    <%= if thirty_balance > 0 do %>
-      <p>The balance for the past 30 days is <span class="text-danger"><%= thirty_balance %></span> AE</p>
-    <% else %>
-      <p>The balance for the past 30 days is <span class="text-success"><%= thirty_balance %></span> AE</p>
-    <% end %>
-    <table class="table table-sm">
-      <thead>
-      </thead>
-        <tr>
-          <th rowspan="2">Account</th>
-          <th colspan="2"><%= data.buckets["1"].name %></th>
-          <th colspan="2"><%= data.buckets["2"].name %></th>
-          <th colspan="2"><%= data.buckets["3"].name %></th>
-          <th colspan="2"><%= data.buckets["4"].name %></th>
-          <th colspan="2"><%= data.buckets["5"].name %></th>
-          <th colspan="2"><%= data.buckets["6"].name %></th>
-          <th colspan="2"><%= data.buckets["7"].name %></th>
-          <th colspan="2">avg(<%= data.buckets["30"].name %>)</th>
-        </tr>
-          <th>+</th>
-          <th>-</th>
-          <th>+</th>
-          <th>-</th>
-          <th>+</th>
-          <th>-</th>
-          <th>+</th>
-          <th>-</th>
-          <th>+</th>
-          <th>-</th>
-          <th>+</th>
-          <th>-</th>
-          <th>+</th>
-          <th>-</th>
-          <th>+</th>
-          <th>-</th>
-        <tr>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for a <- e.addresses do %>
-        <tr>
-          <td>
-            <span><%= link String.slice(a.addr, 0, 10) <> "...", to: Routes.exchanges_address_path(@conn, :show, a.id), class: "text-primary text-decoration-none" %></span>
-            <span><%= link "explorer", to: "https://explorer.aeternity.io/account/transactions/#{a.addr}", class: "btn btn-sm btn-light" %></span>
-            <span><%= link "AEKnow", to: "https://www.aeknow.org/address/wallet/#{a.addr}", class: "btn btn-sm btn-light" %></span>
-          </td>
-          <td><%= round(a.amounts["1"].deposit) %></td>
-          <td><%= round(a.amounts["1"].withdrawal)%></td>
-          <td><%= round(a.amounts["2"].deposit) %></td>
-          <td><%= round(a.amounts["2"].withdrawal)%></td>
-          <td><%= round(a.amounts["3"].deposit) %></td>
-          <td><%= round(a.amounts["3"].withdrawal)%></td>
-          <td><%= round(a.amounts["4"].deposit) %></td>
-          <td><%= round(a.amounts["4"].withdrawal)%></td>
-          <td><%= round(a.amounts["5"].deposit) %></td>
-          <td><%= round(a.amounts["5"].withdrawal)%></td>
-          <td><%= round(a.amounts["6"].deposit) %></td>
-          <td><%= round(a.amounts["6"].withdrawal)%></td>
-          <td><%= round(a.amounts["7"].deposit) %></td>
-          <td><%= round(a.amounts["7"].withdrawal)%></td>
-          <td><%= round(a.amounts["30"].deposit/30) %></td>
-          <td><%= round(a.amounts["30"].withdrawal/30)%></td>
-        </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
+    <div class="card mb-4" id="<%= e.name %>">
+      <div class="card-header">
+        <%= e.name %> <a href="#<%= e.name%>"> <i class="bi bi-link-45deg"></i></a>
+      </div>
+      <div class="card-body">
+        <div id="<%= e.name %>" class="mb-5">
+          <%= if e.txs == 0 do %>
+            <p>No transactions for the past 30 days.</p>
+          <% else %>
+          <h5>Overview</h5>
+          <% labels = e.aggregated |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) %>
+          <% data_sets_all = 
+              [
+                %{name: "Deposits",
+                  borderColor: "#89A7E0",
+                  data: Enum.map(e.aggregated, &(&1.deposits))},
+                %{name: "Withdrawals",
+                  borderColor: "#F48989",
+                  data: Enum.map(e.aggregated, &( -1 * &1.withdrawals))},
+                %{name: "Exposure",
+                  borderColor: "#5ACA75",
+                  data: Enum.map(e.aggregated, &( &1.deposits - &1.withdrawals))}
+              ] %>
+          <% data_sets_txs = 
+              [
+                %{name: "Transactions",
+                  data: Enum.map(e.aggregated, &(&1.txs))}
+              ] %>
+          <div class="mb-3 row">
+            <div class="col-lg-6">
+              <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE movement by day',
+                                                                                    labels: labels, 
+                                                                                    data_sets: data_sets_all}) %>
+            </div>
+            <div class="col-lg-6">
+              <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transactions by date',
+                                                                                    labels: labels, 
+                                                                                    data_sets: data_sets_txs}) %>
+            </div>
+          </div>
+          
+          <% end %>
+
+          <%= if length(e.addresses) == 0 do %>
+            <p>No addresses set.</p>
+          <% else %>
+            <h5>Addresses</h5>
+              <%= for {a, idx}<- Enum.with_index(e.addresses) do %>
+                <% has_alert = Enum.filter(last_7_days, &(&1.name == e.name))
+                               |> (fn([exc]) -> Enum.filter(exc.addresses, &(&1.addr == a.addr)) |> (&(! Enum.empty?(&1))).()
+                                     ([]) -> false
+                                   end).() %>
+                <div class="card mb-4<%= if has_alert do %> border-danger<% end %>" id="<%= a.addr %>">
+                  <div class="card-body">
+                    <h6><%= a.addr %> <a href="#<%= a.addr %>"> <i class="bi bi-link-45deg"></i></a></h6>
+                  <%= if ! a.has_txs do %>
+                    <p>No transactions for the past 30 days.</p>
+                  <% end %>
+                  <%= if a.has_txs do %>
+                    <% data_sets_individual = 
+                        [
+                          %{name: "Deposits",
+                            borderColor: "#89A7E0",
+                            data: Enum.map(a.data, &(&1.deposits.sum))},
+                          %{name: "Withdrawals",
+                            borderColor: "#F48989",
+                            data: Enum.map(a.data, &(&1.withdrawals.sum))},
+                        ] %>
+                    <% data_sets_txs_individual =
+                        [
+                          %{name: "Deposits",
+                            borderColor: "#89A7E0",
+                            data: Enum.map(a.data, &(&1.deposits.txs))},
+                          %{name: "Withdrawals",
+                            borderColor: "#F48989",
+                            data: Enum.map(a.data, &(&1.withdrawals.txs))}
+                        ] %>
+
+                    <% labels = a.data |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) %>
+                    <div class="mb-3 row">
+                      <div class="col-lg-6">
+                        <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE transfers for #{a.addr}',
+                                                                                              labels: labels, 
+                                                                                              data_sets: data_sets_individual}) %>
+                      </div>
+                      <div class="col-lg-6">
+                        <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transaction counts for #{a.addr}',
+                                                                                              labels: labels, 
+                                                                                              data_sets: data_sets_txs_individual}) %>
+                      </div>
+                    </div>
+                  <% end %>
+                  <%= if ! Enum.empty?(a.big_deposits) do %>
+                    <h5 class="alert-heading">Suspicious deposits</h5>
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Date</th>
+                          <th scope="col">Hash</th>
+                          <th scope="col">Amount</th>
+                          <th scope="col">Explorers</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <%= for tx <- a.big_deposits do %>
+                        <tr>
+                          <td><%= Timex.format!(tx.location.micro_time, "%Y-%b-%d %H:%M", :strftime) %></td>
+                          <td><%= tx.location.tx_hash %></td>
+                          <td><%= tx.tx.amount %></td>
+                          <td>
+                            <span><%= link "explorer.aeternity.io", to: "https://explorer.aeternity.io/transactions/#{tx.location.tx_hash}", class: "btn btn-sm btn-light" %></span>
+                            <span><%= link "AEKnow", to: "https://www.aeknow.org/block/transaction/#{tx.location.tx_hash}", class: "btn btn-sm btn-light" %></span>
+                          </td>
+                        </tr>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  <% end %>
+
+                  <div>
+                    <span><%= link "explorer.aeternity.io", to: "https://explorer.aeternity.io/account/transactions/#{a.addr}", class: "btn btn-sm btn-light" %></span>
+                    <span><%= link "AEKnow", to: "https://www.aeknow.org/address/wallet/#{a.addr}", class: "btn btn-sm btn-light" %></span>
+                  </div>
+
+                </div>
+              </div>
+              <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
   <% end %>
   <% end %>
 <% end %>
-<%= link "All exchanges", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>

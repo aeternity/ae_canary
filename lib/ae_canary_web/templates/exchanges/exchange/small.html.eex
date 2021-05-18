@@ -1,55 +1,65 @@
+<% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
+<%= if data == nil do %>
 <div class="card">
   <div class="card-header">
     Exchanges exposure
   </div>
   <div class="card-body">
-    <% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
-    <%= if data == nil do %>
-      <div>
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    <% else %>
+  <div>
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+<% else %>
+<% last_7_days = data.alerts_for_past_7_days %>
+<div class="card<%= if length(last_7_days) > 0 do %> border-danger<% end %>">
+  <div class="card-header<%= if length(last_7_days) > 0 do %> alert-danger border-danger<% end %>">
+    Exchanges exposure
+  </div>
+  <div class="card-body">
       <%= if length(data.exchanges) == 0 do %>
       <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
       <% else %>
-      <table class="table">
-        <thead>
-        </thead>
-          <tr>
-            <th>Exchange</th>
-            <th><%= data.buckets["1"].name %></th>
-            <th><%= data.buckets["2"].name %></th>
-            <th><%= data.buckets["3"].name %></th>
-            <th><%= data.buckets["4"].name %></th>
-            <th><%= data.buckets["5"].name %></th>
-            <th><%= data.buckets["6"].name %></th>
-            <th><%= data.buckets["7"].name %></th>
-            <th>avg(<%= data.buckets["30"].name %>)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for e <- data.exchanges do %>
-          <%= if exposure(e.aggregated["1"]) != 0 do %>
-          <tr>
-            <td><%= e.name %></td>
-            <td><%= exposure(e.aggregated["1"]) %></td>
-            <td><%= exposure(e.aggregated["2"]) %></td>
-            <td><%= exposure(e.aggregated["3"]) %></td>
-            <td><%= exposure(e.aggregated["4"]) %></td>
-            <td><%= exposure(e.aggregated["5"]) %></td>
-            <td><%= exposure(e.aggregated["6"]) %></td>
-            <td><%= exposure(e.aggregated["7"]) %></td>
-            <td><%= round(exposure(e.aggregated["30"])/30) %></td>
-          </tr>
-          <% end %>
-          <% end %>
-        </tbody>
-      </table>
+        <%= if length(last_7_days) > 0 do %>
+        <div class="alert alert-dange1r">
+          <p>Please check the activity for the past <strong>7 days</strong> of the following exchanges:</p>
+            <%= for e <- last_7_days do %>
+              <h6><%= e.name %> (<%= link "link", to: "#{Routes.exchanges_exchange_path(@conn, :dashboard)}##{e.name}" %>)</h6>
+            <% end %>
+        </div>
+        <% end %>
+        <% exchanges = Enum.filter(data.exchanges, &(&1.has_txs_past_7_days)) %>
+        <%= if length(exchanges) == 0 do %>
+          <p>No transactions to or from exchanges for the past 7 days.</p>
+        <% else %>
+        <% labels = hd(exchanges) |> (&(&1.aggregated)).() |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) %>
+        <% data_sets_txs = Enum.map(exchanges,
+          fn(e) -> %{name: e.name,
+                     data: Enum.map(e.aggregated, &(&1.txs))}
+          end) %>
+        <% data_sets_exposure = Enum.map(exchanges,
+          fn(e) -> %{name: e.name,
+                     data: Enum.map(e.aggregated, &(&1.deposits - &1.withdrawals))}
+          end) %>
+        <div class="mb-3 row">
+          <div class="col-lg-6">
+            <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transactions by date',
+                                                                                labels: labels, 
+                                                                                data_sets: data_sets_txs}) %>
+          </div>
+          <div class="col-lg-6">
+            <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Exposure by date',
+                                                                                labels: labels, 
+                                                                                data_sets: data_sets_exposure}) %>
+          </div>
+        </div>
+        <% end %>
       <% end %>
-    <% end %>
     <%= link "More", to: Routes.exchanges_exchange_path(@conn, :dashboard), class: "btn btn-primary" %>
-    <%= link "All exchanges", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
+    <%= if is_admin(@current_user) do %>
+      <%= link "Settings", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
+    <% end %>
   </div>
 </div>
+<% end %>

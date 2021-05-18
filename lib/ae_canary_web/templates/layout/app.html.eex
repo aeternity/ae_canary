@@ -3,11 +3,25 @@
   <head>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta http-equiv="refresh" content="30">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>AeCanary · Aeternity blockchain</title>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
-    <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.min.js"></script>
+    <script>
+      const colorScheme = [
+          "#25CCF7","#FD7272","#54a0ff","#00d2d3",
+          "#1abc9c","#2ecc71","#3498db","#9b59b6","#34495e",
+          "#16a085","#27ae60","#2980b9","#8e44ad","#2c3e50",
+          "#f1c40f","#e67e22","#e74c3c","#ecf0f1","#95a5a6",
+          "#f39c12","#d35400","#c0392b","#bdc3c7","#7f8c8d",
+          "#55efc4","#81ecec","#74b9ff","#a29bfe","#dfe6e9",
+          "#00b894","#00cec9","#0984e3","#6c5ce7","#ffeaa7",
+          "#fab1a0","#ff7675","#fd79a8","#fdcb6e","#e17055",
+          "#d63031","#feca57","#5f27cd","#54a0ff","#01a3a4"
+      ];
+    </script>
   </head>
   <body>
     <main>
@@ -25,7 +39,7 @@
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="accountDropdownMenu">
                     <li><%= link "My account", to: Routes.user_path(@conn, :show_my), class: "dropdown-item" %></li>
-                    <%= if @current_user.role == :admin do %>
+                    <%= if is_admin(@current_user) do %>
                       <li><%= link "All accounts", to: Routes.user_path(@conn, :index), class: "dropdown-item" %></li>
                     <% end %>
                     <li><hr class="dropdown-divider"></li>

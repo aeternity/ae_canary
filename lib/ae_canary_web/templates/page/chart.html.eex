@@ -1,0 +1,32 @@
+<%  uuid = UUID.uuid4() %>
+<canvas id="<%= uuid %>"  ></canvas>
+<script>
+  var ctx = document.getElementById('<%= uuid %>');
+  var myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: [<%= for label <- @labels do%>"<%= label %>", <% end %>],
+          datasets: [
+          <%= for {set, idx} <- Enum.with_index(@data_sets) do %>
+            {
+              label: '<%= set.name %>',
+              data: [<%= for entry <- set.data do%><%= entry %>, <% end %>],
+              fill: false,
+              borderColor: <%= if set[:borderColor] do %>"<%= set.borderColor %>"<% else %>colorScheme[<%= idx + 2 %>]<% end %>,
+              tension: 0.1 },
+          <% end %>
+          ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: '<%= @chart_title %>'
+          }
+        }}
+  });
+</script>

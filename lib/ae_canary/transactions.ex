@@ -47,8 +47,12 @@ defmodule AeCanary.Transactions do
         dynamic([spend: s], ^dynamic and s.recipient_id == ^value)
       {:sender_id, value}, dynamic ->
         dynamic([spend: s], ^dynamic and s.sender_id == ^value)
+      {:amount_at_least, value}, dynamic ->
+        dynamic([spend: s], ^dynamic and s.amount >= ^value)
       {:from, value}, dynamic ->
         dynamic([location: l], ^dynamic and l.block_height >= ^value)
+      {:date_from, value}, dynamic ->
+        dynamic([location: l], ^dynamic and fragment("date(?)", l.micro_time) >= ^value)
       {:to, value}, dynamic ->
         dynamic([location: l], ^dynamic and l.block_height <= ^value)
       {_, _}, dynamic ->
@@ -280,5 +284,27 @@ defmodule AeCanary.Transactions do
         |> Enum.each(&delete_tx_by_location/1)
         :ok
     end
+  end
+
+  def aggregated_for_addresses(role, addresses, from_date) do
+    query =
+      case role do
+        :sender_id ->
+          from(l in Location, as: :location,
+              join: s in Spend, as: :spend,
+              on: l.tx_hash == s.hash,
+              where: (s.sender_id in ^addresses and fragment("date(?)", l.micro_time) >= ^from_date),
+              group_by: [s.sender_id, fragment("date(?)", l.micro_time)],
+              select: %{address: s.sender_id, date: fragment("date(?)", l.micro_time), txs: count(), sum: sum(s.amount)})
+        :recipient_id ->
+          from(l in Location, as: :location,
+              join: s in Spend, as: :spend,
+              on: l.tx_hash == s.hash,
+              where: (s.recipient_id in ^addresses and fragment("date(?)", l.micro_time) >= ^from_date),
+              group_by: [s.recipient_id, fragment("date(?)", l.micro_time)],
+              select: %{address: s.recipient_id, date: fragment("date(?)", l.micro_time), txs: count(), sum: sum(s.amount)})
+      end
+    query
+    |> Repo.all
   end
 end
