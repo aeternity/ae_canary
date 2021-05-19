@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=postgres # replace with your own credentials
       - POSTGRES_DB=canary_db
       - POSTGRES_HOST=canary-postgres
-      - MDW_URL=http://18.156.189.185/mdw/
-      - SECRET_KEY_BASE=h1gZ7OoCUukaas6AjTwLIjSCUrdkQe5l34vHFDnqxf6mlSZD5/j7NfsJcs4NBsYc
-      - GUARDIAN_SECRET_KEY=ZxjSaBGLIU5qGLeVDaBVIe8yXxTO0+rKs/NNuGyA/Fz97oviHxkfg2/hVe8bUO8i
+      - MDW_URL= ## mdw node API url
+      - SECRET_KEY_BASE=
+      - GUARDIAN_SECRET_KEY=
     restart: unless-stopped
