@@ -48,23 +48,23 @@
             <p>No transactions for the past 30 days.</p>
           <% else %>
           <h5>Overview</h5>
-          <% labels = e.aggregated |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) %>
+          <% labels = e.aggregated |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) |> Enum.reverse() %>
           <% data_sets_all = 
               [
                 %{name: "Deposits",
                   borderColor: "#89A7E0",
-                  data: Enum.map(e.aggregated, &(&1.deposits))},
+                  data: Enum.map(e.aggregated, &(&1.deposits)) |> Enum.reverse()},
                 %{name: "Withdrawals",
                   borderColor: "#F48989",
-                  data: Enum.map(e.aggregated, &( -1 * &1.withdrawals))},
+                  data: Enum.map(e.aggregated, &( -1 * &1.withdrawals)) |> Enum.reverse()},
                 %{name: "Exposure",
                   borderColor: "#5ACA75",
-                  data: Enum.map(e.aggregated, &( &1.deposits - &1.withdrawals))}
+                  data: Enum.map(e.aggregated, &( &1.deposits - &1.withdrawals)) |> Enum.reverse()}
               ] %>
           <% data_sets_txs = 
               [
                 %{name: "Transactions",
-                  data: Enum.map(e.aggregated, &(&1.txs))}
+                  data: Enum.map(e.aggregated, &(&1.txs)) |> Enum.reverse()}
               ] %>
           <div class="mb-3 row">
             <div class="col-lg-6">
@@ -101,19 +101,19 @@
                         [
                           %{name: "Deposits",
                             borderColor: "#89A7E0",
-                            data: Enum.map(a.data, &(&1.deposits.sum))},
+                            data: Enum.map(a.data, &(&1.deposits.sum)) |> Enum.reverse()},
                           %{name: "Withdrawals",
                             borderColor: "#F48989",
-                            data: Enum.map(a.data, &(&1.withdrawals.sum))},
+                            data: Enum.map(a.data, &(&1.withdrawals.sum)) |> Enum.reverse()},
                         ] %>
                     <% data_sets_txs_individual =
                         [
                           %{name: "Deposits",
                             borderColor: "#89A7E0",
-                            data: Enum.map(a.data, &(&1.deposits.txs))},
+                            data: Enum.map(a.data, &(&1.deposits.txs)) |> Enum.reverse()},
                           %{name: "Withdrawals",
                             borderColor: "#F48989",
-                            data: Enum.map(a.data, &(&1.withdrawals.txs))}
+                            data: Enum.map(a.data, &(&1.withdrawals.txs)) |> Enum.reverse()}
                         ] %>
 
                     <% labels = a.data |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) %>
