@@ -1,0 +1,12 @@
+_build
+deps
+assets/node_modules
+test
+cover
+doc
+erl_crash.dump
+*.ez
+ae_canary-*.tar
+priv/static
+.DB_CREATED
+postgres-data

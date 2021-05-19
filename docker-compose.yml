@@ -1,0 +1,29 @@
+version: "3.6"
+services:
+  canary-postgres:
+    image: postgres
+    hostname: canary-postgres
+    restart: unless-stopped
+    container_name: canary-postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres # replace with your own credentials
+      - POSTGRES_USER=postgres # replace with your own credentials
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  ae_canary:
+    build: .
+    container_name: ae_canary
+    depends_on:
+      - canary-postgres
+    ports:
+      - 4000:4000
+    environment:
+      - POSTGRES_PASSWORD=postgres # replace with your own credentials
+      - POSTGRES_USER=postgres # replace with your own credentials
+      - POSTGRES_DB=canary_db
+      - POSTGRES_HOST=canary-postgres
+      - MDW_URL=http://18.156.189.185/mdw/
+      - SECRET_KEY_BASE=h1gZ7OoCUukaas6AjTwLIjSCUrdkQe5l34vHFDnqxf6mlSZD5/j7NfsJcs4NBsYc
+      - GUARDIAN_SECRET_KEY=ZxjSaBGLIU5qGLeVDaBVIe8yXxTO0+rKs/NNuGyA/Fz97oviHxkfg2/hVe8bUO8i
+    restart: unless-stopped
