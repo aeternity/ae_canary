@@ -1,0 +1,57 @@
+<div class="row g-3">
+  <%= form_for @changeset, @action, fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger">
+        <p>Oops, something went wrong! Please check the errors below.</p>
+      </div>
+    <% end %>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-2">
+        <%= label f, :icon, class: "form-label" %>
+        <%= text_input f, :icon, class: "form-control" %>
+        <%= error_tag f, :icon %>
+      </div>
+      <div class="col-sm-4">
+        <%= label f, :title, class: "form-label" %>
+        <%= text_input f, :title, class: "form-control" %>
+        <%= error_tag f, :title %>
+      </div>
+    </div>
+    <div class="row g-3 mb-3">
+      <div class="col-sm-12">
+        <div class="col-sm-2 form-check form-switch">
+          <%= label f, :is_public, "Public", class: "form-check-label" %>
+          <%= checkbox f, :is_public, class: "form-check-input" %>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-3">
+        <% state = case @changeset.data.state do nil -> "normal"; r -> r end %>
+        <%= label f, :state, class: "form-label" %>
+        <%= select f, :state, ["normal": "normal", "warning": "warning", "danger": "danger"], class: "form-select", selected: state %>
+      </div>
+    </div>
+    <div class="row g-3 mb-3">
+      <div class="col-sm-8">
+        <%= label f, :message, class: "form-label" %>
+        <%= textarea f, :message, class: "form-control" %>
+        <%= error_tag f, :message %>
+      </div>
+    </div>
+    <div class="row g-3 mb-3">
+      <div class="col-sm-8">
+        <%= label f, :footer, class: "form-label" %>
+        <%= text_input f, :footer, class: "form-control" %>
+        <%= error_tag f, :footer %>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <%= submit "Save", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>
+

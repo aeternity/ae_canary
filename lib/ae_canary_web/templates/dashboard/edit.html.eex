@@ -1,0 +1,5 @@
+<h4>Edit Dashboard</h4>
+
+<%= render "form.html", Map.put(assigns, :action, Routes.dashboard_path(@conn, :update, @dashboard)) %>
+
+<span><%= link "All dashbord messages", to: Routes.dashboard_path(@conn, :index) %></span>

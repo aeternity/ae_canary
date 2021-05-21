@@ -1,0 +1,22 @@
+<h4>Dashboard message</h4>
+
+<%= render "single.html", %{dashboard: @dashboard} %>
+<ul>
+  <li>
+    <strong>Active:</strong>
+    <%= @dashboard.active %>
+  </li>
+  <li>
+    <strong>Public:</strong>
+    <%= @dashboard.is_public %>
+  </li>
+
+</ul>
+
+<%= if @dashboard.active do %>
+  <span><%= link "Deactivate", to: Routes.dashboard_path(@conn, :toggle_active, @dashboard), class: "btn btn-primary" %></span>
+<% else %>
+  <span><%= link "Activate", to: Routes.dashboard_path(@conn, :toggle_active, @dashboard), class: "btn btn-primary" %></span>
+<% end %>
+<span><%= link "Edit", to: Routes.dashboard_path(@conn, :edit, @dashboard), class: "btn btn-light" %></span>
+<span><%= link "All messages", to: Routes.dashboard_path(@conn, :index), class: "btn btn-light" %></span>

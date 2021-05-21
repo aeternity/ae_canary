@@ -1,0 +1,13 @@
+<% alert_class = case @dashboard.state do
+                      "normal" -> "success"
+                      "warning" -> "warning"
+                      "danger" -> "danger"
+                  end %>
+<div class="alert alert-<%= alert_class %>" role="alert">
+  <h4 class="alert-heading"><%= if @dashboard.icon do %><i class="bi <%= @dashboard.icon %>"></i> <% end %><%= @dashboard.title %></h4>
+  <p><%= @dashboard.message %></p>
+  <%= if @dashboard.footer do %>
+    <hr>
+    <p class="mb-0"><%= @dashboard.footer %></p>
+  <% end %>
+</div>

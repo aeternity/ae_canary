@@ -1,0 +1,26 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>State</th>
+      <th>Title</th>
+      <th>Active</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<% max_comment_length = 30 %>
+<%= for dashboard <- @dashboards do %>
+    <tr>
+      <td><%= dashboard.state %></td>
+      <td><i class="bi <%= dashboard.icon %>"></i><%= String.slice(dashboard.title, 0, max_comment_length)%><%= if dashboard.title != nil and String.length(dashboard.title) > max_comment_length do %>...<% end %></td>
+      <td><a href="<%= Routes.dashboard_path(@conn, :toggle_active, dashboard) %>"><%= if dashboard.active do %><span class="badge bg-success">ON</span><% else %><span class="badge bg-danger">OFF</span><% end %></a></td>
+      <td>
+        <span><%= link "Show", to: Routes.dashboard_path(@conn, :show, dashboard), class: "btn btn-light btn-sm" %></span>
+        <span><%= link "Edit", to: Routes.dashboard_path(@conn, :edit, dashboard), class: "btn btn-light btn-sm" %></span>
+        <span><%= link "Delete", to: Routes.dashboard_path(@conn, :delete, dashboard), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-light btn-sm" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>

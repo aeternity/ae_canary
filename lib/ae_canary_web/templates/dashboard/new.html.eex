@@ -1,0 +1,5 @@
+<h4>New dashboard message</h4>
+
+<%= render "form.html", Map.put(assigns, :action, Routes.dashboard_path(@conn, :create)) %>
+
+<span><%= link "All messages", to: Routes.dashboard_path(@conn, :index), class: "btn btn-light" %></span>

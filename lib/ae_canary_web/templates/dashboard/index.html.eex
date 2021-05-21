@@ -1,0 +1,8 @@
+<h4>Public dashboard messages</h4>
+
+<%= render "list.html", Map.put(assigns, :dashboards, @dashboards |> Enum.filter(&(&1.is_public)) |> Enum.sort(&(&1.id < &2.id))) %>
+<h4>Private dashboard messages</h4>
+
+<%= render "list.html", Map.put(assigns, :dashboards, @dashboards |> Enum.filter(&(! &1.is_public)) |> Enum.sort(&(&1.id < &2.id))) %>
+
+<span><%= link "New dashboard message", to: Routes.dashboard_path(@conn, :new), class: "btn btn-primary"  %></span>

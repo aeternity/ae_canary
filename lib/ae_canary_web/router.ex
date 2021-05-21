@@ -75,6 +75,11 @@ defmodule AeCanaryWeb.Router do
       resources "/accounts", AccountController
     end
 
+    scope "/settings" do
+      resources "/dashboard", DashboardController
+      get "/dashboard/:id/toggle", DashboardController, :toggle_active
+    end
+
     end
   end
 

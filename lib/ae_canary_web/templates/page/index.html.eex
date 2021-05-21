@@ -1,3 +1,13 @@
-<p>This is the public dashboard.</p>
-<p>The AeCanary service is still in alpha version. It is yet to be decided what could be exposed to the public while not sacrifising the safety of the service.</p>
+<% msgs = @dashboard_msgs |> Enum.filter(&(&1.is_public)) |> Enum.sort(&(&1.id < &2.id)) %>
+<%= if ! Enum.empty?(msgs) do %>
+  <h4 class="mt-4">Messages</h4>
+  <div class="row">
+    <%= for msg <- msgs do %>
+      <div class="col-sm-12">
+        <%= render AeCanaryWeb.DashboardView, "single.html", %{dashboard: msg} %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
 <p>In order to see the functionality, please <%= link "login", to: Routes.session_path(@conn, :new) %>.
+<% end %>

@@ -42,6 +42,9 @@
                     <%= if is_admin(@current_user) do %>
                       <li><%= link "All accounts", to: Routes.user_path(@conn, :index), class: "dropdown-item" %></li>
                     <% end %>
+                    <%= if is_admin(@current_user) do %>
+                      <li><%= link "Dashboard messages", to: Routes.dashboard_path(@conn, :index), class: "dropdown-item" %></li>
+                    <% end %>
                     <li><hr class="dropdown-divider"></li>
                     <li><%= link "Log out", to: Routes.session_path(@conn, :logout), class: "dropdown-item" %></li>
                   </ul>

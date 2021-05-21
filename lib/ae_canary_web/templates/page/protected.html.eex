@@ -1,4 +1,17 @@
 <h2>Internal dashboard</h2>
+
+<% msgs = @dashboard_msgs |> Enum.filter(&(! &1.is_public)) |> Enum.sort(&(&1.id < &2.id)) %>
+<%= if ! Enum.empty?(msgs) do %>
+  <h4 class="mt-4">Messages</h4>
+  <div class="row">
+    <%= for msg <- msgs do %>
+      <div class="col-sm-12">
+        <%= render AeCanaryWeb.DashboardView, "single.html", %{dashboard: msg} %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
 <h4 class="mt-4">Services</h4>
 <div class="row">
   <div class="col-sm-3">
