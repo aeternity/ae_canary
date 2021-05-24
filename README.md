@@ -28,7 +28,7 @@ code, please check the description [here](/docs/installation.md).
 
 - [x] Introduce exchange accounts. Track their exposure on a regular basis.
 
-- [ ] Revisit the index page and dashboard
+- [x] Revisit the index page and dashboard
 
 - [ ] Log events.
 
