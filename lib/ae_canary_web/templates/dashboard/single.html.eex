@@ -1,11 +1,13 @@
 <% alert_class = case @dashboard.state do
-                      "normal" -> "success"
+                      "normal" -> "light"
+                      "success" -> "success"
                       "warning" -> "warning"
                       "danger" -> "danger"
                   end %>
 <div class="alert alert-<%= alert_class %>" role="alert">
   <h4 class="alert-heading"><%= if @dashboard.icon do %><i class="bi <%= @dashboard.icon %>"></i> <% end %><%= @dashboard.title %></h4>
-  <p><%= @dashboard.message %></p>
+  <p><%= if @dashboard.date do %>[<%= Timex.format!(@dashboard.date, "%Y-%b-%d %H:%M", :strftime) %>] <% end %><%= @dashboard.message |> String.split("\n", trim: false) 
+|> Enum.intersperse(Phoenix.HTML.Tag.tag(:br))%></p>
   <%= if @dashboard.footer do %>
     <hr>
     <p class="mb-0"><%= @dashboard.footer %></p>

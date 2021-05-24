@@ -23,7 +23,8 @@ defmodule AeCanary.Settings do
 
   def active_dashboard_messages do
     from(msg in Dashboard,
-      where: msg.active == true)
+      where: msg.active == true,
+      order_by: [desc: msg.date])
       |> Repo.all()
   end
 

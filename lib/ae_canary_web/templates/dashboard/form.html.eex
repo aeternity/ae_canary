@@ -7,6 +7,7 @@
     <% end %>
 
     <div class="row g-3 mb-3">
+
       <div class="col-sm-2">
         <%= label f, :icon, class: "form-label" %>
         <%= text_input f, :icon, class: "form-control" %>
@@ -19,6 +20,13 @@
       </div>
     </div>
     <div class="row g-3 mb-3">
+      <div class="col-sm-6">
+        <%= datetime_select f, :date, class: "form-control", default: DateTime.utc_now, builder: fn b -> %>
+  Date: <%= b.(:day, []) %> / <%= b.(:month, []) %> / <%= b.(:year, []) %>
+  Time: <%= b.(:hour, []) %> : <%= b.(:minute, []) %>
+        <% end %>
+        <%= error_tag f, :date %>
+      </div>
       <div class="col-sm-12">
         <div class="col-sm-2 form-check form-switch">
           <%= label f, :is_public, "Public", class: "form-check-label" %>
@@ -31,7 +39,7 @@
       <div class="col-sm-3">
         <% state = case @changeset.data.state do nil -> "normal"; r -> r end %>
         <%= label f, :state, class: "form-label" %>
-        <%= select f, :state, ["normal": "normal", "warning": "warning", "danger": "danger"], class: "form-select", selected: state %>
+        <%= select f, :state, ["normal": "normal", "success": "success", "warning": "warning", "danger": "danger"], class: "form-select", selected: state %>
       </div>
     </div>
     <div class="row g-3 mb-3">

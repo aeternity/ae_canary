@@ -1,6 +1,6 @@
 <h2>Internal dashboard</h2>
 
-<% msgs = @dashboard_msgs |> Enum.filter(&(! &1.is_public)) |> Enum.sort(&(&1.id < &2.id)) %>
+<% msgs = @dashboard_msgs |> Enum.filter(&(! &1.is_public)) %>
 <%= if ! Enum.empty?(msgs) do %>
   <h4 class="mt-4">Messages</h4>
   <div class="row">
