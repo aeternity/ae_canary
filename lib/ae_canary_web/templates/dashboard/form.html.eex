@@ -45,7 +45,7 @@
       <div class="col-sm-3">
         <% state = case @changeset.data.state do nil -> "normal"; r -> r end %>
         <%= label f, :state, class: "form-label" %>
-        <%= select f, :state, ["normal": "normal", "success": "success", "warning": "warning", "danger": "danger"], class: "form-select", selected: state %>
+        <%= select f, :state, [normal: "normal", success: "success", warning: "warning", danger: "danger"], class: "form-select", selected: state %>
       </div>
     </div>
     <div class="row g-3 mb-3">

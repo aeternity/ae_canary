@@ -2,8 +2,6 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
   use AeCanary.Mdw.Cache.Service, name: "Exchanges exposure"
 
   alias AeCanary.Transactions
-  alias AeCanary.Transactions.{Tx, Location, Spend}
-  alias AeCanary.Exchanges.{Exchange, Address}
   alias AeCanary.Exchanges
 
   @impl true
@@ -30,7 +28,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
   defp update_DB(from, to, all_exchanges_and_addresses) do
     all_exchanges_and_addresses
     |> Enum.map(
-      fn(%{id: exchange_id, name: exchange_name, addresses: addresses}) ->
+      fn(%{addresses: addresses}) ->
         Enum.map(addresses,
           fn(address) ->
             Mdw.Api.incoming_spend_txs(address.addr, from, to)
@@ -141,13 +139,4 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
   defp one_day_in_blocks(), do: 20 * 24
   defp show_period_in_days(), do: 30 ## days
   defp refresh_period_in_blocks(), do: one_day_in_blocks() * show_period_in_days()
-
-  defp sum_amounts({:ok, txs}) do
-    sum_amounts(txs)
-  end
-  defp sum_amounts(txs) do
-    txs
-    |> Enum.map(fn %Tx{tx: %Spend{amount: amount}} -> amount end)
-    |> Enum.sum()
-  end
 end

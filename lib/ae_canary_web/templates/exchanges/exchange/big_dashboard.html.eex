@@ -85,7 +85,7 @@
             <p>No addresses set.</p>
           <% else %>
             <h5>Addresses</h5>
-              <%= for {a, idx}<- Enum.with_index(e.addresses) do %>
+              <%= for a <- e.addresses do %>
                 <% has_alert = Enum.filter(last_7_days, &(&1.name == e.name))
                                |> (fn([exc]) -> Enum.filter(exc.addresses, &(&1.addr == a.addr)) |> (&(! Enum.empty?(&1))).()
                                      ([]) -> false

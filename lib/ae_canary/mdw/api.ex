@@ -45,7 +45,7 @@ defmodule AeCanary.Mdw.Api do
     delete_old =
       fn() -> Enum.each(old_locations, &Transactions.delete_tx_by_location/1) end
     paged_update_db("txs/backward?spend.recipient_id=#{recipient_id}&limit=#{@limit}", &Tx.decode/1, maybe_insert, delete_old)
-    Transactions.list_txs_of_spend_txs_by(%{recipient_id: recipient_id, select: :tx_and_location})
+    Transactions.list_locations_of_spend_txs_by(%{recipient_id: recipient_id, select: :tx_and_location})
   end
 
   def incoming_spend_txs(sender_id, from, to) when from > to do

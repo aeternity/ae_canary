@@ -265,7 +265,7 @@ defmodule AeCanary.Transactions do
     end
   end
 
-  def maybe_insert_list([], old_list) do
+  def maybe_insert_list([], _old_list) do
     :inserted_all
   end
   def maybe_insert_list([top | new_batch_tail], old_list) do
