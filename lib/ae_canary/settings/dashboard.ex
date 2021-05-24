@@ -10,6 +10,7 @@ defmodule AeCanary.Settings.Dashboard do
     field :message, :string
     field :state, :string
     field :is_public, :boolean, default: false
+    field :pinned, :boolean, default: false
     field :date, :utc_datetime
 
     timestamps()
@@ -18,7 +19,7 @@ defmodule AeCanary.Settings.Dashboard do
   @doc false
   def changeset(dashboard, attrs) do
     dashboard
-    |> cast(attrs, [:state, :message, :active, :icon, :title, :footer, :is_public, :date])
+    |> cast(attrs, [:state, :message, :active, :icon, :title, :footer, :is_public, :date, :pinned])
     |> validate_required([:state, :message, :active, :title])
   end
 end

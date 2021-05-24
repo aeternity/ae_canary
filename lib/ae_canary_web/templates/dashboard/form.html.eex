@@ -33,6 +33,12 @@
           <%= checkbox f, :is_public, class: "form-check-input" %>
         </div>
       </div>
+      <div class="col-sm-12">
+        <div class="col-sm-2 form-check form-switch">
+          <%= label f, :pinned, "Pinned", class: "form-check-label" %>
+          <%= checkbox f, :pinned, class: "form-check-input" %>
+        </div>
+      </div>
     </div>
 
     <div class="row g-3 mb-3">
