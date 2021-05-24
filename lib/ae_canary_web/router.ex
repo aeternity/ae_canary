@@ -73,6 +73,7 @@ defmodule AeCanaryWeb.Router do
     scope "/transactions", Transactions, as: :transactions do
       resources "/spend", SpendController
       resources "/location", LocationController
+      get "/delete", SpendController, :delete_all
     end
 
     scope "/tainted", TaintedAccounts, as: :tainted_accounts do

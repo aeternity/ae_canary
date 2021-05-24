@@ -1,6 +1,9 @@
 <h2 class="card-title">Detailed exchanges exposure</h2>
 <%= if is_admin(@current_user) do %>
   <%= link "Settings", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
+  <%= if is_admin(@current_user) do %>
+    <%= link "Delete all transactions", to: Routes.transactions_spend_path(@conn, :delete_all), class: "btn btn-light" %>
+  <%= end %>
 <% end %>
 <% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
 <%= if data == nil do %>

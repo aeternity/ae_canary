@@ -245,6 +245,11 @@ defmodule AeCanary.Transactions do
     Repo.delete(location)
   end
 
+  def delete_all() do
+    Repo.delete_all(Location)
+    Repo.delete_all(Spend)
+  end
+
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking location changes.
 
