@@ -7,8 +7,7 @@
 <div class="alert alert-<%= alert_class %>" role="alert">
   <%= if @dashboard.pinned do %><div class="float-end"><i class="bi bi-pin-angle-fill"></i></div><% end %>
   <h4 class="alert-heading"><%= if @dashboard.icon do %><i class="bi <%= @dashboard.icon %>"></i> <% end %><%= @dashboard.title %></h4>
-  <p><%= if @dashboard.date do %>[<%= Timex.format!(@dashboard.date, "%Y-%b-%d %H:%M", :strftime) %>] <% end %><%= @dashboard.message |> String.split("\n", trim: false) 
-|> Enum.intersperse(Phoenix.HTML.Tag.tag(:br))%></p>
+  <p><%= if @dashboard.date do %>[<%= Timex.format!(@dashboard.date, "%Y-%b-%d %H:%M", :strftime) %>] <% end %><%= text_to_html @dashboard.message, escape: false, wrapper_tag: :span, insert_brs: true %></p>
   <%= if @dashboard.footer do %>
     <hr>
     <p class="mb-0"><%= @dashboard.footer %></p>
