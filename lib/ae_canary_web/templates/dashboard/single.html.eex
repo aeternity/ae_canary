@@ -10,6 +10,6 @@
   <p><%= if @dashboard.date do %>[<%= Timex.format!(@dashboard.date, "%Y-%b-%d %H:%M", :strftime) %>] <% end %><%= text_to_html @dashboard.message, escape: false, wrapper_tag: :span, insert_brs: true %></p>
   <%= if @dashboard.footer do %>
     <hr>
-    <p class="mb-0"><%= @dashboard.footer %></p>
+    <p class="mb-0"><%= text_to_html @dashboard.footer, escape: false, wrapper_tag: :span, insert_brs: true %></p></p>
   <% end %>
 </div>
