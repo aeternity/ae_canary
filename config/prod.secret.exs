@@ -57,6 +57,15 @@ secret_key_base =
     You can generate one by calling: mix phx.gen.secret
     """
 
+defmodule AeCanary.Config.Helpers do
+  def get_env_integer(key, default) do
+    case Integer.parse(System.get_env(key, default)) do
+      {v, _} -> v
+      :error -> raise "environment value #{key} must be an integer"
+    end
+  end
+end
+
 config :ae_canary, AeCanaryWeb.Endpoint,
   http: [
     port: String.to_integer(System.get_env("PORT") || "4000"),
@@ -70,6 +79,14 @@ config :ae_canary, AeCanary.Accounts.Guardian,
 config :ae_canary,
   mdw_url: mdw_url
 
+
+alias AeCanary.Config.Helpers, as: H
+
+config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
+  stats_interval_in_days: H.get_env_integer("EXCHANGES_STATS_INTERVAL", "30"),
+  show_alerts_interval_in_days: H.get_env_integer("EXCHANGES_ALERTS_INTERVAL", "7"),
+  has_transactions_in_the_past_days_interval: H.get_env_integer("EXCHANGES_HAS_TXS_INTERVAL", "7"),
+  suspicious_deposits_threshold: H.get_env_integer("EXCHANGES_SUSPICIOUS_DEPOSIT_THRESHOLD", "500_000")
 
 
 # ## Using releases (Elixir v1.9+)

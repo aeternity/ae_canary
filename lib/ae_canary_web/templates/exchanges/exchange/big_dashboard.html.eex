@@ -3,7 +3,7 @@
   <%= link "Settings", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
   <%= if is_admin(@current_user) do %>
     <%= link "Delete all transactions", to: Routes.transactions_spend_path(@conn, :delete_all), class: "btn btn-light" %>
-  <%= end %>
+  <% end %>
 <% end %>
 <% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
 <%= if data == nil do %>
@@ -13,18 +13,20 @@
     </div>
   </div>
 <% else %>
-  <% last_7_days = data.alerts_for_past_7_days %>
+  <% last_days = data.alerts_for_past_days %>
+  <% alert_interval_in_days = AeCanary.Mdw.Cache.Service.Exchange.alert_interval_in_days %>
+  <% show_period_in_days = AeCanary.Mdw.Cache.Service.Exchange.show_period_in_days %>
   <h3>Summary</h3>
     <%= if length(data.exchanges) == 0 do %>
     <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
     <% else %>
-      <%= if length(last_7_days) == 0 do %>
-        <p class="alert alert-success">No alert for the past 7 days.</p>
+      <%= if length(last_days) == 0 do %>
+        <p class="alert alert-success">No alert for the past <%= alert_interval_in_days %> days.</p>
       <% else %>
       <div class="alert alert-danger">
-        <h4 class="alert-heading">Past 7 days</h4>
-        <p>Please check the activity for the past <strong>7 days</strong> of the following exchanges:</p>
-          <%= for e <- last_7_days do %>
+        <h4 class="alert-heading">Past <%= alert_interval_in_days %> days</h4>
+        <p>Please check the activity for the past <strong><%= alert_interval_in_days %> days</strong> of the following exchanges:</p>
+          <%= for e <- last_days do %>
             <h5><%= e.name %></h5>
             <ul>
               <%= for a <- e.addresses do %>
@@ -48,7 +50,7 @@
       <div class="card-body">
         <div id="<%= e.name %>" class="mb-5">
           <%= if e.txs == 0 do %>
-            <p>No transactions for the past 30 days.</p>
+            <p>No transactions for the past <%= show_period_in_days %> days.</p>
           <% else %>
           <h5>Overview</h5>
           <% labels = e.aggregated |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) |> Enum.reverse() %>
@@ -89,7 +91,7 @@
           <% else %>
             <h5>Addresses</h5>
               <%= for a <- e.addresses do %>
-                <% has_alert = Enum.filter(last_7_days, &(&1.name == e.name))
+                <% has_alert = Enum.filter(last_days, &(&1.name == e.name))
                                |> (fn([exc]) -> Enum.filter(exc.addresses, &(&1.addr == a.addr)) |> (&(! Enum.empty?(&1))).()
                                      ([]) -> false
                                    end).() %>
@@ -97,7 +99,7 @@
                   <div class="card-body">
                     <h6><%= a.addr %> <a href="#<%= a.addr %>"> <i class="bi bi-link-45deg"></i></a></h6>
                   <%= if ! a.has_txs do %>
-                    <p>No transactions for the past 30 days.</p>
+                    <p>No transactions for the past <%= show_period_in_days %> days.</p>
                   <% end %>
                   <%= if a.has_txs do %>
                     <% data_sets_individual = 

@@ -39,7 +39,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
 
   defp refresh_from_db(update_start, all_exchanges_and_addresses) do
     all_dates =
-      0..30
+      0..show_period_in_days()
       |> Enum.map(&(Timex.shift(update_start, days: -1 * &1)))
     ## fetch from DB
     addresses =
@@ -80,7 +80,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
             |> Enum.map(
               fn(a) ->
                 %{data: data, has_txs: has_txs} = Map.fetch!(addresses_and_data, a.addr)
-                suspicious_deposits = Transactions.list_locations_of_spend_txs_by(%{select: :tx_and_location, recipient_id: a.addr, date_from: Timex.shift(update_start, days: -1 * show_period_in_days()), amount_at_least: Application.fetch_env!(:ae_canary, :suspicious_deposits_threshold)})
+                suspicious_deposits = Transactions.list_locations_of_spend_txs_by(%{select: :tx_and_location, recipient_id: a.addr, date_from: Timex.shift(update_start, days: -1 * show_period_in_days()), amount_at_least: suspicious_deposits_threshold()})
                 Map.merge(a, %{data: data, has_txs: has_txs, big_deposits: suspicious_deposits})
               end)
           aggregated =
@@ -97,20 +97,20 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
                     %{date: date, txs: d1.txs + w1.txs + accum_txs, deposits: d1.sum + accum_d, withdrawals: w1.sum + accum_w}
                   end)
               end)
-          has_txs_past_7_days =
+          has_txs_past_days =
             aggregated
-            |> Enum.slice(0..6)
+            |> Enum.slice(0..has_transactions_in_the_past_days_interval() - 1)
             |> Enum.any?(&(&1.txs > 0))
           txs_total =
             aggregated
             |> Enum.reduce(0, &(&1.txs + &2))
-          Map.merge(e, %{addresses: addrs, aggregated: aggregated, has_txs_past_7_days: has_txs_past_7_days, txs: txs_total})
+          Map.merge(e, %{addresses: addrs, aggregated: aggregated, has_txs_past_days: has_txs_past_days, txs: txs_total})
         end)
       |> Enum.sort(&(&1.txs >= &2.txs))
     seven_days_ago =
       update_start
-      |> Timex.shift(days: -8)
-    alerts_for_past_7_days =
+      |> Timex.shift(days: -1 * alert_interval_in_days())
+    alerts_for_past_days =
       exchanges
       |> Enum.map(
         fn(%{name: name, id: id, addresses: addresses}) ->
@@ -133,10 +133,25 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
           end
         end)
       |> Enum.filter(&(&1 != :skip))
-    %{exchanges: exchanges, alerts_for_past_7_days: alerts_for_past_7_days}
+    %{exchanges: exchanges, alerts_for_past_days: alerts_for_past_days}
   end
 
   defp one_day_in_blocks(), do: 20 * 24
-  defp show_period_in_days(), do: 30 ## days
+
+  def show_period_in_days(), do: config(:stats_interval_in_days, 30)
+
+  def alert_interval_in_days(), do: config(:show_alerts_interval_in_days, 7)
+
+  def has_transactions_in_the_past_days_interval(), do: config(:has_transactions_in_the_past_days_interval, 7)
+
+  def suspicious_deposits_threshold(), do: config(:suspicious_deposits_threshold, 500_000)
+
+  defp config(key, default) do
+    case Application.fetch_env(:ae_canary, AeCanary.Mdw.Cache.Service.Exchange) do
+      :error -> default
+      {:ok, v} -> Keyword.get(v, key, default)
+    end
+  end
+
   defp refresh_period_in_blocks(), do: one_day_in_blocks() * show_period_in_days()
 end

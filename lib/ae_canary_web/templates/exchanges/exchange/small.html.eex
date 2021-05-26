@@ -12,26 +12,26 @@
   </div>
 </div>
 <% else %>
-<% last_7_days = data.alerts_for_past_7_days %>
-<div class="card<%= if length(last_7_days) > 0 do %> border-danger<% end %>">
-  <div class="card-header<%= if length(last_7_days) > 0 do %> alert-danger border-danger<% end %>">
+<% last_days = data.alerts_for_past_days %>
+<div class="card<%= if length(last_days) > 0 do %> border-danger<% end %>">
+  <div class="card-header<%= if length(last_days) > 0 do %> alert-danger border-danger<% end %>">
     Exchanges exposure
   </div>
   <div class="card-body">
       <%= if length(data.exchanges) == 0 do %>
       <p class="mb-2 text-danger">No exchanges, please ask an administrator to set some!</p>
       <% else %>
-        <%= if length(last_7_days) > 0 do %>
+        <%= if length(last_days) > 0 do %>
         <div class="alert alert-dange1r">
-          <p>Please check the activity for the past <strong>7 days</strong> of the following exchanges:</p>
-            <%= for e <- last_7_days do %>
+          <p>Please check the activity for the past <strong><%= AeCanary.Mdw.Cache.Service.Exchange.alert_interval_in_days %> days</strong> of the following exchanges:</p>
+            <%= for e <- last_days do %>
               <h6><%= e.name %> (<%= link "link", to: "#{Routes.exchanges_exchange_path(@conn, :dashboard)}##{e.name}" %>)</h6>
             <% end %>
         </div>
         <% end %>
-        <% exchanges = Enum.filter(data.exchanges, &(&1.has_txs_past_7_days)) %>
+        <% exchanges = Enum.filter(data.exchanges, &(&1.has_txs_past_days)) %>
         <%= if length(exchanges) == 0 do %>
-          <p>No transactions to or from exchanges for the past 7 days.</p>
+          <p>No transactions to or from exchanges for the past <%= AeCanary.Mdw.Cache.Service.Exchange.alert_interval_in_days %> days.</p>
         <% else %>
         <% labels = hd(exchanges) |> (&(&1.aggregated)).() |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) |> Enum.reverse() %>
         <% data_sets_txs = Enum.map(exchanges,

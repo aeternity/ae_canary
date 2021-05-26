@@ -9,8 +9,7 @@ use Mix.Config
 
 config :ae_canary,
   ecto_repos: [AeCanary.Repo],
-  mdw_url: "http://18.156.189.185/mdw/",
-  suspicious_deposits_threshold: 500_000
+  mdw_url: "http://18.156.189.185/mdw/"
 
 # Configures the endpoint
 config :ae_canary, AeCanaryWeb.Endpoint,
@@ -31,6 +30,12 @@ config :phoenix, :json_library, Jason
 config :ae_canary, AeCanaryWeb.Accounts.Guardian,
   issuer: "AeCanary",
   secret_key: "ZxjSaBGLIU5qGLeVDaBVIe8yXxTO0+rKs/NNuGyA/Fz97oviHxkfg2/hVe8bUO8i"
+
+config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
+  stats_interval_in_days: 40,
+  show_alerts_interval_in_days: 10,
+  has_transactions_in_the_past_days_interval: 7,
+  suspicious_deposits_threshold: 500_000
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

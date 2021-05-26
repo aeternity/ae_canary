@@ -23,7 +23,13 @@ services:
       - POSTGRES_USER=postgres # replace with your own credentials
       - POSTGRES_DB=canary_db
       - POSTGRES_HOST=canary-postgres
-      - MDW_URL= ## mdw node API url
+      ## please consult the docs for details
+      - MDW_URL=
       - SECRET_KEY_BASE=
       - GUARDIAN_SECRET_KEY=
+      ## Exchanges exposure settings
+      - EXCHANGES_STATS_INTERVAL=30
+      - EXCHANGES_ALERTS_INTERVAL=7
+      - EXCHANGES_HAS_TXS_INTERVAL=7
+      - EXCHANGES_SUSPICIOUS_DEPOSIT_THRESHOLD=500000
     restart: unless-stopped
