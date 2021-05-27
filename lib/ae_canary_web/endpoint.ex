@@ -24,7 +24,7 @@ defmodule AeCanaryWeb.Endpoint do
     at: "/",
     from: :ae_canary,
     gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
+    only: ~w(css fonts webfonts images js favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

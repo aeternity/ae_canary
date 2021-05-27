@@ -4,6 +4,8 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
   alias AeCanary.Transactions
   alias AeCanary.Exchanges
 
+  alias AeCanary.Statistics.InterquartileRange, as: IR
+
   @impl true
   def init(), do: nil 
 
@@ -81,7 +83,11 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
               fn(a) ->
                 %{data: data, has_txs: has_txs} = Map.fetch!(addresses_and_data, a.addr)
                 suspicious_deposits = Transactions.list_locations_of_spend_txs_by(%{select: :tx_and_location, recipient_id: a.addr, date_from: Timex.shift(update_start, days: -1 * show_period_in_days()), amount_at_least: suspicious_deposits_threshold()})
-                Map.merge(a, %{data: data, has_txs: has_txs, big_deposits: suspicious_deposits})
+                boundaries =
+                  data
+                  |> Enum.map(&(&1.deposits.sum - &1.withdrawals.sum))
+                  |> upper_boundaries()
+                Map.merge(a, %{data: data, has_txs: has_txs, big_deposits: suspicious_deposits, upper_boundaries: boundaries})
               end)
           aggregated =
             addrs
@@ -104,7 +110,8 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
           txs_total =
             aggregated
             |> Enum.reduce(0, &(&1.txs + &2))
-          Map.merge(e, %{addresses: addrs, aggregated: aggregated, has_txs_past_days: has_txs_past_days, txs: txs_total})
+          upper_boundaries = upper_boundaries(aggregated |> Enum.map(&(&1.deposits - &1.withdrawals)))
+          Map.merge(e, %{upper_boundaries: upper_boundaries, addresses: addrs, aggregated: aggregated, has_txs_past_days: has_txs_past_days, txs: txs_total})
         end)
       |> Enum.sort(&(&1.txs >= &2.txs))
     seven_days_ago =
@@ -146,6 +153,10 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
 
   def suspicious_deposits_threshold(), do: config(:suspicious_deposits_threshold, 500_000)
 
+  def iqr_use_positive_exposure_only(), do: config(:iqr_use_positive_exposure_only, false)
+  def iqr_lower_boundary_multiplier(), do: config(:iqr_lower_boundary_multiplier, 1.5)
+  def iqr_upper_boundary_multiplier(), do: config(:iqr_upper_boundary_multiplier, 3)
+
   defp config(key, default) do
     case Application.fetch_env(:ae_canary, AeCanary.Mdw.Cache.Service.Exchange) do
       :error -> default
@@ -154,4 +165,22 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
   end
 
   defp refresh_period_in_blocks(), do: one_day_in_blocks() * show_period_in_days()
+
+  defp upper_boundaries(list0) do
+    list =
+      case iqr_use_positive_exposure_only() do
+        true -> Enum.filter(list0, &(&1 > 0))
+        false -> list0
+      end
+    case IR.third_quartile(list) do
+      nil -> [0]
+      q3 ->
+        iqr = IR.iqr(list)
+        Enum.map(
+          [iqr_lower_boundary_multiplier(), iqr_upper_boundary_multiplier()],
+          fn(multiplier) ->
+            IR.q3_fence(q3, iqr, multiplier)
+          end)
+    end
+  end
 end

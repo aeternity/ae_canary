@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>AeCanary · Aeternity blockchain</title>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.min.js"></script>
+    <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/chartjs-plugin-annotation.min.js") %>"></script>
     <script>
       const colorScheme = [
           "#25CCF7","#FD7272","#54a0ff","#00d2d3",

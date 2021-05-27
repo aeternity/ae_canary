@@ -14,3 +14,6 @@
 import "phoenix_html"
 import 'bootstrap'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
+import { Chart } from 'chart.js';
+
+require('bootstrap-icons/font/bootstrap-icons.css');

@@ -35,7 +35,10 @@ config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
   stats_interval_in_days: 40,
   show_alerts_interval_in_days: 10,
   has_transactions_in_the_past_days_interval: 7,
-  suspicious_deposits_threshold: 500_000
+  suspicious_deposits_threshold: 500_000,
+  iqr_use_positive_exposure_only: true,
+  iqr_lower_boundary_multiplier: 1.5,
+  iqr_upper_boundary_multiplier: 3
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

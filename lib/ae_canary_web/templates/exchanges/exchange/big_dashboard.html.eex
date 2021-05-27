@@ -64,17 +64,27 @@
                   data: Enum.map(e.aggregated, &( -1 * &1.withdrawals)) |> Enum.reverse()},
                 %{name: "Exposure",
                   borderColor: "#5ACA75",
-                  data: Enum.map(e.aggregated, &( &1.deposits - &1.withdrawals)) |> Enum.reverse()}
+                  data: Enum.map(e.aggregated, &( &1.deposits - &1.withdrawals)) |> Enum.reverse()},
               ] %>
+          <% boundaries =
+            e.upper_boundaries
+            |> Enum.map(fn(b) -> %{y: %{from: b, to: b}} end)
+          %>
           <% data_sets_txs = 
               [
                 %{name: "Transactions",
                   data: Enum.map(e.aggregated, &(&1.txs)) |> Enum.reverse()}
               ] %>
           <div class="mb-3 row">
+            <div class="col-lg-12">
+            <p>The boundaries in red represent statistical expectations for an upper boundaries for exposure. They are based on the whole data set and could help exposing outliers. The analysis is done on the visualised set of data.</p>
+            </div>
+          </div>
+          <div class="mb-3 row">
             <div class="col-lg-6">
               <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE movement by day',
                                                                                     labels: labels, 
+                                                                                    lines: boundaries,
                                                                                     data_sets: data_sets_all}) %>
             </div>
             <div class="col-lg-6">
@@ -102,6 +112,12 @@
                     <p>No transactions for the past <%= show_period_in_days %> days.</p>
                   <% end %>
                   <%= if a.has_txs do %>
+                    <% data_sets_exposure = 
+                        [
+                          %{name: "Exposure",
+                            borderColor: "#5ACA75",
+                            data: Enum.map(a.data, &(&1.deposits.sum - &1.withdrawals.sum)) |> Enum.reverse()},
+                        ] %>
                     <% data_sets_individual = 
                         [
                           %{name: "Deposits",
@@ -120,18 +136,36 @@
                             borderColor: "#F48989",
                             data: Enum.map(a.data, &(&1.withdrawals.txs)) |> Enum.reverse()}
                         ] %>
+                    <% address_boundaries =
+                      a.upper_boundaries
+                      |> Enum.map(fn(b) -> %{y: %{from: b, to: b}} end)
+                    %>
 
                     <% labels = a.data |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) %>
                     <div class="mb-3 row">
-                      <div class="col-lg-6">
-                        <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE transfers for #{a.addr}',
-                                                                                              labels: labels, 
-                                                                                              data_sets: data_sets_individual}) %>
+                      <div class="col-lg-12">
+                        <div class="mb-3 row">
+                          <div class="col-lg-12">
+                            <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE exposure for #{a.addr}',
+                                                                                                  labels: labels, 
+                                                                                                  lines: address_boundaries,
+                                                                                                  data_sets: data_sets_exposure}) %>
+                          </div>
+                        </div>
                       </div>
-                      <div class="col-lg-6">
-                        <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transaction counts for #{a.addr}',
-                                                                                              labels: labels, 
-                                                                                              data_sets: data_sets_txs_individual}) %>
+                      <div class="col-lg-12">
+                        <div class="mb-3 row">
+                          <div class="col-lg-6">
+                            <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE transfers for #{a.addr}',
+                                                                                                  labels: labels, 
+                                                                                                  data_sets: data_sets_individual}) %>
+                          </div>
+                          <div class="col-lg-6">
+                            <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transaction counts for #{a.addr}',
+                                                                                                  labels: labels, 
+                                                                                                  data_sets: data_sets_txs_individual}) %>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   <% end %>
