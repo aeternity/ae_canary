@@ -94,3 +94,42 @@ minimum amount in AE tokens for a transaction to have in order to be
 considered suspicious. Please note that only deposits to exchanges can be
 suspicious and withdrawals are not.
 
+### Statistical analysis
+
+Exchanges keep a relatively steady flow of transactions: both deposits and
+withdrawals. This allows us to do a statistical analysis and to spot daily
+exposures that are outliers in the data set. Not that this does not mean that
+they are a good measure to detect an attack but still can help detrminging
+what a reasonable exposure would be, based on the [statistics
+scope](#stats-scope).
+
+AeCanary uses an IQR method for detecting outliers. It is a quite
+straightforward approach: we define "fences" based on Q3. If a value is higher
+than the fence - it is an outlier. The formula is:
+
+```
+fence = Q3 + IQR * multiplier
+
+```
+
+AeCanary suppoerts two multipliers defining a lower and upper fences. Crossing
+the former is not unexpected and shall not be treated as such. The exposure
+going above the latter though is a bigger diviation and it is expected to
+happen less frequently.
+
+Those are adjustable as settings, as follows:
+
+* `EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER` with a defalt `1.5`
+* `EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER` with a defalt `3`
+
+Again, those define helper fences to determine if a daily exposure was an
+outlier. Using this metric only for detecting an attack would yeld more false
+positives than detecting actual attacks, so please use with caution.
+
+Additionally some days exchanges experience negative exposures and this is
+completely fine. This though can impact AeCanary's analysis. There is a
+boolean setting for fine tuning the service - shall negative exposures be
+taken into account or shall only positive numbers be used instead. The setting
+is called `EXCHANGES_IQR_USE_POSITIVE_EXPOSURE_ONLY` and the default is true.
+
+

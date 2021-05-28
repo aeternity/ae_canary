@@ -30,7 +30,19 @@
             <h5><%= e.name %></h5>
             <ul>
               <%= for a <- e.addresses do %>
-                <li><%= a.addr %> has received <%= Enum.count(a.big_deposits) %> deposits with a total amount of <%= Enum.map(a.big_deposits, &(&1.tx.amount)) |> Enum.sum() |> round() %> AE. (<a href="#<%= a.addr %>">link</a>)</li> 
+                <%= if ! Enum.empty?(a.over_the_boundaries) do %>
+                  <li>
+                    <p><%= a.addr %> (<a href="#<%= a.addr %>">link</a>) exposure crossed the boundaries <%= Enum.count(a.over_the_boundaries) %> times:</p>
+                    <ul>
+                      <%= for crossed <- a.over_the_boundaries do %>
+                        <li>On <%= Timex.format!(crossed.date, "%d %b", :strftime)  %> the exposure <%= round(crossed.message.exposure) %> went over the <strong><%= crossed.message.boundary %></strong> boundary of <%= round(crossed.message.limit) %>.</li>
+                      <% end %>
+                    </ul>
+                  </li> 
+                <% end %>
+                <%= if ! Enum.empty?(a.big_deposits) do %>
+                  <li><%= a.addr %> has received <%= Enum.count(a.big_deposits) %> deposits with a total amount of <%= Enum.map(a.big_deposits, &(&1.tx.amount)) |> Enum.sum() |> round() %> AE. (<a href="#<%= a.addr %>">link</a>)</li> 
+                <% end %>
               <% end %>
             </ul>
           <% end %>

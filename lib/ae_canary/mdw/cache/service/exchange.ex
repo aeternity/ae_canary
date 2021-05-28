@@ -87,7 +87,26 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
                   data
                   |> Enum.map(&(&1.deposits.sum - &1.withdrawals.sum))
                   |> upper_boundaries()
-                Map.merge(a, %{data: data, has_txs: has_txs, big_deposits: suspicious_deposits, upper_boundaries: boundaries})
+                [lower_boundary, upper_boundary] =
+                  boundaries
+                  |> Enum.sort()
+                last_day_in_alert_scope = Timex.shift(update_start, days: -1 * alert_interval_in_days())
+                over_the_boundaries =
+                  data
+                  |> Enum.filter(&(Date.compare(&1.date, last_day_in_alert_scope) != :lt)) ## :gt or :eq
+                  |> Enum.filter(&(&1.deposits.sum - &1.withdrawals.sum >= lower_boundary and &1.deposits.sum - &1.withdrawals.sum > 0))
+                  |> Enum.map(
+                    fn(%{date: date, deposits: deposits, withdrawals: withdrawals}) ->
+                      message =
+                        case deposits.sum - withdrawals.sum do
+                          exposure when exposure > upper_boundary ->
+                            %{boundary: "upper", exposure: exposure, limit: upper_boundary}
+                          exposure ->
+                            %{boundary: "lower", exposure: exposure, limit: lower_boundary}
+                        end
+                      %{date: date, message: message}
+                    end)
+                    Map.merge(a, %{data: data, has_txs: has_txs, big_deposits: suspicious_deposits, upper_boundaries: boundaries, over_the_boundaries: over_the_boundaries})
               end)
           aggregated =
             addrs
@@ -124,13 +143,13 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
           interesting_addresses =
             addresses
             |> Enum.map(
-              fn(%{addr: addr, big_deposits: d, id: id}) ->
+              fn(%{addr: addr, big_deposits: d, id: id, over_the_boundaries: over_the_boundaries}) ->
                 deposits =
                   d
                   |> Enum.filter(&(Date.compare(DateTime.to_date(&1.location.micro_time), seven_days_ago) != :lt))
-                case Enum.empty?(deposits) do
+                case Enum.empty?(deposits) and Enum.empty?(over_the_boundaries) do
                   true -> :skip
-                  false -> %{id: id, addr: addr, big_deposits: deposits}
+                  false -> %{id: id, addr: addr, big_deposits: deposits, over_the_boundaries: over_the_boundaries}
                 end
               end)
             |> Enum.filter(&(&1 != :skip))
@@ -173,7 +192,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
         false -> list0
       end
     case IR.third_quartile(list) do
-      nil -> [0]
+      nil -> [0, 0]
       q3 ->
         iqr = IR.iqr(list)
         Enum.map(
