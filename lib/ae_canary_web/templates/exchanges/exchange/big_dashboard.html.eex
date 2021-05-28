@@ -141,7 +141,7 @@
                       |> Enum.map(fn(b) -> %{y: %{from: b, to: b}} end)
                     %>
 
-                    <% labels = a.data |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) %>
+                    <% labels = a.data |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) |> Enum.reverse() %>
                     <div class="mb-3 row">
                       <div class="col-lg-12">
                         <div class="mb-3 row">
