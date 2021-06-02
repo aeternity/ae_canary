@@ -1,18 +1,47 @@
-<% msgs = @dashboard_msgs |> Enum.filter(&(&1.is_public)) %>
-<%= if ! Enum.empty?(msgs) do %>
-  <h4 class="mt-4">Messages</h4>
-  <div class="row">
-    <%= for msg <- msgs |> Enum.filter(&(&1.pinned)) do %>
-      <div class="col-sm-12">
-        <%= render AeCanaryWeb.DashboardView, "single.html", %{dashboard: msg} %>
+<% mdw = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Status.cache_handle) %>
+<%= if mdw do %>
+<div class="row mb-3">
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-header">
+        Iris hard fork progress
       </div>
-    <% end %>
-    <%= for msg <- msgs |> Enum.filter(&(! &1.pinned)) do %>
-      <div class="col-sm-12">
-        <%= render AeCanaryWeb.DashboardView, "single.html", %{dashboard: msg} %>
+      <div class="card-body">
+        <% start = 437357 %>
+        <% hf = 441444 %>
+        <% current = mdw.node_height %>
+        <%= if (current >= hf) do %>
+          Iris had arrived! 🎉🎉🎉
+          <p class="text-muted">You should have already upgraded <a href="https://github.com/aeternity/aeternity/releases/tag/v6.0.0"><i class="bi bi-github"></i> your node</a> and <a href="https://github.com/aeternity/aepp-sdk-js"><i class="bi bi-github"></i> the JS SDK</a>.</p>
+        <% else %>
+          <% blocks_left = hf - current %>
+          <% blocks_total = hf - start %>
+          <% progress = 100 - div((blocks_left * 100), blocks_total) %>
+          <div class="progress">
+            <div class="progress-bar  progress-bar-striped bg-success" role="progressbar" style="width: <%= progress %>% " aria-valuenow="<%= progress %>" aria-valuemin="0" aria-valuemax="100"><%= progress %>%</div>
+          </div>
+          <p class="text-muted">Height <%= current %> / <%= hf %></p>
+          <p class="text-muted"><%= blocks_left %> blocks left till the activation</p>
+          <p class="text-muted">Approx. <%= 3 * blocks_left |> Timex.Duration.from_minutes |> Timex.Format.Duration.Formatters.Humanized.format %></p>
+          <p class="text-muted">You can upgrade <a href="https://github.com/aeternity/aeternity/releases/tag/v6.0.0"><i class="bi bi-github"></i> your node</a> and <a href="https://github.com/aeternity/aepp-sdk-js"><i class="bi bi-github"></i> the JS SDK</a>.</p>
+        <% end %>
       </div>
-    <% end %>
+    </div>
   </div>
-<% else %>
-<p>In order to see the functionality, please <%= link "login", to: Routes.session_path(@conn, :new) %>.
+</div>
 <% end %>
+<% msgs = @dashboard_msgs |> Enum.filter(&(&1.is_public)) %>
+<div class="row">
+  <%= for msg <- msgs |> Enum.filter(&(&1.pinned)) do %>
+    <div class="col-sm-12">
+      <%= render AeCanaryWeb.DashboardView, "single.html", %{dashboard: msg} %>
+    </div>
+  <% end %>
+  <h4 class="mt-4">Messages</h4>
+  <%= for msg <- msgs |> Enum.filter(&(! &1.pinned)) do %>
+    <div class="col-sm-12">
+      <%= render AeCanaryWeb.DashboardView, "single.html", %{dashboard: msg} %>
+    </div>
+  <% end %>
+</div>
+<p>In order to see the functionality, please <%= link "login", to: Routes.session_path(@conn, :new) %>.
