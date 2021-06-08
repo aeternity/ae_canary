@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
     container_name: canary-postgres
     environment:
-      - POSTGRES_PASSWORD=postgres # replace with your own credentials
-      - POSTGRES_USER=postgres # replace with your own credentials
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER-postgres}
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
 
@@ -19,20 +19,20 @@ services:
     ports:
       - 4000:4000
     environment:
-      - POSTGRES_PASSWORD=postgres # replace with your own credentials
-      - POSTGRES_USER=postgres # replace with your own credentials
-      - POSTGRES_DB=canary_db
-      - POSTGRES_HOST=canary-postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-canary_db}
+      - POSTGRES_HOST=${POSTGRES_HOST:-canary-postgres}
       ## please consult the docs for details
-      - MDW_URL=
-      - SECRET_KEY_BASE=
-      - GUARDIAN_SECRET_KEY=
+      - MDW_URL=${MDW_URL}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - GUARDIAN_SECRET_KEY=${GUARDIAN_SECRET_KEY}
       ## Exchanges exposure settings
-      - EXCHANGES_STATS_INTERVAL=30
-      - EXCHANGES_ALERTS_INTERVAL=7
-      - EXCHANGES_HAS_TXS_INTERVAL=7
-      - EXCHANGES_SUSPICIOUS_DEPOSIT_THRESHOLD=500000
-      - EXCHANGES_IQR_USE_POSITIVE_EXPOSURE_ONLY=true
-      - EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER=1.5
-      - EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER=3
+      - EXCHANGES_STATS_INTERVAL=${EXCHANGES_STATS_INTERVAL:-30}
+      - EXCHANGES_ALERTS_INTERVAL=${EXCHANGES_ALERTS_INTERVAL:-7}
+      - EXCHANGES_HAS_TXS_INTERVAL=${EXCHANGES_HAS_TXS_INTERVAL:-7}
+      - EXCHANGES_SUSPICIOUS_DEPOSIT_THRESHOLD=${EXCHANGES_SUSPICIOUS_DEPOSIT_THRESHOLD:-500000}
+      - EXCHANGES_IQR_USE_POSITIVE_EXPOSURE_ONLY=${EXCHANGES_IQR_USE_POSITIVE_EXPOSURE_ONLY:-true}
+      - EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER=${EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER:-1.5}
+      - EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER=${EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER:-3}
     restart: unless-stopped
