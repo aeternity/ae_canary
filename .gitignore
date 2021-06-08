@@ -35,3 +35,4 @@ npm-debug.log
 
 .DB_CREATED
 postgres-data
+.env
