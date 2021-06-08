@@ -50,7 +50,7 @@ After you've cloned the repo, you need to:
   * Start AeCanary with `mix phx.server` or ` iex -S mix phx.server`
     if you prefer console mode
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+Now you can visit [`localhost:8080`](http://localhost:8080) from your browser.
 Please note that the script creates the database.
 
 ## Prod environment

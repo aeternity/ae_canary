@@ -11,9 +11,9 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
 
-  ae_canary:
+  app:
     build: .
-    container_name: ae_canary
+    container_name: app
     depends_on:
       - canary-postgres
     ports:
@@ -36,3 +36,23 @@ services:
       - EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER=${EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER:-1.5}
       - EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER=${EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER:-3}
     restart: unless-stopped
+
+  caddy:
+    image: caddy:2.3.0
+    volumes:
+      - "./Caddyfile:/etc/caddy/Caddyfile"
+      - "caddy-data:/data/caddy"
+      - "caddy-config:/config/caddy"
+    ports:
+      - ${HTTP_PORT:-8080}:80
+      - ${HTTPS_PORT:-8081}:443
+    environment:
+        SITE_ADDRESS: ${SITE_ADDRESS:-localhost:80}
+        APP_ADDRESS: ${APP_ADDRESS:-app:4000}
+    restart: unless-stopped
+    depends_on:
+      - app
+
+volumes:
+  caddy-data:
+  caddy-config:
