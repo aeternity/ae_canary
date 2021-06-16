@@ -3,9 +3,31 @@ defmodule AeCanaryWeb.Transactions.SpendControllerTest do
 
   alias AeCanary.Transactions
 
-  @create_attrs %{amount: 42, fee: 42, hash: "some hash", nonce: 42, recipient_id: "some recipient_id", sender_id: "some sender_id"}
-  @update_attrs %{amount: 43, fee: 43, hash: "some updated hash", nonce: 43, recipient_id: "some updated recipient_id", sender_id: "some updated sender_id"}
-  @invalid_attrs %{amount: nil, fee: nil, hash: nil, nonce: nil, recipient_id: nil, sender_id: nil}
+  @create_attrs %{
+    amount: 42,
+    fee: 42,
+    hash: "some_hash",
+    nonce: 42,
+    recipient_id: "some recipient_id",
+    sender_id: "some sender_id"
+  }
+  @update_attrs %{
+    amount: 43,
+    fee: 43,
+    nonce: 43,
+    recipient_id: "some updated recipient_id",
+    sender_id: "some updated sender_id"
+  }
+  @invalid_attrs %{
+    amount: nil,
+    fee: nil,
+    hash: nil,
+    nonce: nil,
+    recipient_id: nil,
+    sender_id: nil
+  }
+
+  @moduletag :authenticated
 
   def fixture(:spend) do
     {:ok, spend} = Transactions.create_spend(@create_attrs)
@@ -57,14 +79,19 @@ defmodule AeCanaryWeb.Transactions.SpendControllerTest do
 
     test "redirects when data is valid", %{conn: conn, spend: spend} do
       conn = put(conn, Routes.transactions_spend_path(conn, :update, spend), spend: @update_attrs)
+      ## This would cause the test harness some trouble if we also updated the hash
+      ## - we would then be updating the primary key so would need to use the new spend after here
+      ## It should be enough to show that we can update the sender_id
       assert redirected_to(conn) == Routes.transactions_spend_path(conn, :show, spend)
 
       conn = get(conn, Routes.transactions_spend_path(conn, :show, spend))
-      assert html_response(conn, 200) =~ "some updated hash"
+      assert html_response(conn, 200) =~ "some updated sender_id"
     end
 
     test "renders errors when data is invalid", %{conn: conn, spend: spend} do
-      conn = put(conn, Routes.transactions_spend_path(conn, :update, spend), spend: @invalid_attrs)
+      conn =
+        put(conn, Routes.transactions_spend_path(conn, :update, spend), spend: @invalid_attrs)
+
       assert html_response(conn, 200) =~ "Edit Spend"
     end
   end
@@ -75,6 +102,7 @@ defmodule AeCanaryWeb.Transactions.SpendControllerTest do
     test "deletes chosen spend", %{conn: conn, spend: spend} do
       conn = delete(conn, Routes.transactions_spend_path(conn, :delete, spend))
       assert redirected_to(conn) == Routes.transactions_spend_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.transactions_spend_path(conn, :show, spend))
       end

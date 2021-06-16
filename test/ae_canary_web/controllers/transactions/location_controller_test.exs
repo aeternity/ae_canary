@@ -3,8 +3,10 @@ defmodule AeCanaryWeb.Transactions.LocationControllerTest do
 
   alias AeCanary.Transactions
 
-  @create_attrs %{block_hash: "some block_hash", block_height: "some block_height", micro_time: "2010-04-17T14:00:00Z", tx_hash: "some tx_hash"}
-  @update_attrs %{block_hash: "some updated block_hash", block_height: "some updated block_height", micro_time: "2011-05-18T15:01:01Z", tx_hash: "some updated tx_hash"}
+  @moduletag :authenticated
+
+  @create_attrs %{block_hash: "some block_hash", block_height: 100, micro_time: "2010-04-17T14:00:00Z", tx_hash: "some tx_hash"}
+  @update_attrs %{block_hash: "some updated block_hash", block_height: 101, micro_time: "2011-05-18T15:01:01Z", tx_hash: "some updated tx_hash"}
   @invalid_attrs %{block_hash: nil, block_height: nil, micro_time: nil, tx_hash: nil}
 
   def fixture(:location) do

@@ -3,6 +3,8 @@ defmodule AeCanaryWeb.TaintedAccounts.AccountControllerTest do
 
   alias AeCanary.TaintedAccounts
 
+  @moduletag :authenticated
+
   @create_attrs %{addr: "some addr", amount: 42, comment: "some comment", from_height: 42, last_tx_height: 42, white_listed: true}
   @update_attrs %{addr: "some updated addr", amount: 43, comment: "some updated comment", from_height: 43, last_tx_height: 43, white_listed: false}
   @invalid_attrs %{addr: nil, amount: nil, comment: nil, from_height: nil, last_tx_height: nil, white_listed: nil}
@@ -15,14 +17,14 @@ defmodule AeCanaryWeb.TaintedAccounts.AccountControllerTest do
   describe "index" do
     test "lists all accounts", %{conn: conn} do
       conn = get(conn, Routes.tainted_accounts_account_path(conn, :index))
-      assert html_response(conn, 200) =~ "Listing Accounts"
+      assert html_response(conn, 200) =~ "Listing tainted accounts"
     end
   end
 
   describe "new account" do
     test "renders form", %{conn: conn} do
       conn = get(conn, Routes.tainted_accounts_account_path(conn, :new))
-      assert html_response(conn, 200) =~ "New Account"
+      assert html_response(conn, 200) =~ "New tainted account"
     end
   end
 
@@ -39,7 +41,7 @@ defmodule AeCanaryWeb.TaintedAccounts.AccountControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, Routes.tainted_accounts_account_path(conn, :create), account: @invalid_attrs)
-      assert html_response(conn, 200) =~ "New Account"
+      assert html_response(conn, 200) =~ "New tainted account"
     end
   end
 
@@ -48,7 +50,7 @@ defmodule AeCanaryWeb.TaintedAccounts.AccountControllerTest do
 
     test "renders form for editing chosen account", %{conn: conn, account: account} do
       conn = get(conn, Routes.tainted_accounts_account_path(conn, :edit, account))
-      assert html_response(conn, 200) =~ "Edit Account"
+      assert html_response(conn, 200) =~ "Edit tainted account"
     end
   end
 
@@ -65,7 +67,7 @@ defmodule AeCanaryWeb.TaintedAccounts.AccountControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn, account: account} do
       conn = put(conn, Routes.tainted_accounts_account_path(conn, :update, account), account: @invalid_attrs)
-      assert html_response(conn, 200) =~ "Edit Account"
+      assert html_response(conn, 200) =~ "Edit tainted account"
     end
   end
 
