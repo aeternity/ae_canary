@@ -14,7 +14,7 @@
     <%= for exchange <- @exchanges do %>
     <tr>
       <td><%= exchange.name %></td>
-      <td><%= String.slice(exchange.comment, 0, max_comment_length)%><%= if exchange.comment != nil and String.length(exchange.comment) > max_comment_length do %>...<% end %></td>
+      <td><%= if exchange.comment != nil do String.slice(exchange.comment, 0, max_comment_length) end%><%= if exchange.comment != nil and String.length(exchange.comment) > max_comment_length do %>...<% end %></td>
 
       <td>
         <span><%= link "Show", to: Routes.exchanges_exchange_path(@conn, :show, exchange), class: "btn btn-light btn-sm" %></span>

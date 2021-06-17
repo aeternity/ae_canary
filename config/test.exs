@@ -18,5 +18,8 @@ config :ae_canary, AeCanaryWeb.Endpoint,
   http: [port: 4002],
   server: false
 
+config :ae_canary, AeCanary.Mdw.Cache.Service,
+  startup_delay: 240000
+
 # Print only warnings and errors during test
 config :logger, level: :warn

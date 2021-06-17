@@ -16,7 +16,7 @@ config :ae_canary, AeCanary.Repo,
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :ae_canary, AeCanaryWeb.Endpoint,
-  http: [port: 3013],
+  http: [port: 4013],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,

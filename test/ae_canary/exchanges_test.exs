@@ -72,6 +72,9 @@ defmodule AeCanary.ExchangesTest do
     @invalid_attrs %{addr: nil, comment: nil}
 
     def address_fixture(attrs \\ %{}) do
+      exchange = exchange_fixture()
+      attrs = Map.put(attrs, :exchange_id, exchange.id)
+
       {:ok, address} =
         attrs
         |> Enum.into(@valid_attrs)
@@ -91,7 +94,9 @@ defmodule AeCanary.ExchangesTest do
     end
 
     test "create_address/1 with valid data creates a address" do
-      assert {:ok, %Address{} = address} = Exchanges.create_address(@valid_attrs)
+      exchange = exchange_fixture()
+      attrs = Map.put(@valid_attrs, :exchange_id, exchange.id)
+      assert {:ok, %Address{} = address} = Exchanges.create_address(attrs)
       assert address.addr == "some addr"
       assert address.comment == "some comment"
     end

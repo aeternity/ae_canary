@@ -3,6 +3,6 @@ defmodule AeCanaryWeb.PageControllerTest do
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")
-    assert html_response(conn, 200) =~ "This is the public dashboard."
+    assert html_response(conn, 200) =~ "In order to see the functionality"
   end
 end

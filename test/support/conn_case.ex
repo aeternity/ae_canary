@@ -31,6 +31,23 @@ defmodule AeCanaryWeb.ConnCase do
     end
   end
 
+  @default_opts [
+    store: :cookie,
+    key: "secretkey",
+    encryption_salt: "encrypted cookie salt",
+    signing_salt: "signing salt"
+  ]
+
+  @signing_opts Plug.Session.init(Keyword.put(@default_opts, :encrypt, false))
+
+  @create_attrs %{
+          comment: "some comment",
+          email: "some email",
+          name: "some name",
+          pass_hash: "some pass_hash",
+          role: "admin"
+        }
+
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(AeCanary.Repo)
 
@@ -38,6 +55,22 @@ defmodule AeCanaryWeb.ConnCase do
       Ecto.Adapters.SQL.Sandbox.mode(AeCanary.Repo, {:shared, self()})
     end
 
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    {conn, user} =
+      if tags[:authenticated] do
+
+        {:ok, user} = AeCanary.Accounts.create_user(@create_attrs)
+
+        conn =
+          Phoenix.ConnTest.build_conn()
+          |> Plug.Session.call(@signing_opts)
+          |> Plug.Conn.fetch_session()
+          |> AeCanaryWeb.Accounts.Guardian.Plug.sign_in(user)
+
+        {conn, user}
+      else
+        {Phoenix.ConnTest.build_conn(), nil}
+      end
+
+    {:ok, conn: conn, user: user}
   end
 end

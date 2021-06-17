@@ -3,9 +3,11 @@ defmodule AeCanaryWeb.DashboardControllerTest do
 
   alias AeCanary.Settings
 
-  @create_attrs %{active: true, message: "some message", state: "some state"}
-  @update_attrs %{active: false, message: "some updated message", state: "some updated state"}
-  @invalid_attrs %{active: nil, message: nil, state: nil}
+  @moduletag :authenticated
+
+  @create_attrs %{active: true, title: "some title", message: "some message", state: "normal"}
+  @update_attrs %{active: false, title: "some updated title", message: "some updated message", state: "warning"}
+  @invalid_attrs %{active: nil, title: nil, message: nil, state: nil}
 
   def fixture(:dashboard) do
     {:ok, dashboard} = Settings.create_dashboard(@create_attrs)
@@ -15,14 +17,14 @@ defmodule AeCanaryWeb.DashboardControllerTest do
   describe "index" do
     test "lists all dashboard", %{conn: conn} do
       conn = get(conn, Routes.dashboard_path(conn, :index))
-      assert html_response(conn, 200) =~ "Listing Dashboard"
+      assert html_response(conn, 200) =~ "Dashboard messages"
     end
   end
 
   describe "new dashboard" do
     test "renders form", %{conn: conn} do
       conn = get(conn, Routes.dashboard_path(conn, :new))
-      assert html_response(conn, 200) =~ "New Dashboard"
+      assert html_response(conn, 200) =~ "New dashboard message"
     end
   end
 
@@ -34,12 +36,12 @@ defmodule AeCanaryWeb.DashboardControllerTest do
       assert redirected_to(conn) == Routes.dashboard_path(conn, :show, id)
 
       conn = get(conn, Routes.dashboard_path(conn, :show, id))
-      assert html_response(conn, 200) =~ "Show Dashboard"
+      assert html_response(conn, 200) =~ "Dashboard created successfully"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, Routes.dashboard_path(conn, :create), dashboard: @invalid_attrs)
-      assert html_response(conn, 200) =~ "New Dashboard"
+      assert html_response(conn, 200) =~ "New dashboard"
     end
   end
 

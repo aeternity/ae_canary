@@ -7,7 +7,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
   alias AeCanary.Statistics.InterquartileRange, as: IR
 
   @impl true
-  def init(), do: nil 
+  def init(), do: nil
 
   @impl true
   def refresh_interval(), do: minutes(10)

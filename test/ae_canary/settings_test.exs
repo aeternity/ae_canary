@@ -6,9 +6,9 @@ defmodule AeCanary.SettingsTest do
   describe "dashboard" do
     alias AeCanary.Settings.Dashboard
 
-    @valid_attrs %{active: true, message: "some message", state: "some state"}
-    @update_attrs %{active: false, message: "some updated message", state: "some updated state"}
-    @invalid_attrs %{active: nil, message: nil, state: nil}
+    @valid_attrs %{active: true, title: "some title", message: "some message", state: "normal"}
+    @update_attrs %{active: false, title: "some updated title", message: "some updated message", state: "warning"}
+    @invalid_attrs %{active: nil, title: nil, message: nil, state: nil}
 
     def dashboard_fixture(attrs \\ %{}) do
       {:ok, dashboard} =
@@ -33,7 +33,7 @@ defmodule AeCanary.SettingsTest do
       assert {:ok, %Dashboard{} = dashboard} = Settings.create_dashboard(@valid_attrs)
       assert dashboard.active == true
       assert dashboard.message == "some message"
-      assert dashboard.state == "some state"
+      assert dashboard.state == "normal"
     end
 
     test "create_dashboard/1 with invalid data returns error changeset" do
@@ -45,7 +45,7 @@ defmodule AeCanary.SettingsTest do
       assert {:ok, %Dashboard{} = dashboard} = Settings.update_dashboard(dashboard, @update_attrs)
       assert dashboard.active == false
       assert dashboard.message == "some updated message"
-      assert dashboard.state == "some updated state"
+      assert dashboard.state == "warning"
     end
 
     test "update_dashboard/2 with invalid data returns error changeset" do

@@ -14,7 +14,7 @@
 <%= for address <- @addresses do %>
     <tr>
       <td><%= address.addr %></td>
-      <td><%= String.slice(address.comment, 0, max_comment_length)%><%= if address.comment != nil and String.length(address.comment) > max_comment_length do %>...<% end %></td>
+      <td><%= if address.comment != nil do String.slice(address.comment, 0, max_comment_length) end%><%= if address.comment != nil and String.length(address.comment) > max_comment_length do %>...<% end %></td>
 
       <td>
         <span><%= link "Show", to: Routes.exchanges_address_path(@conn, :show, address), class: "btn btn-light" %></span>

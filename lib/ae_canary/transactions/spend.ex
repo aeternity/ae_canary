@@ -3,6 +3,7 @@ defmodule AeCanary.Transactions.Spend do
   import Ecto.Changeset
 
   @primary_key {:hash, :string, autogenerate: false}
+  @derive {Phoenix.Param, key: :hash}
   schema "spend_txs" do
     field :amount, :float
     field :fee, :float

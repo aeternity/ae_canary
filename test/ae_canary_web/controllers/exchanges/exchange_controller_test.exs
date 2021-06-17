@@ -3,6 +3,8 @@ defmodule AeCanaryWeb.Exchanges.ExchangeControllerTest do
 
   alias AeCanary.Exchanges
 
+  @moduletag :authenticated
+
   @create_attrs %{comment: "some comment", name: "some name"}
   @update_attrs %{comment: "some updated comment", name: "some updated name"}
   @invalid_attrs %{comment: nil, name: nil}
@@ -34,7 +36,7 @@ defmodule AeCanaryWeb.Exchanges.ExchangeControllerTest do
       assert redirected_to(conn) == Routes.exchanges_exchange_path(conn, :show, id)
 
       conn = get(conn, Routes.exchanges_exchange_path(conn, :show, id))
-      assert html_response(conn, 200) =~ "Show Exchange"
+      assert html_response(conn, 200) =~ "Exchange created successfully"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
