@@ -24,7 +24,10 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
     all_exchanges_and_addresses = Exchanges.list_exchanges_and_addresses()
     update_DB(update_from, update_to, all_exchanges_and_addresses)
     update_start = DateTime.utc_now() |> DateTime.to_date()
-    refresh_from_db(update_start, all_exchanges_and_addresses)
+    updates = refresh_from_db(update_start, all_exchanges_and_addresses)
+    users = AeCanary.Accounts.list_users()
+    AeCanary.Mdw.Notifier.send_notifications(updates.alerts_for_past_days, users)
+    updates
   end
 
   defp update_DB(from, to, all_exchanges_and_addresses) do

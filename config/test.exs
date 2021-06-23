@@ -21,5 +21,7 @@ config :ae_canary, AeCanaryWeb.Endpoint,
 config :ae_canary, AeCanary.Mdw.Cache.Service,
   startup_delay: 240000
 
+config :ae_canary, AeCanary.Mailer, adapter: Bamboo.TestAdapter
+
 # Print only warnings and errors during test
 config :logger, level: :warn
