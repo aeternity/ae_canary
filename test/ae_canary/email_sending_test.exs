@@ -112,16 +112,6 @@ defmodule AeCanary.EmailDeliveryTest do
       end)
     end
 
-  test "Basic email sending" do
-    user = %AeCanary.Accounts.User{email: "test@domain.io", name: "Test user"}
-    email = AeCanary.Email.test_email(user)
-
-    email |> AeCanary.Mailer.deliver_now()
-
-    # Works with deliver_now and deliver_later
-    assert_delivered_email(email)
-  end
-
   test "Notifications sent only to subscribed users" do
       users = users_fixture()
       AeCanary.Mdw.Notifier.send_notifications(@alerts_for_last_days, users)
