@@ -40,6 +40,8 @@ config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
   iqr_lower_boundary_multiplier: 1.5,
   iqr_upper_boundary_multiplier: 3
 
+config :ae_canary, :fork_monitor_http_client, HTTPoison
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"
