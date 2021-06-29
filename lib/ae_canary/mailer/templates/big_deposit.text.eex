@@ -1,0 +1,3 @@
+AE Canary
+
+<%= @tx.tx.recipient_id %> has received a deposit with the amount <%= @tx.tx.amount %>

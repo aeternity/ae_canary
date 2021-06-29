@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="https://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title></title>
+    <!--[if mso]>
+    <style>
+        table {border-collapse:collapse;border-spacing:0;border:none;margin:0;}
+        div, td {padding:0;}
+        div {margin:0 !important;}
+    </style>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        table, td, div, h1, p {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body style="margin:0;padding:0;word-spacing:normal;background-color:#ffffff;">
+    <div role="article" aria-roledescription="email" lang="en" style="text-size-adjust:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;background-color:#ffffff;">
+        <table role="presentation" style="width:100%;border:none;border-spacing:0;">
+    <tr>
+        <td align="center" style="padding:0;">
+        <!--[if mso]>
+        <table role="presentation" align="center" style="width:600px;">
+        <tr>
+        <td>
+        <![endif]-->
+    <%= @inner_content %>
+    <table role="presentation" style="width:94%;max-width:600px;margin-top:20px;border-radius:5px;border:none;border-spacing:0;text-align:left;font-family:Arial,sans-serif;font-size:16px;line-height:22px;color:#363636;">
+        <tr>
+            <td style="padding:30px;text-align:center;font-size:12px;background-color:#404040;color:#cccccc;">
+                <p style="margin:0;font-size:14px;line-height:20px;">You are receiving this email because your AeCanary account is configured to receive notifications. Change your preferences at <a href="https://canary.aepps.com/account">account prefs</a></p>
+            </td>
+        </tr>
+    </table>
+    <!--[if mso]>
+    </td>
+    </tr>
+    </table>
+    <![endif]-->
+
+        </td>
+    </tr>
+</table>
+
+
+    </div>
+</body>
+</html>

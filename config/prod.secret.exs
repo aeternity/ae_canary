@@ -90,11 +90,16 @@ config :ae_canary, AeCanaryWeb.Endpoint,
   secret_key_base: secret_key_base
 
 config :ae_canary, AeCanary.Accounts.Guardian,
-  secret_key: guardian_secret_key 
+  secret_key: guardian_secret_key
 
 config :ae_canary,
   mdw_url: mdw_url
 
+config :ae_canary, AeCanary.Mailer,
+  adapter: Bamboo.MailgunAdapter,
+  api_key: System.get_env("EMAIL_API_KEY", ""),
+  domain: System.get_env("EMAIL_API_DOMAIN", ""),
+  base_uri: System.get_env("EMAIL_MAILGUN_BASE", "https://api.eu.mailgun.net/v3")
 
 alias AeCanary.Config.Helpers, as: H
 
@@ -112,7 +117,7 @@ config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
   suspicious_deposits_threshold: H.get_env_integer("EXCHANGES_SUSPICIOUS_DEPOSIT_THRESHOLD", "500_000"),
   iqr_use_positive_exposure_only: H.get_env_bool("EXCHANGES_IQR_USE_POSITIVE_EXPOSURE_ONLY", "true"),
   iqr_lower_boundary_multiplier: iqr_lower_boundary_multiplier,
-  iqr_upper_boundary_multiplier: iqr_upper_boundary_multiplier 
+  iqr_upper_boundary_multiplier: iqr_upper_boundary_multiplier
 
 # ## Using releases (Elixir v1.9+)
 #

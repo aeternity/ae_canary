@@ -50,6 +50,19 @@
       </div>
     <% end %>
 
+    <div class="row g-3 mb-3">
+        <div class="col-sm-4">
+            <%= label f, :email_big_deposits, "Email notifications of large deposits", class: "form-label" %>
+            <%= checkbox f, :email_big_deposits, class: "form-check-input" %>
+            <%= error_tag f, :email_big_deposits %>
+        </div>
+        <div class="col-sm-4">
+            <%= label f, :email_boundaries, "Email notifications of boundary limits", class: "form-label" %>
+            <%= checkbox f, :email_boundaries, class: "form-check-input" %>
+            <%= error_tag f, :email_boundaries %>
+        </div>
+    </div>
+
     <div class="mb-3">
       <%= submit "Save", class: "btn btn-primary" %>
     </div>
