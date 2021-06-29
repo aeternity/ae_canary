@@ -74,3 +74,6 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# When developing just log email sending
+config :ae_canary, AeCanary.Mailer, adapter: Bamboo.LocalAdapter

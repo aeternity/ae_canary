@@ -54,6 +54,7 @@ defmodule AeCanary.MixProject do
       {:timex, "~> 3.7"},
       {:uuid, "~> 1.1"},
       { :statistics, "~> 0.6.2"},
+      {:bamboo, "~> 2.2.0"}
     ]
   end
 

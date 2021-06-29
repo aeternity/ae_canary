@@ -56,7 +56,7 @@ defmodule AeCanary.AccountsTest do
       assert user.email == "some updated email"
       assert user.name == "some updated name"
       assert {:ok, user} == Argon2.check_pass(user, "some updated password", hash_key: :pass_hash)
-      assert user.role == :user 
+      assert user.role == :user
     end
 
     test "update_user/2 with invalid data returns error changeset" do

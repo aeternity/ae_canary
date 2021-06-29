@@ -51,7 +51,7 @@ defmodule AeCanaryWeb.UserController do
   def update_my(conn, %{"user" => user_params}) do
     user = current_user(conn)
 
-    sanitized_params = Map.take(user_params, ["name", "email"])
+    sanitized_params = Map.take(user_params, ["name", "email", "email_boundaries", "email_big_deposits"])
     case Accounts.update_user(user, sanitized_params) do
       {:ok, _user} ->
         conn
@@ -91,7 +91,7 @@ defmodule AeCanaryWeb.UserController do
     changeset = Accounts.change_user(user)
     render(conn, "set_password.html", user: user, changeset: changeset)
   end
-  
+
   def edit_my_password(conn, _) do
     user = current_user(conn)
     changeset = Accounts.change_user(user)

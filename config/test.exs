@@ -23,5 +23,7 @@ config :ae_canary, AeCanary.Mdw.Cache.Service,
 
 config :ae_canary, :fork_monitor_http_client, AeCanary.MockHTTPChain
 
+config :ae_canary, AeCanary.Mailer, adapter: Bamboo.TestAdapter
+
 # Print only warnings and errors during test
 config :logger, level: :warn
