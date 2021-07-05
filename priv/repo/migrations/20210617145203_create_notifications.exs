@@ -11,10 +11,10 @@ defmodule AeCanary.Repo.Migrations.CreateNotifications do
       add :delivered, :boolean
       add :addr, :string
       add :boundary, :string
-      add :exposure, :float
-      add :limit, :float
+      add :exposure, :numeric
+      add :limit, :numeric
       add :tx_hash, :string
-      add :amount, :float
+      add :amount, :numeric
 
       timestamps()
     end

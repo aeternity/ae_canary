@@ -12,15 +12,15 @@ defmodule AeCanary.Notifications.Notification do
   """
   schema "notifications" do
     field :addr, :string
-    field :amount, :float
+    field :amount, :decimal
     field :boundary, Ecto.Enum, values: [:upper, :lower]
     field :delivered, :boolean
     field :email, :string
     field :event_datetime, :utc_datetime
     field :event_date, :date
     field :event_type, Ecto.Enum, values: [:big_deposit, :boundary, :fork]
-    field :exposure, :float
-    field :limit, :float
+    field :exposure, :decimal
+    field :limit, :decimal
     field :sent, :boolean
     field :tx_hash, :string
 
