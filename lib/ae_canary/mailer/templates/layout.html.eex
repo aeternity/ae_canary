@@ -39,7 +39,7 @@
     <table role="presentation" style="width:94%;max-width:600px;margin-top:20px;border-radius:5px;border:none;border-spacing:0;text-align:left;font-family:Arial,sans-serif;font-size:16px;line-height:22px;color:#363636;">
         <tr>
             <td style="padding:30px;text-align:center;font-size:12px;background-color:#404040;color:#cccccc;">
-                <p style="margin:0;font-size:14px;line-height:20px;">You are receiving this email because your AeCanary account is configured to receive notifications. Change your preferences at <a href="https://canary.aepps.com/account">account prefs</a></p>
+                <p style="margin:0;font-size:14px;line-height:20px;">You are receiving this email because your AeCanary account is configured to receive notifications. Change your preferences at <a href="https://<%= @site_address %>/account">account prefs</a></p>
             </td>
         </tr>
     </table>

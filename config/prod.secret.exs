@@ -45,6 +45,14 @@ mdw_url =
     This is the address of the Aeternity MDW to be used for data fetching
     """
 
+site_address =
+  System.get_env("SITE_ADDRESS") ||
+    raise """
+    environment variable SITE_ADDRESS is missing.
+    This is the address of the AeCanary host to be used where this should be
+    shown to the user for example in links in emails
+    """
+
 config :ae_canary, AeCanary.Repo,
   # ssl: true,
   url: database_url,
@@ -93,7 +101,8 @@ config :ae_canary, AeCanary.Accounts.Guardian,
   secret_key: guardian_secret_key
 
 config :ae_canary,
-  mdw_url: mdw_url
+  mdw_url: mdw_url,
+  site_adress: site_address
 
 config :ae_canary, AeCanary.Mailer,
   adapter: Bamboo.MailgunAdapter,

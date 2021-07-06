@@ -23,5 +23,7 @@ config :ae_canary, AeCanary.Mdw.Cache.Service,
 
 config :ae_canary, AeCanary.Mailer, adapter: Bamboo.TestAdapter
 
+config :ae_canary, site_address: "test.host"
+
 # Print only warnings and errors during test
 config :logger, level: :warn

@@ -1,5 +1,5 @@
 AE Canary
 
-<%= @addr %> (https://canary.aepps.com/exchanges/dashboard#<%= @addr %>) exposure crossed a boundary.
+<%= @addr %> (https://<%= @site_address %>/exchanges/dashboard#<%= @addr %>) exposure crossed a boundary.
 
 On <%= Timex.format!(@tx.date, "%d %b", :strftime)  %> the exposure <%= round(@tx.message.exposure) %> went over the <strong><%= @tx.message.boundary %></strong> boundary of <%= round(@tx.message.limit) %>.
