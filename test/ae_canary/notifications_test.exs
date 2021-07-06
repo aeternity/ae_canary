@@ -14,7 +14,8 @@ defmodule AeCanary.NotificationsTest do
       exposure: 120.5,
       limit: 120.5,
       tx_hash: "some tx_hash",
-      event_date: ~U[2021-06-17 15:15:51.095096Z]
+      event_date: ~D[2021-06-17],
+      event_datetime: ~U[2021-06-17 15:15:51.095096Z]
     }
     @update_attrs %{
       addr: "some updated addr",
@@ -22,9 +23,10 @@ defmodule AeCanary.NotificationsTest do
       boundary: "lower",
       event_type: "big_deposit",
       exposure: 456.7,
-      limit: 456.7,
+      limit: 456.870835528854899254093987364832,
       tx_hash: "some updated tx_hash",
-      event_date: ~U[2021-06-17 15:15:51.095096Z]
+      event_date: ~D[2021-06-18],
+      event_datetime: ~U[2021-06-18 15:15:51.095096Z]
     }
     @invalid_attrs %{
       addr: nil,
@@ -56,16 +58,36 @@ defmodule AeCanary.NotificationsTest do
       assert Notifications.get_notification!(notification.id) == notification
     end
 
+    test "list_over_boundaries/5 returns the notification with given parameters" do
+      notification = notification_fixture()
+
+      assert Notifications.list_over_boundaries(
+               "some addr",
+               "upper",
+               ~D[2021-06-17],
+               120.5,
+               120.5
+             ) == [notification]
+    end
+
+    test "list_big_deposits/2 returns the notification with given parameters" do
+      notification = notification_fixture(@update_attrs)
+
+      assert Notifications.list_big_deposits("some updated addr", "some updated tx_hash") == [
+               notification
+             ]
+    end
+
     test "create_notification/1 with valid data creates a notification" do
       assert {:ok, %Notification{} = notification} =
                Notifications.create_notification(@valid_attrs)
 
       assert notification.addr == "some addr"
-      assert notification.amount == 120.5
+      assert notification.amount == Decimal.from_float(120.5)
       assert notification.boundary == :upper
       assert notification.event_type == :boundary
-      assert notification.exposure == 120.5
-      assert notification.limit == 120.5
+      assert notification.exposure == Decimal.from_float(120.5)
+      assert notification.limit == Decimal.from_float(120.5)
       assert notification.tx_hash == "some tx_hash"
     end
 
@@ -80,11 +102,11 @@ defmodule AeCanary.NotificationsTest do
                Notifications.update_notification(notification, @update_attrs)
 
       assert notification.addr == "some updated addr"
-      assert notification.amount == 456.7
+      assert notification.amount == Decimal.from_float(456.7)
       assert notification.boundary == :lower
       assert notification.event_type == :big_deposit
-      assert notification.exposure == 456.7
-      assert notification.limit == 456.7
+      assert notification.exposure == Decimal.from_float(456.7)
+      assert notification.limit == Decimal.from_float(456.870835528854899254093987364832)
       assert notification.tx_hash == "some updated tx_hash"
     end
 
