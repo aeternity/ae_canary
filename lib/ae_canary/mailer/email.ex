@@ -19,6 +19,7 @@ defmodule AeCanary.Email do
     |> assign(:tx, tx)
     |> assign(:exchange, exchange_name)
     |> assign(:addr, addr)
+    |> assign(:site_address, Application.fetch_env!(:ae_canary, :site_address))
     |> render(:big_deposit)
   end
 
@@ -38,6 +39,7 @@ defmodule AeCanary.Email do
     |> assign(:tx, tx)
     |> assign(:exchange, exchange_name)
     |> assign(:addr, addr)
+    |> assign(:site_address, Application.fetch_env!(:ae_canary, :site_address))
     |> render(:boundary)
   end
 end
