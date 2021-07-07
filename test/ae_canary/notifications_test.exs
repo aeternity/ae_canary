@@ -11,8 +11,8 @@ defmodule AeCanary.NotificationsTest do
       amount: 120.5,
       boundary: "upper",
       event_type: "boundary",
-      exposure: 120.5,
-      limit: 120.5,
+      exposure: 120.7,
+      limit: 120.3,
       tx_hash: "some tx_hash",
       event_date: ~D[2021-06-17],
       event_datetime: ~U[2021-06-17 15:15:51.095096Z]
@@ -65,8 +65,8 @@ defmodule AeCanary.NotificationsTest do
                "some addr",
                "upper",
                ~D[2021-06-17],
-               120.5,
-               120.5
+               120.7,
+               120.3
              ) == [notification]
     end
 
@@ -83,11 +83,11 @@ defmodule AeCanary.NotificationsTest do
                Notifications.create_notification(@valid_attrs)
 
       assert notification.addr == "some addr"
-      assert notification.amount == Decimal.from_float(120.5)
+      assert notification.amount == Decimal.new(121)
       assert notification.boundary == :upper
       assert notification.event_type == :boundary
-      assert notification.exposure == Decimal.from_float(120.5)
-      assert notification.limit == Decimal.from_float(120.5)
+      assert notification.exposure == Decimal.new(121)
+      assert notification.limit == Decimal.new(120)
       assert notification.tx_hash == "some tx_hash"
     end
 
@@ -102,11 +102,11 @@ defmodule AeCanary.NotificationsTest do
                Notifications.update_notification(notification, @update_attrs)
 
       assert notification.addr == "some updated addr"
-      assert notification.amount == Decimal.from_float(456.7)
+      assert notification.amount == Decimal.new(457)
       assert notification.boundary == :lower
       assert notification.event_type == :big_deposit
-      assert notification.exposure == Decimal.from_float(456.7)
-      assert notification.limit == Decimal.from_float(456.870835528854899254093987364832)
+      assert notification.exposure == Decimal.new(457)
+      assert notification.limit == Decimal.new(457)
       assert notification.tx_hash == "some updated tx_hash"
     end
 

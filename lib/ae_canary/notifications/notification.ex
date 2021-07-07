@@ -44,6 +44,12 @@ defmodule AeCanary.Notifications.Notification do
       :tx_hash,
       :amount
     ])
+    |> update_change(:exposure, fn e -> round_decimal(e) end)
+    |> update_change(:limit, fn e -> round_decimal(e) end)
+    |> update_change(:amount, fn e -> round_decimal(e) end)
     |> validate_required([:event_type])
   end
+
+  defp round_decimal(nil), do: nil
+  defp round_decimal(%Decimal{} = decimal), do: Decimal.round(decimal)
 end

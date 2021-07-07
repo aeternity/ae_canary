@@ -55,6 +55,9 @@ defmodule AeCanary.Notifications do
   end
 
   def list_over_boundaries(addr, boundary, date, exposure, limit) do
+    exposure = Decimal.round(Decimal.from_float(exposure))
+    limit = Decimal.round(Decimal.from_float(limit))
+
     query =
       from n in Notification,
         where:
