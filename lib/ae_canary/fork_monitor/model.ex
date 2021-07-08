@@ -81,4 +81,27 @@ defmodule AeCanary.ForkMonitor.Model do
   def delete_block(%Block{} = block) do
     Repo.delete!(block)
   end
+
+  @doc """
+  Purge blocks below a certain height. First unlink the blocks at that height
+  then remove everything below
+  """
+  def delete_below_height(height) do
+    query =
+      from n in Block,
+        where: n.height == ^height
+
+    blocks = Repo.all(query)
+
+    Enum.each(blocks, fn block ->
+      attrs = %{lastKeyHash: nil}
+      {:ok, _} = update_block(block, attrs)
+    end)
+
+    delete_query =
+      from n in Block,
+        where: n.height < ^height
+
+    Repo.delete_all(delete_query)
+  end
 end

@@ -98,4 +98,11 @@ defmodule AeCanary.ForkMonitorTest do
              %{forkEnd: "end1", forkLength: 3, forkStart: "end1-2"}
            ] = Enum.sort(Model.Detector.checkForForks())
   end
+
+  test "Delete old blocks starting in the middle of a fork" do
+    Model.ChainWalker.updateChainEnds(50_000)
+    assert 21 = length(Model.list_blocks())
+    Model.delete_below_height(6)
+    assert 14 = length(Model.list_blocks())
+  end
 end
