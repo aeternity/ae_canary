@@ -21,6 +21,8 @@ config :ae_canary, AeCanaryWeb.Endpoint,
 config :ae_canary, AeCanary.Mdw.Cache.Service,
   startup_delay: 240000
 
+config :ae_canary, :fork_monitor_http_client, AeCanary.MockHTTPChain
+
 config :ae_canary, AeCanary.Mailer, adapter: Bamboo.TestAdapter
 
 config :ae_canary, site_address: "test.host"
