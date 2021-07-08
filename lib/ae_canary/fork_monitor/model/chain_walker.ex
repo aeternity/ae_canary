@@ -1,4 +1,6 @@
 defmodule AeCanary.ForkMonitor.Model.ChainWalker do
+  require Logger
+
   def nodes() do
     ["http://206.81.24.215:3013/v2"]
   end
@@ -8,33 +10,41 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
    of the module used for the get! request used to fetch the chain.
   """
   def http_client() do
-    Application.get_env(:ae_canary, :fork_monitor_http_client)
+    {:ok, v} = Application.fetch_env(:ae_canary, AeCanary.ForkMonitor)
+    Keyword.get(v, :fork_monitor_http_client)
   end
 
-  def updateChainEnds() do
+  def updateChainEnds(max_depth) do
     uniqueChainEnds = getChainEnds()
-    IO.inspect(Enum.map(uniqueChainEnds, fn e -> e.hash end), label: "chainEnds")
+    Logger.info("Starting with chain ends #{Enum.map(uniqueChainEnds, fn e -> e.hash end)}")
+    topHeight = Enum.map(uniqueChainEnds, fn e -> e.block["height"] end) |> Enum.max()
+    Logger.info("Found top height of #{topHeight}")
+    stopAtHeight = max(0, topHeight - max_depth)
 
-    danglingBranches = AeCanary.ForkMonitor.Model.unattachedBlocks()
-    |> Enum.map(fn branch -> %{hash: branch.keyHash, nodeUrl: hd(nodes())} end)
-    |> resolveBlocks()
+    danglingBranches =
+      AeCanary.ForkMonitor.Model.unattachedBlocks()
+      |> Enum.map(fn branch -> %{hash: branch.keyHash, nodeUrl: hd(nodes())} end)
+      |> resolveBlocks()
 
     ## back trace blocks
     Enum.each(danglingBranches ++ uniqueChainEnds, fn chainEnd ->
       if chainEnd.block == false do
-        IO.puts("Could not find block #{chainEnd.hash} on node #{chainEnd.nodeUrl}")
+        Logger.info("Could not find block #{chainEnd.hash} on node #{chainEnd.nodeUrl}")
       else
-        backTrack(chainEnd.nodeUrl, chainEnd.block, chainEnd.hash)
+        backTrack(chainEnd.nodeUrl, chainEnd.block, chainEnd.hash, stopAtHeight)
       end
     end)
 
-    IO.puts("Finished initial insert")
+    Logger.info("Finished initial insert")
   end
 
-  defp backTrack(nodeUrl, chainEndBlock, chainEndHash) do
-    insertBlock(chainEndBlock)
-    prevBlock = resolveBlock(nodeUrl, chainEndBlock["prev_key_hash"])
-    backTraceOnNode(nodeUrl, chainEndBlock, prevBlock, chainEndHash)
+  defp backTrack(nodeUrl, chainEndBlock, chainEndHash, stopAtHeight) do
+    ## The chain end might be so old its start is before the period of interest
+    if chainEndBlock["height"] > stopAtHeight do
+      insertBlock(chainEndBlock)
+      prevBlock = resolveBlock(nodeUrl, chainEndBlock["prev_key_hash"])
+      backTraceOnNode(nodeUrl, chainEndBlock, prevBlock, chainEndHash, stopAtHeight)
+    end
   end
 
   ## Create attrs as input to the Model.changeset and hence into the db
@@ -46,37 +56,44 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
     }
   end
 
-  defp backTraceOnNode(_nodeUrl, keyBlock, false, chainEndHash) do
+  defp backTraceOnNode(_nodeUrl, keyBlock, false, chainEndHash, _stopAtHeight) do
     ## keyBlock was already installed, but we didn't find its prev block on the node
     ## This must be the origin block, so we are done with this chain
-    IO.puts(
+    Logger.info(
       "End of chain with hash #{keyBlock["hash"]} when prev is #{keyBlock["prev_key_hash"]} on node #{chainEndHash}"
     )
 
     :done
   end
 
-  defp backTraceOnNode(nodeUrl, keyBlock, prevBlock, chainEndHash) do
+  defp backTraceOnNode(nodeUrl, keyBlock, prevBlock, chainEndHash, stopAtHeight) do
     ## At this point keyBlock is already inserted, but until prevBlock
     ## is inserted we can't insert the foreign key reference to it from keyBlock
     case insertBlock(prevBlock) do
       :ok ->
         if rem(keyBlock["height"], 250) == 0 do
-          IO.puts(
+          Logger.info(
             "Inserted block at height #{prevBlock["height"]} with hash #{prevBlock["hash"]} following from chain end #{chainEndHash}"
           )
         end
 
         ## Now the prevBlock is stored we can insert the reference to it
         insertReference(keyBlock)
-        newPrevBlock = resolveBlock(nodeUrl, prevBlock["prev_key_hash"])
-        backTraceOnNode(nodeUrl, prevBlock, newPrevBlock, chainEndHash)
+
+        if prevBlock["height"] > stopAtHeight do
+          newPrevBlock = resolveBlock(nodeUrl, prevBlock["prev_key_hash"])
+          backTraceOnNode(nodeUrl, prevBlock, newPrevBlock, chainEndHash, stopAtHeight)
+        else
+          Logger.info(
+            "Reached max depth for sync at #{prevBlock["hash"]} with height #{prevBlock["height"]}. Stopping backwards search from chain end #{chainEndHash}."
+          )
+        end
 
       :duplicate ->
         ## The prevBlock was already stored we can safely insert the reference to it
         insertReference(keyBlock)
 
-        IO.puts(
+        Logger.info(
           "Found existing block #{prevBlock["hash"]}. Stopping backwards search from chain end #{chainEndHash}."
         )
     end
@@ -91,7 +108,7 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
         :duplicate
 
       err ->
-        IO.puts(err, label: "Failed create block")
+        Logger.error("Failed to create block #{err}")
         :error
     end
   end
@@ -116,7 +133,9 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
   end
 
   defp resolveBlocks(blocks) do
-    Enum.map(blocks, fn block -> Map.put(block, :block, resolveBlock(block.nodeUrl, block.hash)) end)
+    Enum.map(blocks, fn block ->
+      Map.put(block, :block, resolveBlock(block.nodeUrl, block.hash))
+    end)
   end
 
   defp resolveBlock(nodeUrl, keyHash) do
