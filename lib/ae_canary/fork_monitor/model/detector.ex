@@ -23,8 +23,9 @@ defmodule AeCanary.ForkMonitor.Model.Detector do
 
       %{
         forkLength: forkEndBlock.height - startBlock.height + 1,
-        forkStart: startBlock.keyHash,
-        forkEnd: forkEndBlock.keyHash
+        forkStart: startBlock,
+        forkBranchPoint: startBlock.lastKeyHash,
+        forkEnd: forkEndBlock
       }
     end)
   end

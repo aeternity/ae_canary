@@ -2,6 +2,9 @@ defmodule AeCanary.Mdw.Notifier do
   require Logger
   alias AeCanary.Accounts.User
 
+  def send_fork_notifications(forks, _users) do
+    IO.inspect(forks, label: "Fork Notifications")
+  end
   def send_notifications(alerts_for_past_days, users) do
     alerts_for_past_days
     |> Enum.each(fn %{name: name, addresses: addresses} ->

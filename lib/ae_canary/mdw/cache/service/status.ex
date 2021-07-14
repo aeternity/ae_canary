@@ -16,7 +16,7 @@ defmodule AeCanary.Mdw.Cache.Service.Status do
   end
 
   @impl true
-  def init(), do: nil 
+  def init(), do: nil
 
   @impl true
   def refresh_interval(), do: seconds(5)
@@ -25,7 +25,7 @@ defmodule AeCanary.Mdw.Cache.Service.Status do
   def cache_handle(), do: :status
 
   @impl true
-  def refresh() do
+  def refresh(_) do
     case Mdw.Api.status() do
       {:ok, data} -> Map.put(data, :__struct__, Data)
       _failed -> nil

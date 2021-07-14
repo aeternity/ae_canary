@@ -11,7 +11,7 @@ defmodule AeCanary.Mdw.Cache.Service.TaintedAccounts do
   def cache_handle(), do: :tainted_accounts
 
   @impl true
-  def refresh() do
+  def refresh(_) do
     :ok
   end
 end

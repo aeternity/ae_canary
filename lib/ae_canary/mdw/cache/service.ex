@@ -6,7 +6,7 @@ defmodule AeCanary.Mdw.Cache.Service do
   @callback init() :: {:ok, state :: term()}
   @callback cache_handle() :: atom()
   @callback refresh_interval() :: integer()
-  @callback refresh() :: term()
+  @callback refresh(term()) :: term()
 
   defmacro __using__(name: name) do
     quote do
@@ -61,8 +61,8 @@ defmodule AeCanary.Mdw.Cache.Service do
         {:reply, stats, state}
       end
 
-      def handle_info(:refresh_data, state) do
-        refresh_data()
+      def handle_info(:refresh_data, %State{data: data} = state) do
+        refresh_data(data)
         start_refresh_timer()
         {:noreply, %State{state | refresh_start_tmst: now(), refresh_end_tmst: nil}}
       end
@@ -100,8 +100,8 @@ defmodule AeCanary.Mdw.Cache.Service do
       end
 
       # Internal
-      defp refresh_data() do
-        Mdw.async_fetch(&refresh/0, &__MODULE__.set/1)
+      defp refresh_data(prevData) do
+        Mdw.async_fetch(fn -> refresh(prevData) end, &__MODULE__.set/1)
       end
 
       defp start_refresh_timer() do

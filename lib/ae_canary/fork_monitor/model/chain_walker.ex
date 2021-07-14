@@ -14,12 +14,25 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
     Keyword.get(v, :fork_monitor_http_client)
   end
 
-  def updateChainEnds(max_depth) do
+  def updateChainEnds(max_depth, notify_pid \\ nil) do
     uniqueChainEnds = getChainEnds()
-    Logger.info("Starting with chain ends #{Enum.map(uniqueChainEnds, fn e -> e.hash end)}")
+    Logger.info("Found chain ends #{Enum.map(uniqueChainEnds, fn e -> e.hash end)}")
     topHeight = Enum.map(uniqueChainEnds, fn e -> e.block["height"] end) |> Enum.max()
-    Logger.info("Found top height of #{topHeight}")
     stopAtHeight = max(0, topHeight - max_depth)
+
+    Logger.info("Found top height of #{topHeight}, stopping at height #{stopAtHeight}")
+
+    uniqueChainEnds = Enum.reject(uniqueChainEnds, fn e -> e.block["height"] < stopAtHeight end)
+
+    Enum.map(uniqueChainEnds, fn e ->
+      Logger.info("Starting with chain end #{e.hash} (#{e.block["height"]})")
+    end)
+
+    notify(
+      notify_pid,
+      {:started_sync, Enum.map(uniqueChainEnds, fn e -> {e.hash, e.block["height"]} end),
+       topHeight}
+    )
 
     danglingBranches =
       AeCanary.ForkMonitor.Model.unattachedBlocks()
@@ -29,13 +42,14 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
     ## back trace blocks
     Enum.each(danglingBranches ++ uniqueChainEnds, fn chainEnd ->
       if chainEnd.block == false do
-        Logger.info("Could not find block #{chainEnd.hash} on node #{chainEnd.nodeUrl}")
+        Logger.error("Could not find block #{chainEnd.hash} on node #{chainEnd.nodeUrl}")
       else
         backTrack(chainEnd.nodeUrl, chainEnd.block, chainEnd.hash, stopAtHeight)
       end
     end)
 
-    Logger.info("Finished initial insert")
+    Logger.info("Finished inserting")
+    notify(notify_pid, :finished_sync)
   end
 
   defp backTrack(nodeUrl, chainEndBlock, chainEndHash, stopAtHeight) do
@@ -94,7 +108,7 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
         insertReference(keyBlock)
 
         Logger.info(
-          "Found existing block #{prevBlock["hash"]}. Stopping backwards search from chain end #{chainEndHash}."
+          "Found existing block #{prevBlock["hash"]} (#{prevBlock["height"]}). Stopping backwards search from chain end #{chainEndHash}."
         )
     end
   end
@@ -175,4 +189,7 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
   defp resolveBlockOnNodes([], _hash) do
     false
   end
+
+  defp notify(nil, _message), do: :ok
+  defp notify(notify_pid, message), do: send(notify_pid, message)
 end

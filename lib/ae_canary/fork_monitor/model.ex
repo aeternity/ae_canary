@@ -23,6 +23,10 @@ defmodule AeCanary.ForkMonitor.Model do
     Repo.get_by!(Block, keyHash: hash)
   end
 
+@doc """
+Find all the hashes that are branch points in the tree,
+identified as those blocks that share a previous hash with at least one other block
+"""
   def duplicateParentHashes() do
     query =
       from n in Block,
@@ -42,6 +46,10 @@ defmodule AeCanary.ForkMonitor.Model do
     end
   end
 
+@doc """
+Given the list of hashes that are branch points find the blocks that
+start the branches, including only those above startHeight
+"""
   def forkBeginnings(startHeight, forkBeginningHashes) do
     query =
       from n in Block,

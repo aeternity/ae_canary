@@ -2,6 +2,7 @@ defmodule AeCanary.ForkMonitorTest do
   use AeCanary.DataCase
 
   alias AeCanary.ForkMonitor.Model
+  alias AeCanary.ForkMonitor.Model.Block
 
   test "Insert with branches and detect forks" do
     Model.ChainWalker.updateChainEnds(50_000)
@@ -17,10 +18,40 @@ defmodule AeCanary.ForkMonitorTest do
     assert 4 = length(forkBeginnings)
 
     assert [
-             %{forkEnd: "end-main", forkLength: 4, forkStart: "end-main-3"},
-             %{forkEnd: "end-main", forkLength: 10, forkStart: "end-main-9"},
-             %{forkEnd: "end1", forkLength: 3, forkStart: "end1-2"},
-             %{forkEnd: "end2", forkLength: 3, forkStart: "end2-2"}
+             %{keyhash: "end-main-3", lastKeyHash: "end-main-4"},
+             %{keyhash: "end-main-9", lastKeyHash: "end-main-10"},
+             %{keyhash: "end1-2", lastKeyHash: "end-main-4"},
+             %{keyhash: "end2-2", lastKeyHash: "end-main-10"}
+           ] =
+             forkBeginnings
+             |> Enum.map(fn b -> %{keyhash: b.keyHash, lastKeyHash: b.lastKeyHash} end)
+             |> Enum.sort()
+
+    assert [
+             %{
+               forkBranchPoint: "end-main-10",
+               forkEnd: %Block{keyHash: "end2"},
+               forkLength: 3,
+               forkStart: %Block{keyHash: "end2-2"}
+             },
+             %{
+               forkBranchPoint: "end-main-10",
+               forkEnd: %Block{keyHash: "end-main"},
+               forkLength: 10,
+               forkStart: %Block{keyHash: "end-main-9"}
+             },
+             %{
+               forkBranchPoint: "end-main-4",
+               forkEnd: %Block{keyHash: "end1"},
+               forkLength: 3,
+               forkStart: %Block{keyHash: "end1-2"}
+             },
+             %{
+               forkBranchPoint: "end-main-4",
+               forkEnd: %Block{keyHash: "end-main"},
+               forkLength: 4,
+               forkStart: %Block{keyHash: "end-main-3"}
+             }
            ] = Enum.sort(Model.Detector.checkForForks())
   end
 
@@ -64,10 +95,30 @@ defmodule AeCanary.ForkMonitorTest do
     assert 4 = length(forkBeginnings)
 
     assert [
-             %{forkEnd: "end-main", forkLength: 4, forkStart: "end-main-3"},
-             %{forkEnd: "end-main", forkLength: 10, forkStart: "end-main-9"},
-             %{forkEnd: "end1", forkLength: 3, forkStart: "end1-2"},
-             %{forkEnd: "end2", forkLength: 3, forkStart: "end2-2"}
+             %{
+               forkBranchPoint: "end-main-10",
+               forkEnd: %Block{keyHash: "end2"},
+               forkLength: 3,
+               forkStart: %Block{keyHash: "end2-2"}
+             },
+             %{
+               forkBranchPoint: "end-main-10",
+               forkEnd: %Block{keyHash: "end-main"},
+               forkLength: 10,
+               forkStart: %Block{keyHash: "end-main-9"}
+             },
+             %{
+               forkBranchPoint: "end-main-4",
+               forkEnd: %Block{keyHash: "end1"},
+               forkLength: 3,
+               forkStart: %Block{keyHash: "end1-2"}
+             },
+             %{
+               forkBranchPoint: "end-main-4",
+               forkEnd: %Block{keyHash: "end-main"},
+               forkLength: 4,
+               forkStart: %Block{keyHash: "end-main-3"}
+             }
            ] = Enum.sort(Model.Detector.checkForForks())
   end
 
@@ -94,8 +145,18 @@ defmodule AeCanary.ForkMonitorTest do
     assert 2 = length(forkBeginnings)
 
     assert [
-             %{forkEnd: "end-main", forkLength: 4, forkStart: "end-main-3"},
-             %{forkEnd: "end1", forkLength: 3, forkStart: "end1-2"}
+             %{
+               forkBranchPoint: "end-main-4",
+               forkEnd: %Block{keyHash: "end1"},
+               forkLength: 3,
+               forkStart: %Block{keyHash: "end1-2"}
+             },
+             %{
+               forkBranchPoint: "end-main-4",
+               forkEnd: %Block{keyHash: "end-main"},
+               forkLength: 4,
+               forkStart: %Block{keyHash: "end-main-3"}
+             }
            ] = Enum.sort(Model.Detector.checkForForks())
   end
 
@@ -104,5 +165,63 @@ defmodule AeCanary.ForkMonitorTest do
     assert 21 = length(Model.list_blocks())
     Model.delete_below_height(6)
     assert 14 = length(Model.list_blocks())
+  end
+
+  test "Alert identified when fork goes from length 2 to 3" do
+    Model.ChainWalker.updateChainEnds(50_000)
+
+    ## Delete the top block from one of the forks to reduce its length to 2
+    topBlock = Model.get_block!("end1")
+    Model.delete_block(topBlock)
+
+    assert [
+             %{
+               forkBranchPoint: "end-main-10",
+               forkEnd: %Block{keyHash: "end2"},
+               forkLength: 3,
+               forkStart: %Block{keyHash: "end2-2"}
+             },
+             %{
+               forkBranchPoint: "end-main-10",
+               forkEnd: %Block{keyHash: "end-main"},
+               forkLength: 10,
+               forkStart: %Block{keyHash: "end-main-9"}
+             },
+             %{
+               forkBranchPoint: "end-main-4",
+               # Only reaches end1-1 not end1
+               forkEnd: %Block{keyHash: "end1-1"},
+               # This one now only length 2
+               forkLength: 2,
+               forkStart: %Block{keyHash: "end1-2"}
+             },
+             %{
+               forkBranchPoint: "end-main-4",
+               forkEnd: %Block{keyHash: "end-main"},
+               forkLength: 4,
+               forkStart: %Block{keyHash: "end-main-3"}
+             }
+           ] = prevForks = Enum.sort(Model.Detector.checkForForks())
+
+    ## Re-run the updater to re-add the third block to the fork
+    Model.ChainWalker.updateChainEnds(50_000)
+
+    forks = Model.Detector.checkForForks()
+
+    ## Now we have our alert. Fork length went from 2 to 3
+    assert [
+             %{
+               forkBranchPoint: "end-main-4",
+               forkEnd: %Block{
+                 height: 13,
+                 keyHash: "end1"
+               },
+               forkLength: 3,
+               forkStart: %Block{
+                 height: 11,
+                 keyHash: "end1-2"
+               }
+             }
+           ] = AeCanary.ForkMonitor.Model.Alert.alertForForks(prevForks, forks)
   end
 end
