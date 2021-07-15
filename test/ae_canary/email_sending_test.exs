@@ -70,7 +70,6 @@ defmodule AeCanary.EmailDeliveryTest do
     }
   ]
 
-
   @users [
     %{
       email: "test1@domain",
@@ -102,45 +101,99 @@ defmodule AeCanary.EmailDeliveryTest do
   ]
 
   def users_fixture() do
-      Enum.map(@users, fn attrs ->
-        {:ok, user} =
+    Enum.map(@users, fn attrs ->
+      {:ok, user} =
         %{}
         |> Enum.into(attrs)
         |> AeCanary.Accounts.create_user()
 
       user
-      end)
-    end
+    end)
+  end
 
   test "Notifications sent only to subscribed users" do
-      users = users_fixture()
-      AeCanary.Mdw.Notifier.send_notifications(@alerts_for_last_days, users)
-      assert_email_delivered_with(subject: "[AeCanary] Large deposit notification", to: [{"Test user all", "test1@domain"}])
-      assert_email_delivered_with(subject: "[AeCanary] Large deposit notification", to: [{"Test user only deposits", "test2@domain"}])
-      assert_email_delivered_with(subject: "[AeCanary] Boundary crossed notification", to: [{"Test user all", "test1@domain"}])
-      assert_email_delivered_with(subject: "[AeCanary] Boundary crossed notification", to: [{"Test user only boundaries", "test3@domain"}])
-      assert_email_delivered_with(subject: "[AeCanary] Boundary crossed notification", to: [{"Test user all", "test1@domain"}])
-      assert_email_delivered_with(subject: "[AeCanary] Boundary crossed notification", to: [{"Test user only boundaries", "test3@domain"}])
+    users = users_fixture()
+    AeCanary.Mdw.Notifier.send_notifications(@alerts_for_last_days, users)
 
-      assert 6 = length(AeCanary.Notifications.list_notifications())
+    assert_email_delivered_with(
+      subject: "[AeCanary] Large deposit",
+      to: [{"Test user all", "test1@domain"}]
+    )
+
+    assert_email_delivered_with(
+      subject: "[AeCanary] Large deposit",
+      to: [{"Test user only deposits", "test2@domain"}]
+    )
+
+    assert_email_delivered_with(
+      subject: "[AeCanary] Boundary crossed",
+      to: [{"Test user all", "test1@domain"}]
+    )
+
+    assert_email_delivered_with(
+      subject: "[AeCanary] Boundary crossed",
+      to: [{"Test user only boundaries", "test3@domain"}]
+    )
+
+    assert_email_delivered_with(
+      subject: "[AeCanary] Boundary crossed",
+      to: [{"Test user all", "test1@domain"}]
+    )
+
+    assert_email_delivered_with(
+      subject: "[AeCanary] Boundary crossed",
+      to: [{"Test user only boundaries", "test3@domain"}]
+    )
+
+    assert 6 = length(AeCanary.Notifications.list_notifications())
   end
 
   test "Notifications sent only once" do
-      users = users_fixture()
-      AeCanary.Mdw.Notifier.send_notifications(@alerts_for_last_days, users)
-      assert_email_delivered_with(subject: "[AeCanary] Large deposit notification", to: [{"Test user all", "test1@domain"}], html_body: ~r/test.host/)
-      assert_email_delivered_with(subject: "[AeCanary] Large deposit notification", to: [{"Test user only deposits", "test2@domain"}], html_body: ~r/test.host/)
-      assert_email_delivered_with(subject: "[AeCanary] Boundary crossed notification", to: [{"Test user all", "test1@domain"}], html_body: ~r/test.host/)
-      assert_email_delivered_with(subject: "[AeCanary] Boundary crossed notification", to: [{"Test user only boundaries", "test3@domain"}], html_body: ~r/test.host/)
-      assert_email_delivered_with(subject: "[AeCanary] Boundary crossed notification", to: [{"Test user all", "test1@domain"}], html_body: ~r/test.host/)
-      assert_email_delivered_with(subject: "[AeCanary] Boundary crossed notification", to: [{"Test user only boundaries", "test3@domain"}], html_body: ~r/test.host/)
+    users = users_fixture()
+    AeCanary.Mdw.Notifier.send_notifications(@alerts_for_last_days, users)
 
-      assert 6 = length(AeCanary.Notifications.list_notifications())
+    assert_email_delivered_with(
+      subject: "[AeCanary] Large deposit",
+      to: [{"Test user all", "test1@domain"}],
+      html_body: ~r/test.host/
+    )
 
-      AeCanary.Mdw.Notifier.send_notifications(@alerts_for_last_days, users)
+    assert_email_delivered_with(
+      subject: "[AeCanary] Large deposit",
+      to: [{"Test user only deposits", "test2@domain"}],
+      html_body: ~r/test.host/
+    )
 
-      assert_no_emails_delivered()
+    assert_email_delivered_with(
+      subject: "[AeCanary] Boundary crossed",
+      to: [{"Test user all", "test1@domain"}],
+      html_body: ~r/test.host/
+    )
 
-      assert 6 = length(AeCanary.Notifications.list_notifications())
+    assert_email_delivered_with(
+      subject: "[AeCanary] Boundary crossed",
+      to: [{"Test user only boundaries", "test3@domain"}],
+      html_body: ~r/test.host/
+    )
+
+    assert_email_delivered_with(
+      subject: "[AeCanary] Boundary crossed",
+      to: [{"Test user all", "test1@domain"}],
+      html_body: ~r/test.host/
+    )
+
+    assert_email_delivered_with(
+      subject: "[AeCanary] Boundary crossed",
+      to: [{"Test user only boundaries", "test3@domain"}],
+      html_body: ~r/test.host/
+    )
+
+    assert 6 = length(AeCanary.Notifications.list_notifications())
+
+    AeCanary.Mdw.Notifier.send_notifications(@alerts_for_last_days, users)
+
+    assert_no_emails_delivered()
+
+    assert 6 = length(AeCanary.Notifications.list_notifications())
   end
 end

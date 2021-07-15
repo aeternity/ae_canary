@@ -2,9 +2,12 @@ defmodule AeCanary.Mdw.Notifier do
   require Logger
   alias AeCanary.Accounts.User
 
-  def send_fork_notifications(forks, _users) do
-    IO.inspect(forks, label: "Fork Notifications")
+  def send_fork_notifications(allForks, users) do
+    Enum.each(allForks, fn {forkPoint, forks} ->
+      send_fork_notifications(users, forkPoint, forks)
+    end)
   end
+
   def send_notifications(alerts_for_past_days, users) do
     alerts_for_past_days
     |> Enum.each(fn %{name: name, addresses: addresses} ->
@@ -41,6 +44,7 @@ defmodule AeCanary.Mdw.Notifier do
 
   defp send_over_the_boundaries_notifications(users, name, addr, over_the_boundaries) do
     interested_users = Enum.filter(users, fn u -> u.email_boundaries end)
+
     Enum.each(over_the_boundaries, fn %{
                                         date: date,
                                         message: %{
@@ -49,7 +53,6 @@ defmodule AeCanary.Mdw.Notifier do
                                           limit: limit
                                         }
                                       } = event ->
-
       ## Find any emails already sent for this event,
       sent =
         AeCanary.Notifications.list_over_boundaries(addr, boundary, date, exposure, limit)
@@ -59,6 +62,35 @@ defmodule AeCanary.Mdw.Notifier do
       ## We still need to send to interested_users that are not yet in sent MapSet
       Enum.reject(interested_users, fn u -> MapSet.member?(sent, u.email) end)
       |> send_emails("boundary", name, addr, event)
+    end)
+  end
+
+  ## Send a single email for this forkPoint with details of all the forks
+  defp send_fork_notifications(users, forkPoint, forks) do
+    interested_users = Enum.filter(users, fn u -> u.email_large_forks end)
+
+    ## We don't email if an email was already sent for this exact set of conditions.
+    ## The algorithm to prevent duplicates is not persistent for forks - it's in the
+    ## regular checker. This means after a restart of Canary duplicate fork emails
+    ## will be sent to all users. This ought to be quite a rare event.....
+
+    Enum.each(interested_users, fn %User{} = user ->
+        case AeCanary.Email.fork_notification_email(user, forkPoint, forks)
+             |> AeCanary.Mailer.deliver_now(response: true) do
+          {:ok, _, _} ->
+            Logger.info(
+              "Email notification submitted to #{user.email} for Fork detection event from fork #{forkPoint}"
+            )
+
+            true
+
+          {:error, _} ->
+            Logger.error(
+              "Email notification failed to #{user.email} for Fork detection event from fork #{forkPoint}"
+            )
+
+            false
+        end
     end)
   end
 
