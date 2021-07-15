@@ -6,7 +6,7 @@ defmodule AeCanary.ForkMonitor.SyncService do
     defstruct [:chain_walker_pid, :chains, :top_height, :max_depth, :sync_status]
   end
 
-  @refresh_interval 60_000
+  @refresh_interval 180_000
 
   @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(_) do

@@ -20,12 +20,12 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
     topHeight = Enum.map(uniqueChainEnds, fn e -> e.block["height"] end) |> Enum.max()
     stopAtHeight = max(0, topHeight - max_depth)
 
-    Logger.info("Found top height of #{topHeight}, stopping at height #{stopAtHeight}")
+    Logger.debug("Found top height of #{topHeight}, stopping at height #{stopAtHeight}")
 
     uniqueChainEnds = Enum.reject(uniqueChainEnds, fn e -> e.block["height"] < stopAtHeight end)
 
     Enum.map(uniqueChainEnds, fn e ->
-      Logger.info("Starting with chain end #{e.hash} (#{e.block["height"]})")
+      Logger.debug("Starting with chain end #{e.hash} (#{e.block["height"]})")
     end)
 
     notify(

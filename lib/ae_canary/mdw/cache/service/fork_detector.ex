@@ -5,7 +5,7 @@ defmodule AeCanary.Mdw.Cache.Service.ForkDetector do
   def init(), do: []
 
   @impl true
-  def refresh_interval(), do: minutes(2)
+  def refresh_interval(), do: minutes(3)
 
   @impl true
   def cache_handle(), do: :forks
@@ -17,8 +17,8 @@ defmodule AeCanary.Mdw.Cache.Service.ForkDetector do
     ## store the notifications sent with the length and details of the branch points
     forks = AeCanary.ForkMonitor.Model.Detector.checkForForks()
     users = AeCanary.Accounts.list_users()
-    alerts = AeCanary.ForkMonitor.Model.Alert.alertForForks(prevForks, forks)
+    {alerts, newForks} = AeCanary.ForkMonitor.Model.Alert.alertForForks(prevForks, forks)
     AeCanary.Mdw.Notifier.send_fork_notifications(alerts, users)
-    forks
+    newForks
   end
 end
