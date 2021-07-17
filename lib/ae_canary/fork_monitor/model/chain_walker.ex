@@ -73,7 +73,7 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
   defp backTraceOnNode(_nodeUrl, keyBlock, false, chainEndHash, _stopAtHeight) do
     ## keyBlock was already installed, but we didn't find its prev block on the node
     ## This must be the origin block, so we are done with this chain
-    Logger.info(
+    Logger.debug(
       "End of chain with hash #{keyBlock["hash"]} when prev is #{keyBlock["prev_key_hash"]} on node #{chainEndHash}"
     )
 
@@ -98,7 +98,7 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
           newPrevBlock = resolveBlock(nodeUrl, prevBlock["prev_key_hash"])
           backTraceOnNode(nodeUrl, prevBlock, newPrevBlock, chainEndHash, stopAtHeight)
         else
-          Logger.info(
+          Logger.debug(
             "Reached max depth for sync at #{prevBlock["hash"]} with height #{prevBlock["height"]}. Stopping backwards search from chain end #{chainEndHash}."
           )
         end
@@ -107,7 +107,7 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
         ## The prevBlock was already stored we can safely insert the reference to it
         insertReference(keyBlock)
 
-        Logger.info(
+        Logger.debug(
           "Found existing block #{prevBlock["hash"]} (#{prevBlock["height"]}). Stopping backwards search from chain end #{chainEndHash}."
         )
     end

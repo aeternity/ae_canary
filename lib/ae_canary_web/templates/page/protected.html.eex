@@ -49,6 +49,13 @@
   </div>
 <% end %>
 
+<h4 class="mt-4">Chain health</h4>
+<div class="row">
+  <div class="col-sm-9">
+    <%= render AeCanaryWeb.ForkDetectionView, "index.html", assigns %>
+  </div>
+</div>
+
 <h4 class="mt-4">Services</h4>
 <div class="row">
   <div class="col-sm-3">

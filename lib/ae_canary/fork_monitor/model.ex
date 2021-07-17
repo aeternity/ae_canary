@@ -23,10 +23,14 @@ defmodule AeCanary.ForkMonitor.Model do
     Repo.get_by!(Block, keyHash: hash)
   end
 
-@doc """
-Find all the hashes that are branch points in the tree,
-identified as those blocks that share a previous hash with at least one other block
-"""
+  def get_block_at_height!(height) do
+    Repo.get_by!(Block, height: height)
+  end
+
+  @doc """
+  Find all the hashes that are branch points in the tree,
+  identified as those blocks that share a previous hash with at least one other block
+  """
   def duplicateParentHashes() do
     query =
       from n in Block,
@@ -46,10 +50,10 @@ identified as those blocks that share a previous hash with at least one other bl
     end
   end
 
-@doc """
-Given the list of hashes that are branch points find the blocks that
-start the branches, including only those above startHeight
-"""
+  @doc """
+  Given the list of hashes that are branch points find the blocks that
+  start the branches, including only those above startHeight
+  """
   def forkBeginnings(startHeight, forkBeginningHashes) do
     query =
       from n in Block,
@@ -111,5 +115,47 @@ start the branches, including only those above startHeight
         where: n.height < ^height
 
     Repo.delete_all(delete_query)
+  end
+
+  @doc """
+  Utility function for artificially causing a fork by inserting dummy nodes in
+  the database.
+  """
+  def inject_fork(starting_depth, length) do
+    startHeight = max_height() - starting_depth
+    forkPoint = get_block_at_height!(startHeight)
+    indexes = 0..length
+    forkHash = forkPoint.keyHash
+    newForkPrefix = String.slice(forkHash, 0, String.length(forkHash) - 8) <> "----"
+    inject_blocks(newForkPrefix, forkHash, startHeight, indexes)
+  end
+
+  def extend_fork(topHash, start_index, length) do
+    block = AeCanary.ForkMonitor.Model.get_block!(topHash)
+    end_index = start_index+length
+    indexes = start_index..end_index
+    newForkPrefix = String.slice(topHash, 0, String.length(topHash) - 8) <> "----"
+    inject_blocks(newForkPrefix, topHash, block.height + 1, indexes)
+  end
+
+  defp inject_blocks(newForkPrefix, forkHash, startHeight, indexes) do
+    Enum.reduce(indexes, forkHash, fn i, prevHash ->
+      hash = newForkPrefix <> String.pad_leading(Integer.to_string(i), 4, "0")
+
+      create_attrs = %{
+        height: startHeight + i,
+        keyHash: hash,
+        timestamp: DateTime.utc_now()
+      }
+
+      create_block(create_attrs)
+
+      block = AeCanary.ForkMonitor.Model.get_block!(hash)
+      attrs = %{lastKeyHash: prevHash}
+      update_block(block, attrs)
+
+      IO.inspect(hash, label: "Injected hash")
+      hash
+    end)
   end
 end

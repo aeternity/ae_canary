@@ -19,7 +19,7 @@ defmodule AeCanary.ForkMonitor.Model.Alert do
     |> Enum.filter(fn {_, forks} ->
       Enum.count(forks, fn fork -> fork.forkLength >= @minumum_fork_length end) >= 2
     end)
-    |> Enum.reduce({[], %{}}, fn {branchPoint, forks}, {alerts, acc} ->
+    |> Enum.reduce({[], []}, fn {branchPoint, forks}, {alerts, acc} ->
       ## Have we seen any forks from this branch point before?
       previousMatch =
         Enum.find(previousForks, fn {prevBranchPoint, _prevFork} ->
@@ -36,7 +36,7 @@ defmodule AeCanary.ForkMonitor.Model.Alert do
             Enum.map(forks, fn fork -> Map.put(fork, :recentLengths, [fork.forkLength]) end)
             |> Enum.sort(fn a, b -> a.forkLength >= b.forkLength end)
 
-          {[{branchPoint, forks} | alerts], Map.put(acc, branchPoint, forks)}
+          {[{branchPoint, forks} | alerts], [{branchPoint, forks} | acc]}
 
         {_, prevForks} ->
           ## Compare the forks originating at this branchpoint to the previous set at the same place
@@ -88,12 +88,19 @@ defmodule AeCanary.ForkMonitor.Model.Alert do
 
               [growingFork] ->
                 ## One fork grew, did any of the others grow recently?
-                [
-                  growingFork
-                  | Enum.filter(updatedForks, fn fork ->
-                      fork.forkStart != growingFork.forkStart && fork_grew_recently?(fork)
-                    end)
-                ]
+                recentlyGrew =
+                  Enum.filter(updatedForks, fn fork ->
+                    fork.forkStart != growingFork.forkStart && fork_grew_recently?(fork)
+                  end)
+
+                case recentlyGrew do
+                  [] ->
+                    []
+
+                  _ ->
+                    Logger.info("Recently grew: #{branchPoint}")
+                    [growingFork | recentlyGrew]
+                end
 
               [_ | _] ->
                 ## More than one fork grew. Alert with all of them
@@ -111,7 +118,7 @@ defmodule AeCanary.ForkMonitor.Model.Alert do
                 [{branchPoint, sorted} | alerts]
             end
 
-          {newAlerts, Map.put(acc, branchPoint, newForks ++ updatedForks)}
+          {newAlerts, [{branchPoint, newForks ++ updatedForks} | acc]}
       end
     end)
   end
