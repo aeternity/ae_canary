@@ -46,9 +46,9 @@ mdw_url =
     """
 
 site_address =
-  System.get_env("SITE_ADDRESS") ||
+  System.get_env("EMAIL_SITE_ADDRESS") ||
     raise """
-    environment variable SITE_ADDRESS is missing.
+    environment variable EMAIL_SITE_ADDRESS is missing.
     This is the address of the AeCanary host to be used where this should be
     shown to the user for example in links in emails
     """
@@ -102,7 +102,7 @@ config :ae_canary, AeCanary.Accounts.Guardian,
 
 config :ae_canary,
   mdw_url: mdw_url,
-  site_adress: site_address
+  site_address: site_address
 
 config :ae_canary, AeCanary.Mailer,
   adapter: Bamboo.MailgunAdapter,
