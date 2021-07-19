@@ -51,7 +51,7 @@ defmodule AeCanaryWeb.UserController do
   def update_my(conn, %{"user" => user_params}) do
     user = current_user(conn)
 
-    sanitized_params = Map.take(user_params, ["name", "email", "email_boundaries", "email_big_deposits"])
+    sanitized_params = Map.take(user_params, ["name", "email", "email_boundaries", "email_big_deposits", "email_large_forks"])
     case Accounts.update_user(user, sanitized_params) do
       {:ok, _user} ->
         conn

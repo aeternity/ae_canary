@@ -1,0 +1,5 @@
+AE Canary
+
+Fork detected from point <%= @forkPoint %> 
+(https://<%= @site_address %>/exchanges/dashboard#<%= @forkPoint %>)
+

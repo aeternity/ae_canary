@@ -61,6 +61,12 @@
             <%= checkbox f, :email_boundaries, class: "form-check-input" %>
             <%= error_tag f, :email_boundaries %>
         </div>
+        <div class="col-sm-4">
+            <%= label f, :email_large_forks, "Email notifications of detected forks", class: "form-label" %>
+            <%= checkbox f, :email_large_forks, class: "form-check-input" %>
+            <%= error_tag f, :email_large_forks %>
+        </div>
+
     </div>
 
     <div class="mb-3">

@@ -10,7 +10,8 @@ defmodule AeCanary.Mdw.Cache.Service.Supervisor do
     children = [
       AeCanary.Mdw.Cache.Service.Status,
       AeCanary.Mdw.Cache.Service.Exchange,
-      AeCanary.Mdw.Cache.Service.TaintedAccounts
+      AeCanary.Mdw.Cache.Service.TaintedAccounts,
+      AeCanary.Mdw.Cache.Service.ForkDetector
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

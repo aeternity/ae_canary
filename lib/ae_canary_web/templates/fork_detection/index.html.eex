@@ -1,0 +1,51 @@
+<% allForks = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.ForkDetector.cache_handle) %>
+<%= if allForks == nil do %>
+<div class="card">
+  <div class="card-header">
+    Fork detection
+  </div>
+  <div class="card-body">
+  <div>
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+<% else %>
+    <%= if length(allForks) == 0 do %>
+        <div class="card alert-success border-success">
+            <div class="card-header">
+                No currently active forks detected
+            </div>
+        </div>
+    <% else %>
+        <div class="card border-danger">
+            <div class="card-header alert-danger border-danger">
+                Active Forks detected
+            </div>
+            <div class="card-body alert-danger">
+                <ul>
+                <%= for {branchPoint, forks} <- allForks do %>
+                    <li><p>Forks originating from <%= branchPoint %></p></li>
+                    <ul>
+                        <%= for fork <- forks do %>
+                            <li>
+                                <strong>Latest block: <%= fork.forkEnd.keyHash %></strong>
+                                <div class="ms-4">
+                                    <div>Current length (from fork): <%= fork.forkLength %></div>
+                                    <div>Height: <%= fork.forkEnd.height %></div>
+                                    <div>Timestamp: <%= fork.forkEnd.timestamp %></div>
+                                    <div>First block in fork: <%= fork.forkStart.keyHash %></div>
+                                    <div>First block height: <%= fork.forkStart.height %></div>
+                                    <div>First block timestamp: <%= fork.forkStart.timestamp %></div>
+                                </div>
+                            </li>
+                        <% end %>
+                    </ul>
+                <% end %>
+                </ul>
+
+            </div>
+        </div>
+    <% end %>
+<% end %>

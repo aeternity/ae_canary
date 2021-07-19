@@ -16,7 +16,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
   def cache_handle(), do: :exchanges
 
   @impl true
-  def refresh() do
+  def refresh(_) do
     ## update DB
     {:ok, %{node_height: top_height}} = Mdw.Api.status()
     update_from = top_height - refresh_period_in_blocks()

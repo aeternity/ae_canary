@@ -19,7 +19,8 @@ defmodule AeCanary.Application do
       # {AeCanary.Worker, arg}
       :poolboy.child_spec(:worker, AeCanary.Mdw.poolboy_spec()),
       AeCanary.Mdw.Cache,
-      AeCanary.Mdw.Cache.Service.Supervisor
+      AeCanary.Mdw.Cache.Service.Supervisor,
+      AeCanary.ForkMonitor.SyncService
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
