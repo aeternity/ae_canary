@@ -10,6 +10,7 @@ use Mix.Config
 config :ae_canary,
   ecto_repos: [AeCanary.Repo],
   mdw_url: "http://18.156.189.185/mdw/",
+  node_url: "http://206.81.24.215:3013/v2/",
   site_address: "localhost"
 
 # Configures the endpoint
@@ -44,6 +45,9 @@ config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
 config :ae_canary, AeCanary.ForkMonitor,
   fork_monitor_http_client: HTTPoison,
   max_sync_depth: 50_000
+
+config :ae_canary, AeCanary.Mdw.Cache.Service.BlockDelay,
+  alert_idle_minutes: 1
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

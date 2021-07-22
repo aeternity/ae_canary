@@ -81,9 +81,12 @@
 </div>
 <h4 class="mt-4">System health</h4>
 <div class="row">
-  <% services = [AeCanary.Mdw.Cache.Service.Status, AeCanary.Mdw.Cache.Service.Exchange, AeCanary.Mdw.Cache.Service.ForkDetector, AeCanary.Mdw.Cache.Service.TaintedAccounts] %>
+  <% services = [AeCanary.Mdw.Cache.Service.Status, AeCanary.Mdw.Cache.Service.Exchange,
+                AeCanary.Mdw.Cache.Service.ForkDetector,
+                AeCanary.Mdw.Cache.Service.BlockDelay,
+                AeCanary.Mdw.Cache.Service.TaintedAccounts] %>
   <%= for service <- services do %>
-    <div class="col-sm-3">
+    <div class="col-sm-2">
       <%= render "service.html", Map.put(assigns, :service, service)  %>
     </div>
   <% end %>
