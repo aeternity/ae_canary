@@ -43,6 +43,15 @@
     <strong>Email notifications for detected forks:</strong>
     <%= @user.email_large_forks %>
   </li>
+
+  <li>
+    <strong>Specific exchange view:</strong>
+    <%= if @user.exchange_view do %>
+      <%= @user.exchange_view.name %>
+    <% else %>
+      none
+    <% end %>
+  </li>
 </ul>
 <%= if my_account do %>
 <%= link "Edit", to: Routes.user_path(@conn, :edit_my), class: "btn btn-light" %>

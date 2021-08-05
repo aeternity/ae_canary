@@ -13,7 +13,9 @@
     </div>
   </div>
 <% else %>
-  <% last_days = data.alerts_for_past_days %>
+  <% last_days = apply_view_filter(data.alerts_for_past_days, @current_user.exchange_view_id) %>
+  <% all_exchanges0 = data.exchanges %>
+  <% exchanges = apply_view_filter(all_exchanges0, @current_user.exchange_view_id) %>
   <% alert_interval_in_days = AeCanary.Mdw.Cache.Service.Exchange.alert_interval_in_days %>
   <% show_period_in_days = AeCanary.Mdw.Cache.Service.Exchange.show_period_in_days %>
   <h3>Summary</h3>
@@ -53,8 +55,8 @@
 
   <h3>Description</h3>
   <p class="mb-2 text-muted">This is amount of tokens at risk if there is a 51% attack now. Sudden spikes can be a symptom for a future attack.</p>
-  <%= if length(data.exchanges) != 0 do %>
-  <%= for e <- data.exchanges do %>
+  <%= if length(exchanges) != 0 do %>
+  <%= for e <- exchanges do %>
     <div class="card mb-4" id="<%= e.name %>">
       <div class="card-header">
         <%= e.name %> <a href="#<%= e.name%>"> <i class="bi bi-link-45deg"></i></a>

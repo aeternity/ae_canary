@@ -13,6 +13,7 @@ defmodule AeCanary.Accounts.User do
     field :email_big_deposits, :boolean, default: false
     field :email_boundaries, :boolean, default: false
     field :email_large_forks, :boolean, default: false
+    belongs_to :exchange_view, AeCanary.Exchanges.Exchange, references: :id
 
     timestamps()
   end
@@ -29,9 +30,11 @@ defmodule AeCanary.Accounts.User do
       :comment,
       :email_big_deposits,
       :email_boundaries,
-      :email_large_forks
+      :email_large_forks,
+      :exchange_view_id
     ])
     |> put_password_hash()
+##    |> put_exchange_view(attrs)
     |> validate_required([:email, :pass_hash, :name, :role])
     |> unique_constraint(:email)
   end
@@ -43,4 +46,11 @@ defmodule AeCanary.Accounts.User do
   end
 
   defp put_password_hash(changeset), do: changeset
+
+  defp put_exchange_view(%Ecto.Changeset{valid?: true} = changeset, %{"exchange_view" => exchange_view}
+       ) do
+    1 = put_assoc(changeset, :exchange_view, exchange_view)
+  end
+  defp put_exchange_view(changeset, _), do: changeset
+
 end
