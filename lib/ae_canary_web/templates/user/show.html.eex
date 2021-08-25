@@ -28,20 +28,28 @@
     <%= @user.comment %>
   </li>
   <% end %>
+  </ul>
 
+<strong>Email Notification Preferences:</strong>
+<ul>
   <li>
-    <strong>Email notifications for large deposits:</strong>
+    <strong>Large deposits:</strong>
     <%= @user.email_big_deposits %>
   </li>
 
   <li>
-    <strong>Email notifications for exceeded boundaries:</strong>
+    <strong>Exceeded boundaries:</strong>
     <%= @user.email_boundaries %>
   </li>
 
   <li>
-    <strong>Email notifications for detected forks:</strong>
+    <strong>Detected forks:</strong>
     <%= @user.email_large_forks %>
+  </li>
+
+    <li>
+    <strong>Idle chain:</strong>
+    <%= @user.email_idle %>
   </li>
 </ul>
 <%= if my_account do %>

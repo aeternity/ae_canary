@@ -12,7 +12,7 @@ defmodule AeCanary.Mdw.Cache.Service.Supervisor do
       AeCanary.Mdw.Cache.Service.Exchange,
       AeCanary.Mdw.Cache.Service.TaintedAccounts,
       AeCanary.Mdw.Cache.Service.ForkDetector,
-      AeCanary.Mdw.Cache.Service.BlockDelay
+      AeCanary.Mdw.Cache.Service.IdleDetector
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

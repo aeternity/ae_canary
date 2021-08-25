@@ -13,6 +13,7 @@ defmodule AeCanary.Accounts.User do
     field :email_big_deposits, :boolean, default: false
     field :email_boundaries, :boolean, default: false
     field :email_large_forks, :boolean, default: false
+    field :email_idle, :boolean, default: false
 
     timestamps()
   end
@@ -29,7 +30,8 @@ defmodule AeCanary.Accounts.User do
       :comment,
       :email_big_deposits,
       :email_boundaries,
-      :email_large_forks
+      :email_large_forks,
+      :email_idle
     ])
     |> put_password_hash()
     |> validate_required([:email, :pass_hash, :name, :role])

@@ -51,20 +51,26 @@
     <% end %>
 
     <div class="row g-3 mb-3">
-        <div class="col-sm-4">
-            <%= label f, :email_big_deposits, "Email notifications of large deposits", class: "form-label" %>
+        <div class="form-label">Email Notification Preferences</div>
+        <div class="col-sm-3">
+            <%= label f, :email_big_deposits, "Large deposits", class: "form-label" %>
             <%= checkbox f, :email_big_deposits, class: "form-check-input" %>
             <%= error_tag f, :email_big_deposits %>
         </div>
-        <div class="col-sm-4">
-            <%= label f, :email_boundaries, "Email notifications of boundary limits", class: "form-label" %>
+        <div class="col-sm-3">
+            <%= label f, :email_boundaries, "Boundary limits", class: "form-label" %>
             <%= checkbox f, :email_boundaries, class: "form-check-input" %>
             <%= error_tag f, :email_boundaries %>
         </div>
-        <div class="col-sm-4">
-            <%= label f, :email_large_forks, "Email notifications of detected forks", class: "form-label" %>
+        <div class="col-sm-3">
+            <%= label f, :email_large_forks, "Detected forks", class: "form-label" %>
             <%= checkbox f, :email_large_forks, class: "form-check-input" %>
             <%= error_tag f, :email_large_forks %>
+        </div>
+        <div class="col-sm-3">
+            <%= label f, :email_idle, "Idle chain", class: "form-label" %>
+            <%= checkbox f, :email_idle, class: "form-check-input" %>
+            <%= error_tag f, :email_idle %>
         </div>
 
     </div>

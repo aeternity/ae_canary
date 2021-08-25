@@ -1,0 +1,5 @@
+AE Canary
+
+The Aeternity blockchain has not created a new key block for <%= @block.delay_minutes %> minutes, which is longer than the configured warning value of <%= @block.config_delay %> minutes.
+
+The current top block is <%= @addr %> created at <%= @block.block_time %> 

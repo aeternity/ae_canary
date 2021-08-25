@@ -1,0 +1,32 @@
+<% top_block = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.IdleDetector.cache_handle) %>
+<%= if top_block == nil do %>
+<div class="card">
+  <div class="card-header">
+    Idle detection
+  </div>
+  <div class="card-body">
+  <div>
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+<% else %>
+    <%= if Timex.after?(Timex.now(), top_block.expiry_time) do %>
+        <div class="card border-danger">
+            <div class="card-header alert-danger border-danger">
+                No new blocks for longer than the threshold
+            </div>
+            <div class="card-body alert-danger">
+                Delay since last block: <%= Timex.diff(Timex.now(), top_block.expiry_time, :minutes) %> minutes
+            </div>
+        </div>
+    <% else %>
+        <div class="card border-danger">
+            <div class="card-header alert-danger border-danger">
+                Some kind of delay
+            </div>
+
+        </div>
+    <% end %>
+<% end %>

@@ -1,0 +1,5 @@
+AE Canary
+
+The Aeternity blockchain newest key block does not contain any microblocks. This might indicate a problem.
+
+The current top block is <%= @addr %> created at <%= @block.block_time %>
