@@ -8,7 +8,7 @@ defmodule AeCanary.Mdw.Cache.Service.IdleDetector do
   def refresh_interval(), do: minutes(1)
 
   @impl true
-  def cache_handle(), do: :block_delay
+  def cache_handle(), do: :idle
 
   @impl true
   def refresh(state) do
@@ -18,21 +18,10 @@ defmodule AeCanary.Mdw.Cache.Service.IdleDetector do
     case state do
       nil ->
         ## Bootstrap state on first run
-        block_time = Timex.from_unix(current_generation["key_block"]["time"], :millisecond)
-        expiry_time = Timex.shift(block_time, minutes: max_idle_config())
-        minutes_since_last = Timex.diff(Timex.now(), block_time, :minutes)
-
-        %{
-          generation: current_generation,
-          block_time: block_time,
-          expiry_time: expiry_time,
-          delay_minutes: minutes_since_last,
-          config_delay: max_idle_config()
-        }
+        new_state(current_generation)
 
       %{generation: %{"key_block" => storedKeyBlock}} = state ->
         currentKeyBlock = current_generation["key_block"]
-        minutes_since_last = Timex.diff(Timex.now(), state.block_time, :minutes)
         ## Look for potential health problems
         if currentKeyBlock["hash"] == storedKeyBlock["hash"] do
           ## No new keyblock yet
@@ -46,9 +35,11 @@ defmodule AeCanary.Mdw.Cache.Service.IdleDetector do
               users,
               Map.put(state, :event_type, :idle)
             )
-          end
 
-          %{state | delay_minutes: minutes_since_last}
+            new_state(current_generation) |> Map.put(:idle_status, :idle)
+          else
+            new_state(current_generation)
+          end
         else
           ## It's a new keyblock. We assume the previous keyblock is now fully mined
           ## so we can check its health
@@ -64,13 +55,15 @@ defmodule AeCanary.Mdw.Cache.Service.IdleDetector do
               users,
               Map.put(state, :event_type, :idle_no_microblocks)
             )
+
+            new_state(current_generation) |> Map.put(:idle_status, :idle)
           else
             ## 3. Check if any microblocks contain transactions
             ## Fetch each microblock in turn until one is found that includes at least one tx
             ## If none of them contain any transactions that's worth notifying
             case any_transactions?(prevGeneration["micro_blocks"]) do
               true ->
-                :ok
+                new_state(current_generation)
 
               false ->
                 users = AeCanary.Accounts.list_users()
@@ -80,22 +73,27 @@ defmodule AeCanary.Mdw.Cache.Service.IdleDetector do
                   users,
                   Map.put(state, :event_type, :idle_no_transactions)
                 )
+
+                new_state(current_generation) |> Map.put(:idle_status, :idle_no_transactions)
             end
           end
-
-          block_time = Timex.from_unix(current_generation["key_block"]["time"], :millisecond)
-          expiry_time = Timex.shift(block_time, minutes: max_idle_config())
-          minutes_since_last = Timex.diff(Timex.now(), block_time, :minutes)
-
-          %{
-            generation: current_generation,
-            block_time: block_time,
-            expiry_time: expiry_time,
-            delay_minutes: minutes_since_last,
-            config_delay: max_idle_config()
-          }
         end
     end
+  end
+
+  defp new_state(generation) do
+    block_time = Timex.from_unix(generation["key_block"]["time"], :millisecond)
+    expiry_time = Timex.shift(block_time, minutes: max_idle_config())
+    minutes_since_last = Timex.diff(Timex.now(), block_time, :minutes)
+
+    %{
+      generation: generation,
+      block_time: block_time,
+      expiry_time: expiry_time,
+      delay_minutes: minutes_since_last,
+      config_delay: max_idle_config(),
+      idle_status: :active
+    }
   end
 
   defp any_transactions?(micro_blocks) do

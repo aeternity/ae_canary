@@ -8,7 +8,7 @@
     <td style="padding:30px;background-color:#f8d7da;color:#842029;border:1px solid transparent;border-radius:5px;border-color:#dc3545">
         <h1 style="margin-top:0;margin-bottom:16px;font-size:20px;line-height:32px;font-weight:bold;letter-spacing:-0.02em;">No new key block created</h1>
         <ul>
-            <li style="margin:0;">The Aeternity blockchain has not created a new key block for <%= @block.delay_minutes %> minutes, which is longer than the configured warning value of <%= @block.config_delay %> minutes.</li>
+            <li style="margin:0;">The Aeternity blockchain has not created a new key block for <%= @block.delay_minutes %> minutes.</li>
             <li style="margin:0;">The current top block is <%= @addr %> created at <%= @block.block_time %>.</li>
         </ul>
     </td>
