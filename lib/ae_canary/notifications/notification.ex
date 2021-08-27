@@ -18,7 +18,7 @@ defmodule AeCanary.Notifications.Notification do
     field :email, :string
     field :event_datetime, :utc_datetime
     field :event_date, :date
-    field :event_type, Ecto.Enum, values: [:big_deposit, :boundary, :fork]
+    field :event_type, Ecto.Enum, values: [:big_deposit, :boundary, :fork, :idle, :idle_no_microblocks, :idle_no_transactions]
     field :exposure, :decimal
     field :limit, :decimal
     field :sent, :boolean

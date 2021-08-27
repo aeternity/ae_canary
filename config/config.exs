@@ -9,7 +9,8 @@ use Mix.Config
 
 config :ae_canary,
   ecto_repos: [AeCanary.Repo],
-  mdw_url: "http://18.156.189.185/mdw/",
+  mdw_url: "http://mdw.mainnet.aeternity.io/mdw/",
+  node_url: "https://mainnet.aeternity.io/",
   site_address: "localhost"
 
 # Configures the endpoint
@@ -44,6 +45,10 @@ config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
 config :ae_canary, AeCanary.ForkMonitor,
   fork_monitor_http_client: HTTPoison,
   max_sync_depth: 50_000
+
+config :ae_canary, AeCanary.Mdw.Cache.Service.IdleDetector,
+  alert_idle_minutes: 40,
+  min_block_life_seconds: 30
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

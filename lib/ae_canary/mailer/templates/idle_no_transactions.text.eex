@@ -1,0 +1,6 @@
+AE Canary
+
+The Aeternity blockchain newest key block contains microblocks but no transactions. This might indicate a problem.
+
+The current top block is <%= @addr %> created at <%= @block.block_time %>
+The block with no transactions is <%= @block.generation["key_block"]["prev_key_hash"] %>.

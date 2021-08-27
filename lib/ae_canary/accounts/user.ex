@@ -13,6 +13,7 @@ defmodule AeCanary.Accounts.User do
     field :email_big_deposits, :boolean, default: false
     field :email_boundaries, :boolean, default: false
     field :email_large_forks, :boolean, default: false
+    field :email_idle, :boolean, default: false
     belongs_to :exchange_view, AeCanary.Exchanges.Exchange, references: :id
 
     timestamps()
@@ -31,6 +32,7 @@ defmodule AeCanary.Accounts.User do
       :email_big_deposits,
       :email_boundaries,
       :email_large_forks,
+      :email_idle,
       :exchange_view_id
     ])
     |> put_password_hash()
