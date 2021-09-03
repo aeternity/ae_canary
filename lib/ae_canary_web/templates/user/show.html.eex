@@ -47,9 +47,18 @@
     <%= @user.email_large_forks %>
   </li>
 
-    <li>
+  <li>
     <strong>Idle chain:</strong>
     <%= @user.email_idle %>
+  </li>
+
+  <li>
+    <strong>Specific exchange view:</strong>
+    <%= if @user.exchange_view do %>
+      <%= @user.exchange_view.name %>
+    <% else %>
+      none
+    <% end %>
   </li>
 </ul>
 <%= if my_account do %>

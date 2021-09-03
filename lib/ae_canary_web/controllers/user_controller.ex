@@ -65,7 +65,12 @@ defmodule AeCanaryWeb.UserController do
 
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = Accounts.get_user!(id)
-
+    null_val = Integer.to_string(AeCanaryWeb.UserView.all_exchanges_placeholder_value())
+    user_params =
+      case user_params do
+        %{"exchange_view_id" => ^null_val} -> Map.put(user_params, "exchange_view_id", nil)
+        _ -> user_params
+      end
     case Accounts.update_user(user, user_params) do
       {:ok, user} ->
         conn

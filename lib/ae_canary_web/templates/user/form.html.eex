@@ -25,6 +25,11 @@
         <%= label f, :role, class: "form-label"  %>
         <%= select f, :role, ["Admin": "admin", "User": "user", "Archived user": "archived"], class: "form-select", selected: role %>
       </div>
+      <div class="col-sm-4">
+        <% exchange_view = case @changeset.data.exchange_view_id do nil -> all_exchanges_placeholder_value(); r -> r end %>
+        <%= label f, :exchange_view_id, class: "form-label"  %>
+        <%= select f, :exchange_view_id, exchanges_dropdown_values(), class: "form-select", selected: exchange_view %>
+      </div>
       <% end %>
     </div>
     <%= if not my_account do %>
