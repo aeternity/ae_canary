@@ -1,18 +1,14 @@
 defmodule AeCanary.Mdw.Cache.Service.Status do
-  use AeCanary.Mdw.Cache.Service, name: "MDW status"
+  use AeCanary.Mdw.Cache.Service, name: "Node connection status"
 
   defmodule Data do
-    defstruct mdw_version: "0.0.0",
-              node_version: "0.0.0",
-              node_height: 0,
-              node_syncing: false,
-              mdw_synced: false
+    defstruct node_version: "0.0.0",
+              node_height: 0
+
     @type t() :: %__MODULE__{
-      mdw_version: String.t,
-      node_version: String.t,
-      node_height: integer(),
-      node_syncing: boolean(),
-      mdw_synced: boolean()}
+            node_version: String.t(),
+            node_height: integer()
+          }
   end
 
   @impl true
@@ -26,9 +22,12 @@ defmodule AeCanary.Mdw.Cache.Service.Status do
 
   @impl true
   def refresh(_) do
-    case Mdw.Api.status() do
-      {:ok, data} -> Map.put(data, :__struct__, Data)
-      _failed -> nil
+    case AeCanary.Node.Api.status() do
+      {:ok, %{"node_version" => vsn, "top_block_height" => height}} ->
+        %Data{node_version: vsn, node_height: height}
+
+      _failed ->
+        nil
     end
   end
 end

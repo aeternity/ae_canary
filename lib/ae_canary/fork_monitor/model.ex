@@ -27,6 +27,20 @@ defmodule AeCanary.ForkMonitor.Model do
     Repo.get_by!(Block, height: height)
   end
 
+  def get_linked_keyblocks_above_height(hash, height) do
+    keyblocks_above_height(hash, height, [])
+  end
+
+  defp keyblocks_above_height(hash, height, acc) do
+    block = get_block!(hash)
+
+    if block.height > height do
+      keyblocks_above_height(block.lastKeyHash, height, [block | acc])
+    else
+      Enum.reverse(acc)
+    end
+  end
+
   @doc """
   Find all the hashes that are branch points in the tree,
   identified as those blocks that share a previous hash with at least one other block
@@ -98,6 +112,7 @@ defmodule AeCanary.ForkMonitor.Model do
   Purge blocks below a certain height. First unlink the blocks at that height
   then remove everything below
   """
+  @chunk_sz 100
   def delete_below_height(height) do
     query =
       from n in Block,
@@ -106,15 +121,26 @@ defmodule AeCanary.ForkMonitor.Model do
     blocks = Repo.all(query)
 
     Enum.each(blocks, fn block ->
+      ## Unlink parent
       attrs = %{lastKeyHash: nil}
       {:ok, _} = update_block(block, attrs)
     end)
 
+    delete_below_height_in_chunks(height, @chunk_sz)
+  end
+
+  defp delete_below_height_in_chunks(height, chunk_sz) do
+    bottom_limit = height - chunk_sz
     delete_query =
       from n in Block,
-        where: n.height < ^height
+        where: n.height < ^height and n.height >= ^bottom_limit
 
-    Repo.delete_all(delete_query)
+    case Repo.delete_all(delete_query) do
+      {qty, _} when qty < chunk_sz ->
+        :ok
+      _ ->
+        delete_below_height_in_chunks(bottom_limit, chunk_sz)
+    end
   end
 
   @doc """
@@ -132,7 +158,7 @@ defmodule AeCanary.ForkMonitor.Model do
 
   def extend_fork(topHash, start_index, length) do
     block = AeCanary.ForkMonitor.Model.get_block!(topHash)
-    end_index = start_index+length
+    end_index = start_index + length
     indexes = start_index..end_index
     newForkPrefix = String.slice(topHash, 0, String.length(topHash) - 8) <> "----"
     inject_blocks(newForkPrefix, topHash, block.height + 1, indexes)
@@ -154,7 +180,6 @@ defmodule AeCanary.ForkMonitor.Model do
       attrs = %{lastKeyHash: prevHash}
       update_block(block, attrs)
 
-      IO.inspect(hash, label: "Injected hash")
       hash
     end)
   end

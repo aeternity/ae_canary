@@ -2,6 +2,10 @@ defmodule AeCanary.Node.Api do
   @moduledoc """
   API for talking directly to an aeternity node rather than middleware
   """
+  def status() do
+    get("v2/status")
+  end
+
   def current_generation() do
     get("v2/generations/current")
   end
@@ -20,6 +24,10 @@ defmodule AeCanary.Node.Api do
 
   def transaction_count(microblock_hash) do
     get("v2/micro-blocks/hash/" <> microblock_hash <> "/transactions/count")
+  end
+
+  def transactions_in_microblock(microblock_hash) do
+    get("v2/micro-blocks/hash/" <> microblock_hash <> "/transactions")
   end
 
   defp get(uri) do

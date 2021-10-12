@@ -68,10 +68,10 @@ defmodule AeCanary.Mdw.Notifier do
   defp send_big_deposit_notifications(users, name, addr, big_deposits) do
     interested_users = Enum.filter(users, fn u -> u.email_big_deposits end)
 
-    Enum.each(big_deposits, fn %AeCanary.Transactions.Tx{} = tx ->
+    Enum.each(big_deposits, fn %AeCanary.Transactions.Spend{} = tx ->
       ## Find any emails already sent for this event
       sent =
-        AeCanary.Notifications.list_big_deposits(addr, tx.tx.hash)
+        AeCanary.Notifications.list_big_deposits(addr, tx.hash)
         |> Enum.map(fn n -> n.email end)
         |> MapSet.new()
 
@@ -163,7 +163,7 @@ defmodule AeCanary.Mdw.Notifier do
     |> AeCanary.Notifications.create_notification()
   end
 
-  defp event_attrs(%AeCanary.Transactions.Tx{tx: tx}) do
+  defp event_attrs(%AeCanary.Transactions.Spend{} = tx) do
     %{amount: tx.amount, tx_hash: tx.hash, event_datetime: tx.inserted_at}
   end
 
@@ -187,7 +187,7 @@ defmodule AeCanary.Mdw.Notifier do
     %{tx_hash: generation["key_block"]["hash"]}
   end
 
-  defp event_detail(%AeCanary.Transactions.Tx{tx: tx}) do
+  defp event_detail(%AeCanary.Transactions.Spend{} = tx) do
     "tx hash: " <> tx.hash
   end
 

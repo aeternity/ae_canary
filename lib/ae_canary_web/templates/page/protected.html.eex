@@ -69,12 +69,10 @@
       <div class="card-body">
         <% mdw = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Status.cache_handle) %>
         <%= if mdw do %>
-        <p class="text-muted">version <%= mdw.mdw_version %>, sync<%= if mdw.mdw_synced do %>ed<% else %>ing<% end %></p>
-        <p class="text-muted">node version <%= mdw.node_version %>, sync<%= if mdw.node_syncing do %>ing<% else %>ed<% end %></p>
+        <p class="text-muted">node version <%= mdw.node_version %></p>
         <% else %>
         <h6 class="card-subtitle mb-2 text-danger">disconnected</h6>
         <% end %>
-        <a href="#" class="btn disabled">More</a>
       </div>
     </div>
   </div>

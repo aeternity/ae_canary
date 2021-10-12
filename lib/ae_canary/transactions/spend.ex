@@ -10,6 +10,10 @@ defmodule AeCanary.Transactions.Spend do
     field :nonce, :integer
     field :recipient_id, :string
     field :sender_id, :string
+    field :keyblock_hash, :string
+    field :block_hash, :string
+    field :block_height, :integer
+    field :micro_time, :utc_datetime
 
     timestamps()
   end
@@ -17,7 +21,7 @@ defmodule AeCanary.Transactions.Spend do
   @doc false
   def changeset(spend, attrs) do
     spend
-    |> cast(attrs, [:hash, :sender_id, :recipient_id, :nonce, :amount, :fee])
-    |> validate_required([:hash, :sender_id, :recipient_id, :nonce, :amount, :fee])
+    |> cast(attrs, [:hash, :keyblock_hash, :block_hash, :block_height, :micro_time, :sender_id, :recipient_id, :nonce, :amount, :fee])
+    |> validate_required([:hash, :keyblock_hash, :block_hash, :block_height, :micro_time, :sender_id, :recipient_id, :nonce, :amount, :fee])
   end
 end

@@ -7,25 +7,33 @@ defmodule AeCanary.Transactions do
   alias AeCanary.Repo
 
   alias AeCanary.Transactions.Spend
-  alias AeCanary.Transactions.Location
 
-  defmodule Tx do
-    defstruct [:location, :tx]
-    defp aetto_to_ae(aetto), do: aetto / :math.pow(10, 18)
-    def decode(json) do
-      %{block_height: height, block_hash: mb_hash, micro_time: time, hash: tx_hash, tx: tx0} = json
-      {tx, tx_type} =
-        case tx0 do
-          %{type: "SpendTx", amount: amount, fee: fee, recipient_id: recipient_id, sender_id: sender_id} ->
-            {%Spend{hash: tx_hash, amount: aetto_to_ae(amount), fee: aetto_to_ae(fee), recipient_id: recipient_id, sender_id: sender_id}, :spend}
-        end
-      utc_datetime =
-        time
-        |> DateTime.from_unix!(:millisecond)
-        |> DateTime.truncate(:second)
-      location = %Location{block_hash: mb_hash, block_height: height, micro_time: utc_datetime, tx_hash: tx_hash, tx_type: tx_type}
-      %Tx{location: location, tx: tx}
-    end
+  defp aetto_to_ae(aetto), do: aetto / :math.pow(10, 18)
+
+  def decode_spend!(json, utc_datetime, keyblock_hash) do
+    %{"block_height" => height, "block_hash" => mb_hash, "hash" => tx_hash, "tx" => tx} = json
+
+    %{
+      "amount" => amount,
+      "fee" => fee,
+      "nonce" => nonce,
+      "recipient_id" => recipient_id,
+      "sender_id" => sender_id,
+      "type" => "SpendTx"
+    } = tx
+
+    %Spend{
+      hash: tx_hash,
+      amount: aetto_to_ae(amount),
+      fee: aetto_to_ae(fee),
+      recipient_id: recipient_id,
+      sender_id: sender_id,
+      nonce: nonce,
+      keyblock_hash: keyblock_hash,
+      block_hash: mb_hash,
+      block_height: height,
+      micro_time: utc_datetime
+    }
   end
 
   @doc """
@@ -45,41 +53,95 @@ defmodule AeCanary.Transactions do
     Enum.reduce(params, dynamic(true), fn
       {:recipient_id, value}, dynamic ->
         dynamic([spend: s], ^dynamic and s.recipient_id == ^value)
+
       {:sender_id, value}, dynamic ->
         dynamic([spend: s], ^dynamic and s.sender_id == ^value)
+
       {:amount_at_least, value}, dynamic ->
         dynamic([spend: s], ^dynamic and s.amount >= ^value)
+
       {:from, value}, dynamic ->
-        dynamic([location: l], ^dynamic and l.block_height >= ^value)
+        dynamic([spend: s], ^dynamic and s.block_height >= ^value)
+
       {:date_from, value}, dynamic ->
-        dynamic([location: l], ^dynamic and fragment("date(?)", l.micro_time) >= ^value)
+        dynamic([spend: s], ^dynamic and fragment("date(?)", s.micro_time) >= ^value)
+
       {:to, value}, dynamic ->
-        dynamic([location: l], ^dynamic and l.block_height <= ^value)
+        dynamic([spend: s], ^dynamic and s.block_height <= ^value)
+
       {_, _}, dynamic ->
         # Not a where parameter
         dynamic
     end)
   end
 
-  def list_locations_of_spend_txs_by(params) do
+  def list_tx_hash_in_block(mh) do
     query =
-      case params[:select] do
-        :location ->
-          from(l in Location, as: :location,
-            join: s in Spend, as: :spend,
-            on: l.tx_hash == s.hash,
-            order_by: [desc: l.micro_time],
-            select: l)
-          |> where(^dynamic_where(params))
-        :tx_and_location ->
-          from(l in Location, as: :location,
-            join: s in Spend, as: :spend,
-            on: l.tx_hash == s.hash,
-            order_by: [desc: l.micro_time],
-            select: %Tx{location: l, tx: s})
-          |> where(^dynamic_where(params))
-      end
+      from s in Spend,
+        where: s.block_hash == ^mh,
+        select: s.hash
+
     Repo.all(query)
+  end
+
+  def any_transactions_in_keyblock?(keyblock_hash) do
+    query =
+      from s in Spend,
+        where: s.keyblock_hash == ^keyblock_hash
+
+    Repo.exists?(query)
+  end
+
+  def list_spend_txs_by(params) do
+    query =
+      from(s in Spend,
+        as: :spend,
+        order_by: [desc: s.micro_time]
+      )
+      |> where(^dynamic_where(params))
+
+    Repo.all(query)
+  end
+
+  def delete_unattached_transactions_above_height(validHashes, height) do
+    query =
+      from s in Spend,
+        where: s.block_height > ^height and s.hash not in ^validHashes
+
+    Repo.delete_all(query)
+  end
+
+  def delete_transactions(tx_hashes) do
+    query =
+      from s in Spend,
+        where: s.hash in ^tx_hashes
+
+    Repo.delete_all(query)
+  end
+
+  def delete_spend_with_hash(tx_hash) do
+    query =
+      from s in Spend,
+        where: s.hash == ^tx_hash
+
+    Repo.delete_all(query)
+  end
+
+  @chunk_sz 100
+  def delete_spend_below_height(height) do
+    bottom_limit = height - @chunk_sz
+
+    delete_query =
+      from s in Spend,
+        where: s.block_height < ^height and s.block_height >= ^bottom_limit
+
+    case Repo.delete_all(delete_query) do
+      {qty, _} when qty < @chunk_sz ->
+        :ok
+
+      _ ->
+        delete_spend_below_height(bottom_limit)
+    end
   end
 
   @doc """
@@ -110,7 +172,25 @@ defmodule AeCanary.Transactions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_spend(attrs \\ %{}) do
+  def insert_spend(%Spend{} = spend) do
+    case Repo.get(Spend, spend.hash) do
+      nil ->
+        Repo.insert(spend)
+
+      existing ->
+        attrs = %{
+          keyblock_hash: spend.keyblock_hash,
+          block_hash: spend.block_hash,
+          block_height: spend.block_height,
+          micro_time: spend.micro_time,
+          nonce: spend.nonce
+        }
+
+        update_spend(%Spend{} = existing, attrs)
+    end
+  end
+
+  def create_spend(attrs) do
     %Spend{}
     |> Spend.changeset(attrs)
     |> Repo.insert()
@@ -163,153 +243,42 @@ defmodule AeCanary.Transactions do
     Spend.changeset(spend, attrs)
   end
 
-
-  @doc """
-  Returns the list of location.
-
-  ## Examples
-
-      iex> list_location()
-      [%Location{}, ...]
-
-  """
-  def list_location do
-    Repo.all(Location)
-  end
-
-  @doc """
-  Gets a single location.
-
-  Raises `Ecto.NoResultsError` if the Location does not exist.
-
-  ## Examples
-
-      iex> get_location!(123)
-      %Location{}
-
-      iex> get_location!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_location!(id), do: Repo.get!(Location, id)
-
-  @doc """
-  Creates a location.
-
-  ## Examples
-
-      iex> create_location(%{field: value})
-      {:ok, %Location{}}
-
-      iex> create_location(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_location(attrs \\ %{}) do
-    %Location{}
-    |> Location.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a location.
-
-  ## Examples
-
-      iex> update_location(location, %{field: new_value})
-      {:ok, %Location{}}
-
-      iex> update_location(location, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_location(%Location{} = location, attrs) do
-    location
-    |> Location.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a location.
-
-  ## Examples
-
-      iex> delete_location(location)
-      {:ok, %Location{}}
-
-      iex> delete_location(location)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_location(%Location{} = location) do
-    Repo.delete(location)
-  end
-
   def delete_all() do
-    Repo.delete_all(Location)
     Repo.delete_all(Spend)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking location changes.
-
-  ## Examples
-
-      iex> change_location(location)
-      %Ecto.Changeset{data: %Location{}}
-
-  """
-  def change_location(%Location{} = location, attrs \\ %{}) do
-    Location.changeset(location, attrs)
-  end
-
-  def delete_tx_by_location(location) do
-    Repo.delete(location)
-    case location.tx_type do
-      :spend -> %Spend{hash: location.tx_hash} |> Repo.delete()
-    end
-  end
-
-  def maybe_insert_list([], _old_list) do
-    :inserted_all
-  end
-  def maybe_insert_list([top | new_batch_tail], old_list) do
-    %Tx{location: location, tx: tx} = top
-    case Enum.find_index(old_list, fn l -> l.tx_hash == location.tx_hash end) do ## TODO detect reincluded txs
-      nil -> ## new transaction
-        Repo.insert(location)
-        case tx do
-          %Spend{} -> Repo.insert(tx)
-        end
-        maybe_insert_list(new_batch_tail, old_list)
-      0 -> ## last inserted transaction
-        :ok
-      idx -> ## some txs were kicked out
-        Enum.slice(old_list, 1..idx-1)
-        |> Enum.each(&delete_tx_by_location/1)
-        :ok
-    end
   end
 
   def aggregated_for_addresses(role, addresses, from_date) do
     query =
       case role do
         :sender_id ->
-          from(l in Location, as: :location,
-              join: s in Spend, as: :spend,
-              on: l.tx_hash == s.hash,
-              where: (s.sender_id in ^addresses and fragment("date(?)", l.micro_time) >= ^from_date),
-              group_by: [s.sender_id, fragment("date(?)", l.micro_time)],
-              select: %{address: s.sender_id, date: fragment("date(?)", l.micro_time), txs: count(), sum: sum(s.amount)})
+          from(s in Spend,
+            as: :spend,
+            where: s.sender_id in ^addresses and fragment("date(?)", s.micro_time) >= ^from_date,
+            group_by: [s.sender_id, fragment("date(?)", s.micro_time)],
+            select: %{
+              address: s.sender_id,
+              date: fragment("date(?)", s.micro_time),
+              txs: count(),
+              sum: sum(s.amount)
+            }
+          )
+
         :recipient_id ->
-          from(l in Location, as: :location,
-              join: s in Spend, as: :spend,
-              on: l.tx_hash == s.hash,
-              where: (s.recipient_id in ^addresses and fragment("date(?)", l.micro_time) >= ^from_date),
-              group_by: [s.recipient_id, fragment("date(?)", l.micro_time)],
-              select: %{address: s.recipient_id, date: fragment("date(?)", l.micro_time), txs: count(), sum: sum(s.amount)})
+          from(s in Spend,
+            as: :spend,
+            where:
+              s.recipient_id in ^addresses and fragment("date(?)", s.micro_time) >= ^from_date,
+            group_by: [s.recipient_id, fragment("date(?)", s.micro_time)],
+            select: %{
+              address: s.recipient_id,
+              date: fragment("date(?)", s.micro_time),
+              txs: count(),
+              sum: sum(s.amount)
+            }
+          )
       end
+
     query
-    |> Repo.all
+    |> Repo.all()
   end
 end

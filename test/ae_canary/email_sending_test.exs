@@ -8,27 +8,19 @@ defmodule AeCanary.EmailDeliveryTest do
         %{
           addr: "ak_6sssiKcg7AywyJkfSdHz52RbDUq5cZe41234567890",
           big_deposits: [
-            %AeCanary.Transactions.Tx{
-              location: %AeCanary.Transactions.Location{
-                block_hash: "mh_GoiWvJ7kCXnatAH5ct7ZLpYFdqNgYtcfGdUqDRjjPwBWjCCT5",
-                block_height: 440_849,
-                id: 10,
-                inserted_at: ~N[2021-06-14 15:33:16],
-                micro_time: ~U[2021-06-09 04:50:09Z],
-                tx_hash: "th_21M5vaTkBhJNNMHPLXtWXZTjsWKv977QXfyg3VD1234567890",
-                tx_type: :spend,
-                updated_at: ~N[2021-06-14 15:33:16]
-              },
-              tx: %AeCanary.Transactions.Spend{
-                amount: 640_356.1757720001,
-                fee: 2.800000000176e-5,
-                hash: "th_21M5vaTkBhJNNMHPLXtWXZTjsWKv977QXfyg3VD1234567890",
-                inserted_at: ~N[2021-06-14 15:33:16],
-                nonce: nil,
-                recipient_id: "ak_6sssiKcg7AywyJkfSdHz52RbDUq5cZe41234567890",
-                sender_id: "ak_TgZUru3fNkobL678ZmpsqxTz7nFayoLNJB2E1234567890",
-                updated_at: ~N[2021-06-14 15:33:16]
-              }
+            %AeCanary.Transactions.Spend{
+              amount: 640_356.1757720001,
+              fee: 2.800000000176e-5,
+              hash: "th_21M5vaTkBhJNNMHPLXtWXZTjsWKv977QXfyg3VD1234567890",
+              inserted_at: ~N[2021-06-14 15:33:16],
+              nonce: nil,
+              recipient_id: "ak_6sssiKcg7AywyJkfSdHz52RbDUq5cZe41234567890",
+              sender_id: "ak_TgZUru3fNkobL678ZmpsqxTz7nFayoLNJB2E1234567890",
+              keyblock_hash: "kh_XXXXvJ7kCXnatAH5ct7ZLpYFdqNgYtcfGdUqDRjjPwBWjCCT5",
+              block_hash: "mh_GoiWvJ7kCXnatAH5ct7ZLpYFdqNgYtcfGdUqDRjjPwBWjCCT5",
+              block_height: 440_849,
+              micro_time: ~U[2021-06-09 04:50:09Z],
+              updated_at: ~N[2021-06-14 15:33:16]
             }
           ],
           id: 4,

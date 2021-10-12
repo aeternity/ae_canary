@@ -1,5 +1,0 @@
-<h1>Edit Location</h1>
-
-<%= render "form.html", Map.put(assigns, :action, Routes.transactions_location_path(@conn, :update, @location)) %>
-
-<span><%= link "Back", to: Routes.transactions_location_path(@conn, :index) %></span>

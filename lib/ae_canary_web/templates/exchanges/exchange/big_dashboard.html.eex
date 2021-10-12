@@ -1,9 +1,6 @@
 <h2 class="card-title">Detailed exchanges exposure</h2>
 <%= if is_admin(@current_user) do %>
   <%= link "Settings", to: Routes.exchanges_exchange_path(@conn, :index), class: "btn btn-light" %>
-  <%= if is_admin(@current_user) do %>
-    <%= link "Delete all transactions", to: Routes.transactions_spend_path(@conn, :delete_all), class: "btn btn-light" %>
-  <% end %>
 <% end %>
 <% data = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Exchange.cache_handle) %>
 <%= if data == nil do %>
@@ -40,10 +37,10 @@
                         <li>On <%= Timex.format!(crossed.date, "%d %b", :strftime)  %> the exposure <%= round(crossed.message.exposure) %> went over the <strong><%= crossed.message.boundary %></strong> boundary of <%= round(crossed.message.limit) %>.</li>
                       <% end %>
                     </ul>
-                  </li> 
+                  </li>
                 <% end %>
                 <%= if ! Enum.empty?(a.big_deposits) do %>
-                  <li><%= a.addr %> has received <%= Enum.count(a.big_deposits) %> deposits with a total amount of <%= Enum.map(a.big_deposits, &(&1.tx.amount)) |> Enum.sum() |> round() %> AE. (<a href="#<%= a.addr %>">link</a>)</li> 
+                  <li><%= a.addr %> has received <%= Enum.count(a.big_deposits) %> deposits with a total amount of <%= Enum.map(a.big_deposits, &(&1.amount)) |> Enum.sum() |> round() %> AE. (<a href="#<%= a.addr %>">link</a>)</li>
                 <% end %>
               <% end %>
             </ul>
@@ -68,7 +65,7 @@
           <% else %>
           <h5>Overview</h5>
           <% labels = e.aggregated |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) |> Enum.reverse() %>
-          <% data_sets_all = 
+          <% data_sets_all =
               [
                 %{name: "Deposits",
                   borderColor: "#89A7E0",
@@ -84,7 +81,7 @@
             e.upper_boundaries
             |> Enum.map(fn(b) -> %{y: %{from: b, to: b}} end)
           %>
-          <% data_sets_txs = 
+          <% data_sets_txs =
               [
                 %{name: "Transactions",
                   data: Enum.map(e.aggregated, &(&1.txs)) |> Enum.reverse()}
@@ -97,17 +94,17 @@
           <div class="mb-3 row">
             <div class="col-lg-6">
               <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE movement by day',
-                                                                                    labels: labels, 
+                                                                                    labels: labels,
                                                                                     lines: boundaries,
                                                                                     data_sets: data_sets_all}) %>
             </div>
             <div class="col-lg-6">
               <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transactions by date',
-                                                                                    labels: labels, 
+                                                                                    labels: labels,
                                                                                     data_sets: data_sets_txs}) %>
             </div>
           </div>
-          
+
           <% end %>
 
           <%= if length(e.addresses) == 0 do %>
@@ -126,13 +123,13 @@
                     <p>No transactions for the past <%= show_period_in_days %> days.</p>
                   <% end %>
                   <%= if a.has_txs do %>
-                    <% data_sets_exposure = 
+                    <% data_sets_exposure =
                         [
                           %{name: "Exposure",
                             borderColor: "#5ACA75",
                             data: Enum.map(a.data, &(&1.deposits.sum - &1.withdrawals.sum)) |> Enum.reverse()},
                         ] %>
-                    <% data_sets_individual = 
+                    <% data_sets_individual =
                         [
                           %{name: "Deposits",
                             borderColor: "#89A7E0",
@@ -161,7 +158,7 @@
                         <div class="mb-3 row">
                           <div class="col-lg-12">
                             <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE exposure for #{a.addr}',
-                                                                                                  labels: labels, 
+                                                                                                  labels: labels,
                                                                                                   lines: address_boundaries,
                                                                                                   data_sets: data_sets_exposure}) %>
                           </div>
@@ -171,12 +168,12 @@
                         <div class="mb-3 row">
                           <div class="col-lg-6">
                             <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'AE transfers for #{a.addr}',
-                                                                                                  labels: labels, 
+                                                                                                  labels: labels,
                                                                                                   data_sets: data_sets_individual}) %>
                           </div>
                           <div class="col-lg-6">
                             <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transaction counts for #{a.addr}',
-                                                                                                  labels: labels, 
+                                                                                                  labels: labels,
                                                                                                   data_sets: data_sets_txs_individual}) %>
                           </div>
                         </div>
@@ -197,12 +194,12 @@
                       <tbody>
                         <%= for tx <- a.big_deposits do %>
                         <tr>
-                          <td><%= Timex.format!(tx.location.micro_time, "%Y-%b-%d %H:%M", :strftime) %></td>
-                          <td><%= tx.location.tx_hash %></td>
-                          <td><%= round(tx.tx.amount) %></td>
+                          <td><%= Timex.format!(tx.micro_time, "%Y-%b-%d %H:%M", :strftime) %></td>
+                          <td><%= tx.hash %></td>
+                          <td><%= round(tx.amount) %></td>
                           <td>
-                            <span><%= link "explorer.aeternity.io", to: "https://explorer.aeternity.io/transactions/#{tx.location.tx_hash}", class: "btn btn-sm btn-light" %></span>
-                            <span><%= link "AEKnow", to: "https://www.aeknow.org/block/transaction/#{tx.location.tx_hash}", class: "btn btn-sm btn-light" %></span>
+                            <span><%= link "explorer.aeternity.io", to: "https://explorer.aeternity.io/transactions/#{tx.hash}", class: "btn btn-sm btn-light" %></span>
+                            <span><%= link "AEKnow", to: "https://www.aeknow.org/block/transaction/#{tx.hash}", class: "btn btn-sm btn-light" %></span>
                           </td>
                         </tr>
                         <% end %>
