@@ -36,6 +36,7 @@ defmodule AeCanary.Accounts.User do
     |> put_password_hash()
 ##    |> put_exchange_view(attrs)
     |> validate_required([:email, :pass_hash, :name, :role])
+    |> foreign_key_constraint(:exchanges, name: :users_exchange_view_id_fkey)
     |> unique_constraint(:email)
   end
 

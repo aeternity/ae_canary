@@ -8,8 +8,20 @@ defmodule AeCanary.AccountsTest do
 
     @valid_user_roles [:admin, :user, :archived]
 
-    @valid_attrs %{comment: "some comment", email: "some email", name: "some name", password: "some password", role: :admin}
-    @update_attrs %{comment: "some updated comment", email: "some updated email", name: "some updated name", password: "some updated password", role: :user}
+    @valid_attrs %{
+      comment: "some comment",
+      email: "some email",
+      name: "some name",
+      password: "some password",
+      role: :admin
+    }
+    @update_attrs %{
+      comment: "some updated comment",
+      email: "some updated email",
+      name: "some updated name",
+      password: "some updated password",
+      role: :user
+    }
     @invalid_attrs %{comment: nil, email: nil, name: nil, pass_hash: nil, role: nil}
 
     def user_fixture(attrs \\ %{}) do
@@ -23,7 +35,7 @@ defmodule AeCanary.AccountsTest do
 
     test "list_users/0 returns all users" do
       user = user_fixture()
-      assert Accounts.list_users() == [reset_virtual_fields(user)]
+      assert reset_virtual_fields(Accounts.list_users()) == [reset_virtual_fields(user)]
     end
 
     test "get_user!/1 returns the user with given id" do
@@ -32,21 +44,23 @@ defmodule AeCanary.AccountsTest do
     end
 
     test "create_user/1 with valid data creates a user" do
-      test_role =
-        fn(role) ->
-          assert {:ok, %User{} = user} = Accounts.create_user(%{@valid_attrs | role: role})
-          assert user.comment == "some comment"
-          assert user.email == "some email"
-          assert user.name == "some name"
-          assert {:ok, user} == Argon2.check_pass(user, "some password", hash_key: :pass_hash)
-          assert user.role == role
-        end
+      test_role = fn role ->
+        assert {:ok, %User{} = user} = Accounts.create_user(%{@valid_attrs | role: role})
+        assert user.comment == "some comment"
+        assert user.email == "some email"
+        assert user.name == "some name"
+        assert {:ok, user} == Argon2.check_pass(user, "some password", hash_key: :pass_hash)
+        assert user.role == role
+      end
+
       Enum.each(@valid_user_roles, test_role)
     end
 
     test "create_user/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Accounts.create_user(@invalid_attrs)
-      assert {:error, %Ecto.Changeset{}} = Accounts.create_user(%{@valid_attrs | role: :something_invalid})
+
+      assert {:error, %Ecto.Changeset{}} =
+               Accounts.create_user(%{@valid_attrs | role: :something_invalid})
     end
 
     test "update_user/2 with valid data updates the user" do
@@ -77,7 +91,11 @@ defmodule AeCanary.AccountsTest do
     end
   end
 
+  defp reset_virtual_fields(users) when is_list(users) do
+    Enum.map(users, fn u -> reset_virtual_fields(u) end)
+  end
+
   defp reset_virtual_fields(user) do
-    %{user | password: nil}
+    %{user | password: nil, exchange_view: nil}
   end
 end

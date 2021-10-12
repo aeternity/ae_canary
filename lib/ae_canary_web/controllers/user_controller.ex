@@ -15,6 +15,12 @@ defmodule AeCanaryWeb.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
+    null_val = Integer.to_string(AeCanaryWeb.UserView.all_exchanges_placeholder_value())
+    user_params =
+      case user_params do
+        %{"exchange_view_id" => ^null_val} -> Map.put(user_params, "exchange_view_id", nil)
+        _ -> user_params
+      end
     case Accounts.create_user(user_params) do
       {:ok, user} ->
         conn
