@@ -53,7 +53,7 @@ defmodule AeCanary.MixProject do
       {:poison, "~> 3.1"},
       {:timex, "~> 3.7"},
       {:uuid, "~> 1.1"},
-      { :statistics, "~> 0.6.2"},
+      {:statistics, "~> 0.6.2"},
       {:bamboo, "~> 2.2.0"}
     ]
   end
@@ -67,7 +67,8 @@ defmodule AeCanary.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "ecto.seeds"],
+      "ecto.seeds": "run priv/repo/seeds.exs",
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
