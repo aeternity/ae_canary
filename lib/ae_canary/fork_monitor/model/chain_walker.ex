@@ -138,11 +138,11 @@ defmodule AeCanary.ForkMonitor.Model.ChainWalker do
     case AeCanary.Node.Api.chain_ends() do
       {:ok, chainEnds} ->
         resolveBlocks(chainEnds)
+
       err ->
         Logger.error("Failed to fetch chain ends #{err}")
         []
     end
-
   end
 
   defp resolveBlocks(blocks) do

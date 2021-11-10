@@ -84,5 +84,4 @@ defmodule AeCanary.EmailIdleDetectionTest do
       html_body: ~r/The Aeternity blockchain newest key block does not contain any microblocks/
     )
   end
-
 end

@@ -92,7 +92,7 @@ defmodule AeCanaryWeb.Router do
   #   pipe_through :api
   # end
 
-  if Mix.env == :dev do
+  if Mix.env() == :dev do
     forward "/sent_emails", Bamboo.SentEmailViewerPlug
   end
 

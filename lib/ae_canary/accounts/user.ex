@@ -32,7 +32,7 @@ defmodule AeCanary.Accounts.User do
       :email_big_deposits,
       :email_boundaries,
       :email_large_forks,
-      :email_idle
+      :email_idle,
       :exchange_view_id
     ])
     |> put_password_hash()
