@@ -45,9 +45,15 @@ defmodule AeCanary.AccountsTest do
 
     test "create_user/1 with valid data creates a user" do
       test_role = fn role ->
-        assert {:ok, %User{} = user} = Accounts.create_user(%{@valid_attrs | role: role})
+        assert {:ok, %User{} = user} =
+                 Accounts.create_user(%{
+                   @valid_attrs
+                   | email: @valid_attrs.email <> " #{role}",
+                     role: role
+                 })
+
         assert user.comment == "some comment"
-        assert user.email == "some email"
+        assert user.email == "some email #{role}"
         assert user.name == "some name"
         assert {:ok, user} == Argon2.check_pass(user, "some password", hash_key: :pass_hash)
         assert user.role == role
