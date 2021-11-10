@@ -56,7 +56,7 @@ defmodule AeCanaryWeb.Router do
       end
     end
 
-    # administrator pages 
+    # administrator pages
     scope "/" do
       pipe_through [:ensure_auth, :ensure_admin]
 
@@ -92,6 +92,10 @@ defmodule AeCanaryWeb.Router do
   # scope "/api", AeCanaryWeb do
   #   pipe_through :api
   # end
+
+  if Mix.env == :dev do
+    forward "/sent_emails", Bamboo.SentEmailViewerPlug
+  end
 
   # Enables LiveDashboard only for development
   #

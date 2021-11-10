@@ -8,6 +8,45 @@ defmodule AeCanary.Mdw.Notifier do
     end)
   end
 
+  def send_idle_notifications(lastBlock, users, details) do
+    interested_users = Enum.filter(users, fn u -> u.email_idle end)
+
+    sent =
+      AeCanary.Notifications.list_idle_events(:idle, lastBlock)
+      |> Enum.map(fn n -> n.email end)
+      |> MapSet.new()
+
+    ## We still need to send to interested_users that are not yet in sent MapSet
+    Enum.reject(interested_users, fn u -> MapSet.member?(sent, u.email) end)
+    |> send_emails(:idle, "", lastBlock, details)
+  end
+
+  def send_idle_no_microblocks_notifications(lastBlock, users, details) do
+    interested_users = Enum.filter(users, fn u -> u.email_idle end)
+
+    sent =
+      AeCanary.Notifications.list_idle_events(:idle_no_microblocks, lastBlock)
+      |> Enum.map(fn n -> n.email end)
+      |> MapSet.new()
+
+    ## We still need to send to interested_users that are not yet in sent MapSet
+    Enum.reject(interested_users, fn u -> MapSet.member?(sent, u.email) end)
+    |> send_emails(:idle_no_microblocks, "", lastBlock, details)
+  end
+
+  def send_idle_no_transactions_notifications(lastBlock, users, details) do
+    interested_users = Enum.filter(users, fn u -> u.email_idle end)
+
+    sent =
+      AeCanary.Notifications.list_idle_events(:idle_no_transactions, lastBlock)
+      |> Enum.map(fn n -> n.email end)
+      |> MapSet.new()
+
+    ## We still need to send to interested_users that are not yet in sent MapSet
+    Enum.reject(interested_users, fn u -> MapSet.member?(sent, u.email) end)
+    |> send_emails(:idle_no_transactions, "", lastBlock, details)
+  end
+
   def send_notifications(alerts_for_past_days, users) do
     alerts_for_past_days
     |> Enum.each(fn %{name: name, addresses: addresses} ->
@@ -75,22 +114,22 @@ defmodule AeCanary.Mdw.Notifier do
     ## will be sent to all users. This ought to be quite a rare event.....
 
     Enum.each(interested_users, fn %User{} = user ->
-        case AeCanary.Email.fork_notification_email(user, forkPoint, forks)
-             |> AeCanary.Mailer.deliver_now(response: true) do
-          {:ok, _, _} ->
-            Logger.info(
-              "Email notification submitted to #{user.email} for Fork detection event from fork #{forkPoint}"
-            )
+      case AeCanary.Email.fork_notification_email(user, forkPoint, forks)
+           |> AeCanary.Mailer.deliver_now(response: true) do
+        {:ok, _, _} ->
+          Logger.info(
+            "Email notification submitted to #{user.email} for Fork detection event from fork #{forkPoint}"
+          )
 
-            true
+          true
 
-          {:error, _} ->
-            Logger.error(
-              "Email notification failed to #{user.email} for Fork detection event from fork #{forkPoint}"
-            )
+        {:error, _} ->
+          Logger.error(
+            "Email notification failed to #{user.email} for Fork detection event from fork #{forkPoint}"
+          )
 
-            false
-        end
+          false
+      end
     end)
   end
 
@@ -132,11 +171,39 @@ defmodule AeCanary.Mdw.Notifier do
     %{boundary: msg.boundary, exposure: msg.exposure, limit: msg.limit, event_date: date}
   end
 
+  defp event_attrs(%{date: date}) do
+    %{event_date: date}
+  end
+
+  defp event_attrs(%{event_type: :idle, generation: generation}) do
+    %{tx_hash: generation["key_block"]["hash"]}
+  end
+
+  defp event_attrs(%{event_type: :idle_no_microblocks, generation: generation}) do
+    %{tx_hash: generation["key_block"]["hash"]}
+  end
+
+  defp event_attrs(%{event_type: :idle_no_transactions, generation: generation}) do
+    %{tx_hash: generation["key_block"]["hash"]}
+  end
+
   defp event_detail(%AeCanary.Transactions.Tx{tx: tx}) do
     "tx hash: " <> tx.hash
   end
 
   defp event_detail(%{message: msg}) do
     "boundary: #{msg.boundary} exposure: #{msg.exposure}"
+  end
+
+  defp event_detail(%{event_type: :idle}) do
+    "idle: no keyblocks for longer than threshold"
+  end
+
+  defp event_detail(%{event_type: :idle_no_microblocks}) do
+    "idle_no_microblocks: no microblocks in latest keyblock"
+  end
+
+  defp event_detail(%{event_type: :idle_no_transactions}) do
+    "idle_no_transactions: no transaction in any microblocks in the key block"
   end
 end

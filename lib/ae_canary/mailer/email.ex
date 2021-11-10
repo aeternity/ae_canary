@@ -43,6 +43,60 @@ defmodule AeCanary.Email do
     |> render(:boundary)
   end
 
+  def notification_email(
+        %User{email: email, name: name},
+        _exchange_name,
+        addr,
+        %{event_type: :idle} = block
+      ) do
+    new_email()
+    |> to({name, email})
+    |> from({"AeCanary", "canary@aeternity.io"})
+    |> put_html_layout({AeCanary.Email.NotificationView, "layout.html"})
+    |> put_text_layout({AeCanary.Email.NotificationView, "idle.text"})
+    |> subject("[AeCanary] Idle chain detected")
+    |> assign(:block, block)
+    |> assign(:addr, addr)
+    |> assign(:site_address, Application.fetch_env!(:ae_canary, :site_address))
+    |> render(:idle)
+  end
+
+  def notification_email(
+        %User{email: email, name: name},
+        _exchange_name,
+        addr,
+        %{event_type: :idle_no_microblocks} = block
+      ) do
+    new_email()
+    |> to({name, email})
+    |> from({"AeCanary", "canary@aeternity.io"})
+    |> put_html_layout({AeCanary.Email.NotificationView, "layout.html"})
+    |> put_text_layout({AeCanary.Email.NotificationView, "idle_no_microblocks.text"})
+    |> subject("[AeCanary] Idle chain no microblocks detected")
+    |> assign(:block, block)
+    |> assign(:addr, addr)
+    |> assign(:site_address, Application.fetch_env!(:ae_canary, :site_address))
+    |> render(:idle_no_microblocks)
+  end
+
+  def notification_email(
+        %User{email: email, name: name},
+        _exchange_name,
+        addr,
+        %{event_type: :idle_no_transactions} = block
+      ) do
+    new_email()
+    |> to({name, email})
+    |> from({"AeCanary", "canary@aeternity.io"})
+    |> put_html_layout({AeCanary.Email.NotificationView, "layout.html"})
+    |> put_text_layout({AeCanary.Email.NotificationView, "idle_no_transactions.text"})
+    |> subject("[AeCanary] Idle chain no transactions detected in keyblock")
+    |> assign(:block, block)
+    |> assign(:addr, addr)
+    |> assign(:site_address, Application.fetch_env!(:ae_canary, :site_address))
+    |> render(:idle_no_transactions)
+  end
+
   def fork_notification_email(%User{email: email, name: name}, forkPoint, forks) do
     new_email()
     |> to({name, email})

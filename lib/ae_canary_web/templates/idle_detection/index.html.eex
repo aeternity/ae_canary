@@ -1,0 +1,54 @@
+<% state = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.IdleDetector.cache_handle) %>
+<%= if state == nil do %>
+<div class="card">
+  <div class="card-header">
+    Idle detection
+  </div>
+  <div class="card-body">
+  <div>
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+<% else %>
+    <%= if state.idle_status == :active do %>
+        <div class="card alert-success border-success">
+            <div class="card-header">
+                Latest block is not delayed and contains transactions
+            </div>
+        </div>
+    <% end %>
+    <%= if state.idle_status == :idle do %>
+        <div class="card border-danger">
+            <div class="card-header alert-danger border-danger">
+                No new blocks for longer than configured threshold
+            </div>
+            <div class="card-body alert-danger">
+                <p>Delay since last block: <%= state.delay_minutes %> minutes</p>
+                <p>Current block: <%= state.generation["key_block"]["hash"] %>
+            </div>
+        </div>
+    <% end %>
+    <%= if state.idle_status == :idle_no_microblocks do %>
+        <div class="card border-danger">
+            <div class="card-header alert-danger border-danger">
+                Last mined keyblock contained no microblocks
+            </div>
+            <div class="card-body alert-danger">
+                <p>Block: <%= state.generation["key_block"]["prev_key_hash"] %>
+            </div>
+        </div>
+    <% end %>
+    <%= if state.idle_status == :idle_no_transactions do %>
+        <div class="card border-danger">
+            <div class="card-header alert-danger border-danger">
+                Last mined keyblock contained microblocks but zero transactions
+            </div>
+            <div class="card-body alert-danger">
+                <p>Block: <%= state.generation["key_block"]["prev_key_hash"] %>
+            </div>
+        </div>
+    <% end %>
+
+<% end %>
