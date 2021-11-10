@@ -7,6 +7,7 @@ defmodule AeCanaryWeb.SessionController do
   def new(conn, _) do
     changeset = Accounts.change_user(%User{})
     maybe_user = Guardian.Plug.current_resource(conn)
+
     if maybe_user do
       redirect(conn, to: Routes.page_path(conn, :index))
     else
@@ -21,25 +22,33 @@ defmodule AeCanaryWeb.SessionController do
 
   def logout(conn, _) do
     conn
-    |> Guardian.Plug.sign_out() #This module's full name is AeCanaryWeb.Accounts.Guardian.Plug,
-    |> redirect(to: "/login")   #and the arguments specfied in the Guardian.Plug.sign_out()
-  end                           #docs are not applicable here
+    # This module's full name is AeCanaryWeb.Accounts.Guardian.Plug,
+    |> Guardian.Plug.sign_out()
+    # and the arguments specfied in the Guardian.Plug.sign_out()
+    |> redirect(to: "/login")
+  end
+
+  # docs are not applicable here
 
   defp login_reply({:ok, %User{role: :archived}}, conn) do
     conn
     |> put_resp_content_type("text/plain")
     |> send_resp(403, "Your account had been blocked. Please contact support.")
   end
+
   defp login_reply({:ok, user}, conn) do
     conn
     |> put_flash(:info, "Welcome back, #{user.name}!")
-    |> Guardian.Plug.sign_in(user)                        #This module's full name is AeCanaryWeb.Accounts.Guardian.Plug,
-    |> redirect(to: Routes.page_path(conn, :index))   #and the arguments specified in the Guardian.Plug.sign_in()
-  end                                                     #docs are not applicable here.
+    # This module's full name is AeCanaryWeb.Accounts.Guardian.Plug,
+    |> Guardian.Plug.sign_in(user)
+    # and the arguments specified in the Guardian.Plug.sign_in()
+    |> redirect(to: Routes.page_path(conn, :index))
+  end
+
+  # docs are not applicable here.
   defp login_reply({:error, reason}, conn) do
     conn
     |> put_flash(:error, to_string(reason))
     |> new(%{})
   end
 end
-

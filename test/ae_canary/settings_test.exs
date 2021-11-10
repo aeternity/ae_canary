@@ -7,7 +7,12 @@ defmodule AeCanary.SettingsTest do
     alias AeCanary.Settings.Dashboard
 
     @valid_attrs %{active: true, title: "some title", message: "some message", state: "normal"}
-    @update_attrs %{active: false, title: "some updated title", message: "some updated message", state: "warning"}
+    @update_attrs %{
+      active: false,
+      title: "some updated title",
+      message: "some updated message",
+      state: "warning"
+    }
     @invalid_attrs %{active: nil, title: nil, message: nil, state: nil}
 
     def dashboard_fixture(attrs \\ %{}) do

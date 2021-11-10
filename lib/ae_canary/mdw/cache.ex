@@ -1,10 +1,10 @@
 defmodule AeCanary.Mdw.Cache do
-
   defmodule State do
     defstruct new_data: %{}
+
     @type t() :: %__MODULE__{
-      new_data: Map.t
-      }
+            new_data: Map.t()
+          }
   end
 
   # Callbacks

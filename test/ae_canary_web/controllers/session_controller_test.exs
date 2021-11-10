@@ -13,7 +13,11 @@ defmodule AeCanaryWeb.SessionControllerTest do
     end
 
     test "Successful login", %{conn: conn, user: user} do
-      conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: Helper.default_password})
+      conn =
+        post(conn, Routes.session_path(conn, :login),
+          user: %{email: user.email, password: Helper.default_password()}
+        )
+
       assert redirected_to(conn) == Routes.page_path(conn, :index)
       conn = get(conn, Routes.page_path(conn, :index))
       assert html_response(conn, 200) =~ "Internal dashboard"
@@ -21,14 +25,23 @@ defmodule AeCanaryWeb.SessionControllerTest do
 
     test "Unsuccessful login", %{conn: conn, user: user} do
       wrong_pass = "some wrong pass"
-      assert Helper.default_password != wrong_pass
-      conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: wrong_pass})
-      assert get_flash(conn, :error) == "invalid_credentials" 
+      assert Helper.default_password() != wrong_pass
+
+      conn =
+        post(conn, Routes.session_path(conn, :login),
+          user: %{email: user.email, password: wrong_pass}
+        )
+
+      assert get_flash(conn, :error) == "invalid_credentials"
       assert html_response(conn, 200) =~ "Login Page"
     end
 
     test "Logout", %{conn: conn, user: user} do
-      conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: Helper.default_password})
+      conn =
+        post(conn, Routes.session_path(conn, :login),
+          user: %{email: user.email, password: Helper.default_password()}
+        )
+
       conn = get(conn, Routes.session_path(conn, :logout))
       assert redirected_to(conn) == Routes.session_path(conn, :new)
       conn = get(conn, Routes.session_path(conn, :new))
@@ -45,7 +58,11 @@ defmodule AeCanaryWeb.SessionControllerTest do
     end
 
     test "Successful login", %{conn: conn, user: user} do
-      conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: Helper.default_password})
+      conn =
+        post(conn, Routes.session_path(conn, :login),
+          user: %{email: user.email, password: Helper.default_password()}
+        )
+
       assert redirected_to(conn) == Routes.page_path(conn, :index)
       conn = get(conn, Routes.page_path(conn, :index))
       assert html_response(conn, 200) =~ "Internal dashboard"
@@ -53,14 +70,23 @@ defmodule AeCanaryWeb.SessionControllerTest do
 
     test "Unsuccessful login", %{conn: conn, user: user} do
       wrong_pass = "some wrong pass"
-      assert Helper.default_password != wrong_pass
-      conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: wrong_pass})
-      assert get_flash(conn, :error) == "invalid_credentials" 
+      assert Helper.default_password() != wrong_pass
+
+      conn =
+        post(conn, Routes.session_path(conn, :login),
+          user: %{email: user.email, password: wrong_pass}
+        )
+
+      assert get_flash(conn, :error) == "invalid_credentials"
       assert html_response(conn, 200) =~ "Login Page"
     end
 
     test "Logout", %{conn: conn, user: user} do
-      conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: Helper.default_password})
+      conn =
+        post(conn, Routes.session_path(conn, :login),
+          user: %{email: user.email, password: Helper.default_password()}
+        )
+
       conn = get(conn, Routes.session_path(conn, :logout))
       assert redirected_to(conn) == Routes.session_path(conn, :new)
       conn = get(conn, Routes.session_path(conn, :new))
@@ -77,18 +103,25 @@ defmodule AeCanaryWeb.SessionControllerTest do
     end
 
     test "Successful login", %{conn: conn, user: user} do
-      conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: Helper.default_password})
+      conn =
+        post(conn, Routes.session_path(conn, :login),
+          user: %{email: user.email, password: Helper.default_password()}
+        )
+
       assert response(conn, 403) =~ "Your account had been blocked. Please contact support."
     end
 
     test "Unsuccessful login", %{conn: conn, user: user} do
       wrong_pass = "some wrong pass"
-      assert Helper.default_password != wrong_pass
-      conn = post(conn, Routes.session_path(conn, :login), user: %{email: user.email, password: wrong_pass})
-      assert get_flash(conn, :error) == "invalid_credentials" 
+      assert Helper.default_password() != wrong_pass
+
+      conn =
+        post(conn, Routes.session_path(conn, :login),
+          user: %{email: user.email, password: wrong_pass}
+        )
+
+      assert get_flash(conn, :error) == "invalid_credentials"
       assert html_response(conn, 200) =~ "Login Page"
     end
   end
-
-
 end

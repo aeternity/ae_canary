@@ -1,5 +1,5 @@
 defmodule AeCanary.Mdw do
- @timeout 60000
+  @timeout 60000
 
   def poolboy_spec do
     [
@@ -16,15 +16,14 @@ defmodule AeCanary.Mdw do
       fn pid ->
         AeCanary.Mdw.Worker.exec(pid, fetch_fun)
       end,
-      @timeout)
+      @timeout
+    )
   end
 
   def async_fetch(fetch_fun, callback) do
-    Task.start_link(
-      fn ->
-        res = fetch(fetch_fun)
-        callback.(res)
-      end)
+    Task.start_link(fn ->
+      res = fetch(fetch_fun)
+      callback.(res)
+    end)
   end
-
 end

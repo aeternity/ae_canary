@@ -58,7 +58,9 @@ defmodule AeCanaryWeb.Exchanges.ExchangeControllerTest do
     setup [:create_exchange]
 
     test "redirects when data is valid", %{conn: conn, exchange: exchange} do
-      conn = put(conn, Routes.exchanges_exchange_path(conn, :update, exchange), exchange: @update_attrs)
+      conn =
+        put(conn, Routes.exchanges_exchange_path(conn, :update, exchange), exchange: @update_attrs)
+
       assert redirected_to(conn) == Routes.exchanges_exchange_path(conn, :show, exchange)
 
       conn = get(conn, Routes.exchanges_exchange_path(conn, :show, exchange))
@@ -66,7 +68,11 @@ defmodule AeCanaryWeb.Exchanges.ExchangeControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, exchange: exchange} do
-      conn = put(conn, Routes.exchanges_exchange_path(conn, :update, exchange), exchange: @invalid_attrs)
+      conn =
+        put(conn, Routes.exchanges_exchange_path(conn, :update, exchange),
+          exchange: @invalid_attrs
+        )
+
       assert html_response(conn, 200) =~ "Edit Exchange"
     end
   end
@@ -77,6 +83,7 @@ defmodule AeCanaryWeb.Exchanges.ExchangeControllerTest do
     test "deletes chosen exchange", %{conn: conn, exchange: exchange} do
       conn = delete(conn, Routes.exchanges_exchange_path(conn, :delete, exchange))
       assert redirected_to(conn) == Routes.exchanges_exchange_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.exchanges_exchange_path(conn, :show, exchange))
       end

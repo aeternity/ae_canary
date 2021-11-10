@@ -6,9 +6,30 @@ defmodule AeCanary.TaintedAccountsTest do
   describe "accounts" do
     alias AeCanary.TaintedAccounts.Account
 
-    @valid_attrs %{addr: "some addr", amount: 42, comment: "some comment", from_height: 42, last_tx_height: 42, white_listed: true}
-    @update_attrs %{addr: "some updated addr", amount: 43, comment: "some updated comment", from_height: 43, last_tx_height: 43, white_listed: false}
-    @invalid_attrs %{addr: nil, amount: nil, comment: nil, from_height: nil, last_tx_height: nil, white_listed: nil}
+    @valid_attrs %{
+      addr: "some addr",
+      amount: 42,
+      comment: "some comment",
+      from_height: 42,
+      last_tx_height: 42,
+      white_listed: true
+    }
+    @update_attrs %{
+      addr: "some updated addr",
+      amount: 43,
+      comment: "some updated comment",
+      from_height: 43,
+      last_tx_height: 43,
+      white_listed: false
+    }
+    @invalid_attrs %{
+      addr: nil,
+      amount: nil,
+      comment: nil,
+      from_height: nil,
+      last_tx_height: nil,
+      white_listed: nil
+    }
 
     def account_fixture(attrs \\ %{}) do
       {:ok, account} =

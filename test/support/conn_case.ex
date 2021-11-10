@@ -41,12 +41,12 @@ defmodule AeCanaryWeb.ConnCase do
   @signing_opts Plug.Session.init(Keyword.put(@default_opts, :encrypt, false))
 
   @create_attrs %{
-          comment: "some comment",
-          email: "some email",
-          name: "some name",
-          pass_hash: "some pass_hash",
-          role: "admin"
-        }
+    comment: "some comment",
+    email: "some email",
+    name: "some name",
+    pass_hash: "some pass_hash",
+    role: "admin"
+  }
 
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(AeCanary.Repo)
@@ -57,7 +57,6 @@ defmodule AeCanaryWeb.ConnCase do
 
     {conn, user} =
       if tags[:authenticated] do
-
         {:ok, user} = AeCanary.Accounts.create_user(@create_attrs)
 
         conn =

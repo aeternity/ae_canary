@@ -63,7 +63,7 @@ defmodule AeCanaryWeb.DashboardController do
   def toggle_active(conn, %{"id" => id}) do
     dashboard = Settings.get_dashboard!(id)
 
-    case Settings.update_dashboard(dashboard, %{active: ! dashboard.active}) do
+    case Settings.update_dashboard(dashboard, %{active: !dashboard.active}) do
       {:ok, _dashboard} ->
         conn
         |> redirect(to: Routes.dashboard_path(conn, :index))

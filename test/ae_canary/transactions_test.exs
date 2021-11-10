@@ -6,9 +6,30 @@ defmodule AeCanary.TransactionsTest do
   describe "spend_txs" do
     alias AeCanary.Transactions.Spend
 
-    @valid_attrs %{amount: 42, fee: 42, hash: "some hash", nonce: 42, recipient_id: "some recipient_id", sender_id: "some sender_id"}
-    @update_attrs %{amount: 43, fee: 43, hash: "some updated hash", nonce: 43, recipient_id: "some updated recipient_id", sender_id: "some updated sender_id"}
-    @invalid_attrs %{amount: nil, fee: nil, hash: nil, nonce: nil, recipient_id: nil, sender_id: nil}
+    @valid_attrs %{
+      amount: 42,
+      fee: 42,
+      hash: "some hash",
+      nonce: 42,
+      recipient_id: "some recipient_id",
+      sender_id: "some sender_id"
+    }
+    @update_attrs %{
+      amount: 43,
+      fee: 43,
+      hash: "some updated hash",
+      nonce: 43,
+      recipient_id: "some updated recipient_id",
+      sender_id: "some updated sender_id"
+    }
+    @invalid_attrs %{
+      amount: nil,
+      fee: nil,
+      hash: nil,
+      nonce: nil,
+      recipient_id: nil,
+      sender_id: nil
+    }
 
     def spend_fixture(attrs \\ %{}) do
       {:ok, spend} =
@@ -75,8 +96,18 @@ defmodule AeCanary.TransactionsTest do
   describe "location" do
     alias AeCanary.Transactions.Location
 
-    @valid_attrs %{block_hash: "some block_hash", block_height: 100, micro_time: "2010-04-17T14:00:00Z", tx_hash: "some tx_hash"}
-    @update_attrs %{block_hash: "some updated block_hash", block_height: 101, micro_time: "2011-05-18T15:01:01Z", tx_hash: "some updated tx_hash"}
+    @valid_attrs %{
+      block_hash: "some block_hash",
+      block_height: 100,
+      micro_time: "2010-04-17T14:00:00Z",
+      tx_hash: "some tx_hash"
+    }
+    @update_attrs %{
+      block_hash: "some updated block_hash",
+      block_height: 101,
+      micro_time: "2011-05-18T15:01:01Z",
+      tx_hash: "some updated tx_hash"
+    }
     @invalid_attrs %{block_hash: nil, block_height: nil, micro_time: nil, tx_hash: nil}
 
     def location_fixture(attrs \\ %{}) do

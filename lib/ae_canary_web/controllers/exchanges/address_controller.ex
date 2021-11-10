@@ -19,7 +19,6 @@ defmodule AeCanaryWeb.Exchanges.AddressController do
     render(conn, "new.html", changeset: changeset)
   end
 
-
   def create(conn, %{"address" => address_params}) do
     case Exchanges.create_address(address_params) do
       {:ok, address} ->

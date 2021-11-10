@@ -8,6 +8,5 @@ defmodule AeCanary.Repo.Migrations.ImproveDashboardMsgs do
       add :is_public, :boolean
       add :footer, :string
     end
-
   end
 end

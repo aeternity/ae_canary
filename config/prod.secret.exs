@@ -28,8 +28,7 @@ db_db =
     environment variable POSTGRES_DBis missing.
     """
 
-database_url =
-  "ecto://#{db_user}:#{db_pass}@#{db_host}/#{db_db}"
+database_url = "ecto://#{db_user}:#{db_pass}@#{db_host}/#{db_db}"
 
 guardian_secret_key =
   System.get_env("GUARDIAN_SECRET_KEY") ||
@@ -80,8 +79,9 @@ defmodule AeCanary.Config.Helpers do
     end
   end
 
-  def get_env_bool(key, default) when default == "true" or
-                                      default == "false" do
+  def get_env_bool(key, default)
+      when default == "true" or
+             default == "false" do
     case System.get_env(key, default) do
       "true" -> true
       "false" -> false
@@ -97,8 +97,7 @@ config :ae_canary, AeCanaryWeb.Endpoint,
   ],
   secret_key_base: secret_key_base
 
-config :ae_canary, AeCanary.Accounts.Guardian,
-  secret_key: guardian_secret_key
+config :ae_canary, AeCanary.Accounts.Guardian, secret_key: guardian_secret_key
 
 config :ae_canary,
   mdw_url: mdw_url,
@@ -113,18 +112,25 @@ config :ae_canary, AeCanary.Mailer,
 alias AeCanary.Config.Helpers, as: H
 
 iqr_lower_boundary_multiplier = H.get_env_float("EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER", "1.5")
-iqr_upper_boundary_multiplier =  H.get_env_float("EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER", "3")
+iqr_upper_boundary_multiplier = H.get_env_float("EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER", "3")
+
 case iqr_upper_boundary_multiplier < iqr_lower_boundary_multiplier do
-  true -> raise "EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER must be greater than EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER"
-  false -> :pass
+  true ->
+    raise "EXCHANGES_IQR_UPPER_BOUNDARY_MULTILPLIER must be greater than EXCHANGES_IQR_LOWER_BOUNDARY_MULTILPLIER"
+
+  false ->
+    :pass
 end
 
 config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
   stats_interval_in_days: H.get_env_integer("EXCHANGES_STATS_INTERVAL", "30"),
   show_alerts_interval_in_days: H.get_env_integer("EXCHANGES_ALERTS_INTERVAL", "7"),
-  has_transactions_in_the_past_days_interval: H.get_env_integer("EXCHANGES_HAS_TXS_INTERVAL", "7"),
-  suspicious_deposits_threshold: H.get_env_integer("EXCHANGES_SUSPICIOUS_DEPOSIT_THRESHOLD", "500_000"),
-  iqr_use_positive_exposure_only: H.get_env_bool("EXCHANGES_IQR_USE_POSITIVE_EXPOSURE_ONLY", "true"),
+  has_transactions_in_the_past_days_interval:
+    H.get_env_integer("EXCHANGES_HAS_TXS_INTERVAL", "7"),
+  suspicious_deposits_threshold:
+    H.get_env_integer("EXCHANGES_SUSPICIOUS_DEPOSIT_THRESHOLD", "500_000"),
+  iqr_use_positive_exposure_only:
+    H.get_env_bool("EXCHANGES_IQR_USE_POSITIVE_EXPOSURE_ONLY", "true"),
   iqr_lower_boundary_multiplier: iqr_lower_boundary_multiplier,
   iqr_upper_boundary_multiplier: iqr_upper_boundary_multiplier
 

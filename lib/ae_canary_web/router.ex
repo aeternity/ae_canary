@@ -28,7 +28,6 @@ defmodule AeCanaryWeb.Router do
     plug AeCanaryWeb.Accounts.CheckAdmin
   end
 
-
   # Maybe logged in routes
   scope "/", AeCanaryWeb do
     pipe_through [:browser, :auth]
@@ -70,21 +69,21 @@ defmodule AeCanaryWeb.Router do
         resources "/addresses", AddressController
         get "/addresses/new/:exchange_id", AddressController, :new_by_exchange
       end
-    scope "/transactions", Transactions, as: :transactions do
-      resources "/spend", SpendController
-      resources "/location", LocationController
-      get "/delete", SpendController, :delete_all
-    end
 
-    scope "/tainted", TaintedAccounts, as: :tainted_accounts do
-      resources "/accounts", AccountController
-    end
+      scope "/transactions", Transactions, as: :transactions do
+        resources "/spend", SpendController
+        resources "/location", LocationController
+        get "/delete", SpendController, :delete_all
+      end
 
-    scope "/settings" do
-      resources "/dashboard", DashboardController
-      get "/dashboard/:id/toggle", DashboardController, :toggle_active
-    end
+      scope "/tainted", TaintedAccounts, as: :tainted_accounts do
+        resources "/accounts", AccountController
+      end
 
+      scope "/settings" do
+        resources "/dashboard", DashboardController
+        get "/dashboard/:id/toggle", DashboardController, :toggle_active
+      end
     end
   end
 

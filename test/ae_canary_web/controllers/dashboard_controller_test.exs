@@ -6,7 +6,12 @@ defmodule AeCanaryWeb.DashboardControllerTest do
   @moduletag :authenticated
 
   @create_attrs %{active: true, title: "some title", message: "some message", state: "normal"}
-  @update_attrs %{active: false, title: "some updated title", message: "some updated message", state: "warning"}
+  @update_attrs %{
+    active: false,
+    title: "some updated title",
+    message: "some updated message",
+    state: "warning"
+  }
   @invalid_attrs %{active: nil, title: nil, message: nil, state: nil}
 
   def fixture(:dashboard) do
@@ -77,6 +82,7 @@ defmodule AeCanaryWeb.DashboardControllerTest do
     test "deletes chosen dashboard", %{conn: conn, dashboard: dashboard} do
       conn = delete(conn, Routes.dashboard_path(conn, :delete, dashboard))
       assert redirected_to(conn) == Routes.dashboard_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.dashboard_path(conn, :show, dashboard))
       end
