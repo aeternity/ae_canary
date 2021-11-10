@@ -72,8 +72,7 @@ defmodule AeCanary.Notifications do
   def list_idle_events(event_type, lastBlock) do
     query =
       from n in Notification,
-        where:
-          n.event_type == ^event_type and n.addr == ^lastBlock
+        where: n.event_type == ^event_type and n.addr == ^lastBlock
 
     Repo.all(query)
   end
