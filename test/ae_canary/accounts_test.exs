@@ -56,6 +56,11 @@ defmodule AeCanary.AccountsTest do
       Enum.each(@valid_user_roles, test_role)
     end
 
+    test "create_user/1 with duplicated email return error changeset" do
+      assert {:ok, %User{}} = Accounts.create_user(@valid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Accounts.create_user(@valid_attrs)
+    end
+
     test "create_user/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Accounts.create_user(@invalid_attrs)
 
