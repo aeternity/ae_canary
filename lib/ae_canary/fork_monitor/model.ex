@@ -132,7 +132,7 @@ defmodule AeCanary.ForkMonitor.Model do
 
   def extend_fork(topHash, start_index, length) do
     block = AeCanary.ForkMonitor.Model.get_block!(topHash)
-    end_index = start_index+length
+    end_index = start_index + length
     indexes = start_index..end_index
     newForkPrefix = String.slice(topHash, 0, String.length(topHash) - 8) <> "----"
     inject_blocks(newForkPrefix, topHash, block.height + 1, indexes)

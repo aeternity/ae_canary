@@ -53,7 +53,7 @@ defmodule AeCanary.MixProject do
       {:poison, "~> 3.1"},
       {:timex, "~> 3.7"},
       {:uuid, "~> 1.1"},
-      { :statistics, "~> 0.6.2"},
+      {:statistics, "~> 0.6.2"},
       {:bamboo, "~> 2.2.0"}
     ]
   end

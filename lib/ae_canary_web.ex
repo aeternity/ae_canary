@@ -74,13 +74,13 @@ defmodule AeCanaryWeb do
         Timex.now()
         |> Timex.diff(timex_tmst, :second)
         |> Timex.Duration.from_seconds()
-        |> Timex.Format.Duration.Formatters.Humanized.format
+        |> Timex.Format.Duration.Formatters.Humanized.format()
       end
 
       def format_milliseconds(milliseconds) do
         milliseconds
         |> Timex.Duration.from_milliseconds()
-        |> Timex.Format.Duration.Formatters.Humanized.format
+        |> Timex.Format.Duration.Formatters.Humanized.format()
       end
 
       def is_admin(user), do: user.role == :admin

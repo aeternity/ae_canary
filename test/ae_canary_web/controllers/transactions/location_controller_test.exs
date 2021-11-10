@@ -5,8 +5,18 @@ defmodule AeCanaryWeb.Transactions.LocationControllerTest do
 
   @moduletag :authenticated
 
-  @create_attrs %{block_hash: "some block_hash", block_height: 100, micro_time: "2010-04-17T14:00:00Z", tx_hash: "some tx_hash"}
-  @update_attrs %{block_hash: "some updated block_hash", block_height: 101, micro_time: "2011-05-18T15:01:01Z", tx_hash: "some updated tx_hash"}
+  @create_attrs %{
+    block_hash: "some block_hash",
+    block_height: 100,
+    micro_time: "2010-04-17T14:00:00Z",
+    tx_hash: "some tx_hash"
+  }
+  @update_attrs %{
+    block_hash: "some updated block_hash",
+    block_height: 101,
+    micro_time: "2011-05-18T15:01:01Z",
+    tx_hash: "some updated tx_hash"
+  }
   @invalid_attrs %{block_hash: nil, block_height: nil, micro_time: nil, tx_hash: nil}
 
   def fixture(:location) do
@@ -40,7 +50,9 @@ defmodule AeCanaryWeb.Transactions.LocationControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.transactions_location_path(conn, :create), location: @invalid_attrs)
+      conn =
+        post(conn, Routes.transactions_location_path(conn, :create), location: @invalid_attrs)
+
       assert html_response(conn, 200) =~ "New Location"
     end
   end
@@ -58,7 +70,11 @@ defmodule AeCanaryWeb.Transactions.LocationControllerTest do
     setup [:create_location]
 
     test "redirects when data is valid", %{conn: conn, location: location} do
-      conn = put(conn, Routes.transactions_location_path(conn, :update, location), location: @update_attrs)
+      conn =
+        put(conn, Routes.transactions_location_path(conn, :update, location),
+          location: @update_attrs
+        )
+
       assert redirected_to(conn) == Routes.transactions_location_path(conn, :show, location)
 
       conn = get(conn, Routes.transactions_location_path(conn, :show, location))
@@ -66,7 +82,11 @@ defmodule AeCanaryWeb.Transactions.LocationControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, location: location} do
-      conn = put(conn, Routes.transactions_location_path(conn, :update, location), location: @invalid_attrs)
+      conn =
+        put(conn, Routes.transactions_location_path(conn, :update, location),
+          location: @invalid_attrs
+        )
+
       assert html_response(conn, 200) =~ "Edit Location"
     end
   end
@@ -77,6 +97,7 @@ defmodule AeCanaryWeb.Transactions.LocationControllerTest do
     test "deletes chosen location", %{conn: conn, location: location} do
       conn = delete(conn, Routes.transactions_location_path(conn, :delete, location))
       assert redirected_to(conn) == Routes.transactions_location_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.transactions_location_path(conn, :show, location))
       end

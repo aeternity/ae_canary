@@ -5,9 +5,27 @@ defmodule AeCanaryWeb.UserControllerTest do
   alias AeCanary.TestHelper, as: Helper
   import Helper, only: [create_user: 1, create_admin: 1, login: 1]
 
-  @create_test_attrs %{comment: "test comment", email: "test email", name: "test name", pass_hash: "test pass_hash", role: "user"}
-  @create_attrs %{comment: "some comment", email: "some email", name: "some name", pass_hash: "some pass_hash", role: "admin"}
-  @update_attrs %{comment: "some updated comment", email: "some updated email", name: "some updated name", pass_hash: "some updated pass_hash", role: "user"}
+  @create_test_attrs %{
+    comment: "test comment",
+    email: "test email",
+    name: "test name",
+    pass_hash: "test pass_hash",
+    role: "user"
+  }
+  @create_attrs %{
+    comment: "some comment",
+    email: "some email",
+    name: "some name",
+    pass_hash: "some pass_hash",
+    role: "admin"
+  }
+  @update_attrs %{
+    comment: "some updated comment",
+    email: "some updated email",
+    name: "some updated name",
+    pass_hash: "some updated pass_hash",
+    role: "user"
+  }
   @invalid_attrs %{comment: nil, email: nil, name: nil, pass_hash: nil, role: nil}
 
   def fixture(:user) do
@@ -17,6 +35,7 @@ defmodule AeCanaryWeb.UserControllerTest do
 
   describe "Admin user has full access" do
     setup [:create_admin, :create_test_user, :login]
+
     test "lists all users", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Users"
@@ -63,6 +82,7 @@ defmodule AeCanaryWeb.UserControllerTest do
     test "deletes user", %{conn: conn, test_user: user} do
       conn = delete(conn, Routes.user_path(conn, :delete, user))
       assert redirected_to(conn) == Routes.user_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.user_path(conn, :show, user))
       end
@@ -71,6 +91,7 @@ defmodule AeCanaryWeb.UserControllerTest do
 
   describe "Regular user has no access" do
     setup [:create_user, :create_test_user, :login]
+
     test "lists all users", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :index))
       assert response(conn, 401) =~ "unauthorized"
@@ -114,6 +135,7 @@ defmodule AeCanaryWeb.UserControllerTest do
 
   describe "Not logged  users have no access" do
     setup [:create_test_user]
+
     test "lists all users", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :index))
       assert response(conn, 401) =~ "unauthenticated"

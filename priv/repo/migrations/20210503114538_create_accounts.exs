@@ -3,6 +3,7 @@ defmodule AeCanary.Repo.Migrations.CreateAccounts do
 
   def change do
     execute "CREATE SCHEMA tainted_accounts"
+
     create table(:accounts, prefix: "tainted_accounts") do
       add :addr, :string
       add :from_height, :integer
@@ -13,6 +14,5 @@ defmodule AeCanary.Repo.Migrations.CreateAccounts do
 
       timestamps()
     end
-
   end
 end

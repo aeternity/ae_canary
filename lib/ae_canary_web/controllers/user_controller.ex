@@ -16,11 +16,13 @@ defmodule AeCanaryWeb.UserController do
 
   def create(conn, %{"user" => user_params}) do
     null_val = Integer.to_string(AeCanaryWeb.UserView.all_exchanges_placeholder_value())
+
     user_params =
       case user_params do
         %{"exchange_view_id" => ^null_val} -> Map.put(user_params, "exchange_view_id", nil)
         _ -> user_params
       end
+
     case Accounts.create_user(user_params) do
       {:ok, user} ->
         conn
@@ -57,7 +59,15 @@ defmodule AeCanaryWeb.UserController do
   def update_my(conn, %{"user" => user_params}) do
     user = current_user(conn)
 
-    sanitized_params = Map.take(user_params, ["name", "email", "email_boundaries", "email_big_deposits", "email_large_forks"])
+    sanitized_params =
+      Map.take(user_params, [
+        "name",
+        "email",
+        "email_boundaries",
+        "email_big_deposits",
+        "email_large_forks"
+      ])
+
     case Accounts.update_user(user, sanitized_params) do
       {:ok, _user} ->
         conn
@@ -72,11 +82,13 @@ defmodule AeCanaryWeb.UserController do
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = Accounts.get_user!(id)
     null_val = Integer.to_string(AeCanaryWeb.UserView.all_exchanges_placeholder_value())
+
     user_params =
       case user_params do
         %{"exchange_view_id" => ^null_val} -> Map.put(user_params, "exchange_view_id", nil)
         _ -> user_params
       end
+
     case Accounts.update_user(user, user_params) do
       {:ok, user} ->
         conn
@@ -109,7 +121,6 @@ defmodule AeCanaryWeb.UserController do
     render(conn, "set_password.html", user: user, changeset: changeset, my_account: true)
   end
 
-
   def set_password(conn, %{"id" => user_id, "user" => %{"password" => password}}) do
     user = Accounts.get_user!(user_id)
 
@@ -138,9 +149,7 @@ defmodule AeCanaryWeb.UserController do
     end
   end
 
-
   defp current_user(conn) do
     Map.get(conn.assigns, :current_user)
   end
-
 end

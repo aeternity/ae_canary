@@ -8,7 +8,13 @@ defmodule AeCanary.TestHelper do
 
   @email "joe@doe.com"
   @password "some password"
-  @create_user_attrs %{comment: "Good guy Joe", email: @email, name: "Joe Doe", password: @password, role: "user"}
+  @create_user_attrs %{
+    comment: "Good guy Joe",
+    email: @email,
+    name: "Joe Doe",
+    password: @password,
+    role: "user"
+  }
 
   def create_user_(attrs), do: create_account("user", attrs)
 
@@ -23,15 +29,18 @@ defmodule AeCanary.TestHelper do
   def create_archived_user(_), do: create_archived_user_(%{})
 
   defp create_account(role, attrs) do
-      {:ok, user} =
-        attrs 
-        |> Enum.into(%{@create_user_attrs| role: role})
-        |> Accounts.create_user()
+    {:ok, user} =
+      attrs
+      |> Enum.into(%{@create_user_attrs | role: role})
+      |> Accounts.create_user()
+
     %{user: user}
   end
 
   def login(%{conn: conn}) do
-    conn = post(conn, Routes.session_path(conn, :login), user: %{email: @email, password: @password})
+    conn =
+      post(conn, Routes.session_path(conn, :login), user: %{email: @email, password: @password})
+
     %{conn: conn}
   end
 

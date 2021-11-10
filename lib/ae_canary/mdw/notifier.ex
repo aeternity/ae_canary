@@ -75,22 +75,22 @@ defmodule AeCanary.Mdw.Notifier do
     ## will be sent to all users. This ought to be quite a rare event.....
 
     Enum.each(interested_users, fn %User{} = user ->
-        case AeCanary.Email.fork_notification_email(user, forkPoint, forks)
-             |> AeCanary.Mailer.deliver_now(response: true) do
-          {:ok, _, _} ->
-            Logger.info(
-              "Email notification submitted to #{user.email} for Fork detection event from fork #{forkPoint}"
-            )
+      case AeCanary.Email.fork_notification_email(user, forkPoint, forks)
+           |> AeCanary.Mailer.deliver_now(response: true) do
+        {:ok, _, _} ->
+          Logger.info(
+            "Email notification submitted to #{user.email} for Fork detection event from fork #{forkPoint}"
+          )
 
-            true
+          true
 
-          {:error, _} ->
-            Logger.error(
-              "Email notification failed to #{user.email} for Fork detection event from fork #{forkPoint}"
-            )
+        {:error, _} ->
+          Logger.error(
+            "Email notification failed to #{user.email} for Fork detection event from fork #{forkPoint}"
+          )
 
-            false
-        end
+          false
+      end
     end)
   end
 

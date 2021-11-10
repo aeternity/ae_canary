@@ -7,12 +7,14 @@ defmodule AeCanary.Mdw.Cache.Service.Status do
               node_height: 0,
               node_syncing: false,
               mdw_synced: false
+
     @type t() :: %__MODULE__{
-      mdw_version: String.t,
-      node_version: String.t,
-      node_height: integer(),
-      node_syncing: boolean(),
-      mdw_synced: boolean()}
+            mdw_version: String.t(),
+            node_version: String.t(),
+            node_height: integer(),
+            node_syncing: boolean(),
+            mdw_synced: boolean()
+          }
   end
 
   @impl true

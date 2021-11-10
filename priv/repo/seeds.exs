@@ -13,7 +13,28 @@
 alias AeCanary.Accounts
 
 Enum.each(
-  [ %{email: "admin", password: "admin", name: "Admin", comment: "This is a test admin account", role: :admin},
-    %{email: "user", password: "user", name: "User", comment: "This is a test user account", role: :user},
-    %{email: "archived", password: "archived", name: "User", comment: "This is a test archived account", role: :archived}],
-  &Accounts.create_user/1)
+  [
+    %{
+      email: "admin",
+      password: "admin",
+      name: "Admin",
+      comment: "This is a test admin account",
+      role: :admin
+    },
+    %{
+      email: "user",
+      password: "user",
+      name: "User",
+      comment: "This is a test user account",
+      role: :user
+    },
+    %{
+      email: "archived",
+      password: "archived",
+      name: "User",
+      comment: "This is a test archived account",
+      role: :archived
+    }
+  ],
+  &Accounts.create_user/1
+)

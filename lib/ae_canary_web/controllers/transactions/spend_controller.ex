@@ -62,6 +62,7 @@ defmodule AeCanaryWeb.Transactions.SpendController do
 
   def delete_all(conn, _) do
     Transactions.delete_all()
+
     conn
     |> put_flash(:info, "All transactions deleted successfully.")
     |> redirect(to: Routes.page_path(conn, :index))

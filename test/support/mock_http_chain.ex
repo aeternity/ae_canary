@@ -43,10 +43,19 @@ defmodule AeCanary.MockHTTPChain do
   defp get_block("end-main-7"), do: %{height: 7, hash: "end-main-7", prev_key_hash: "end-main-8"}
   defp get_block("end-main-8"), do: %{height: 6, hash: "end-main-8", prev_key_hash: "end-main-9"}
   defp get_block("end-main-9"), do: %{height: 5, hash: "end-main-9", prev_key_hash: "end-main-10"}
-  defp get_block("end-main-10"), do: %{height: 4, hash: "end-main-10", prev_key_hash: "end-main-11"}
-  defp get_block("end-main-11"), do: %{height: 3, hash: "end-main-11", prev_key_hash: "end-main-12"}
-  defp get_block("end-main-12"), do: %{height: 2, hash: "end-main-12", prev_key_hash: "end-main-13"}
-  defp get_block("end-main-13"), do: %{height: 1, hash: "end-main-13", prev_key_hash: "end-main-14"}
+
+  defp get_block("end-main-10"),
+    do: %{height: 4, hash: "end-main-10", prev_key_hash: "end-main-11"}
+
+  defp get_block("end-main-11"),
+    do: %{height: 3, hash: "end-main-11", prev_key_hash: "end-main-12"}
+
+  defp get_block("end-main-12"),
+    do: %{height: 2, hash: "end-main-12", prev_key_hash: "end-main-13"}
+
+  defp get_block("end-main-13"),
+    do: %{height: 1, hash: "end-main-13", prev_key_hash: "end-main-14"}
+
   defp get_block("end-main-14"), do: %{height: 0, hash: "end-main-14", prev_key_hash: ""}
   ## It's the end
   defp get_block(_), do: false

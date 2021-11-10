@@ -5,8 +5,7 @@ defmodule AeCanaryWeb.Exchanges.AddressView do
 
   def dropdown_values() do
     AeCanary.Exchanges.list_exchanges()
-    |> Enum.map(
-      fn %Exchange{id: id, name: name} -> {name, id} end)
+    |> Enum.map(fn %Exchange{id: id, name: name} -> {name, id} end)
     |> Enum.into(%{})
   end
 end
