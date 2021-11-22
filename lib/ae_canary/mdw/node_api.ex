@@ -2,6 +2,9 @@ defmodule AeCanary.Node.Api do
   @moduledoc """
   API for talking directly to an aeternity node rather than middleware
   """
+
+  def status(), do: get("v2/status")
+
   def current_generation() do
     get("v2/generations/current")
   end
