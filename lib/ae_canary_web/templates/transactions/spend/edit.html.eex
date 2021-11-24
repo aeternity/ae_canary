@@ -1,5 +1,0 @@
-<h1>Edit Spend</h1>
-
-<%= render "form.html", Map.put(assigns, :action, Routes.transactions_spend_path(@conn, :update, @spend)) %>
-
-<span><%= link "Back", to: Routes.transactions_spend_path(@conn, :index) %></span>

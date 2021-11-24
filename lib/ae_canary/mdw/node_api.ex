@@ -25,6 +25,10 @@ defmodule AeCanary.Node.Api do
     get("v2/micro-blocks/hash/" <> microblock_hash <> "/transactions/count")
   end
 
+  def transactions_in_microblock(microblock_hash) do
+    get("v2/micro-blocks/hash/" <> microblock_hash <> "/transactions")
+  end
+
   defp get(uri) do
     node = Application.fetch_env!(:ae_canary, :node_url)
 

@@ -17,30 +17,12 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
 
   @impl true
   def refresh(_) do
-    ## update DB
-    {:ok, %{node_height: top_height}} = Mdw.Api.status()
-    update_from = top_height - refresh_period_in_blocks()
-    update_to = top_height
     all_exchanges_and_addresses = Exchanges.list_exchanges_and_addresses()
-    update_DB(update_from, update_to, all_exchanges_and_addresses)
     update_start = DateTime.utc_now() |> DateTime.to_date()
     updates = refresh_from_db(update_start, all_exchanges_and_addresses)
     users = AeCanary.Accounts.list_users()
     AeCanary.Mdw.Notifier.send_notifications(updates.alerts_for_past_days, users)
     updates
-  end
-
-  defp update_DB(from, to, all_exchanges_and_addresses) do
-    all_exchanges_and_addresses
-    |> Enum.map(fn %{addresses: addresses} ->
-      Enum.map(
-        addresses,
-        fn address ->
-          Mdw.Api.incoming_spend_txs(address.addr, from, to)
-          Mdw.Api.outgoing_spend_txs(address.addr, from, to)
-        end
-      )
-    end)
   end
 
   defp refresh_from_db(update_start, all_exchanges_and_addresses) do
@@ -118,8 +100,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
               %{data: data, has_txs: has_txs} = Map.fetch!(addresses_and_data, a.addr)
 
               suspicious_deposits =
-                Transactions.list_locations_of_spend_txs_by(%{
-                  select: :tx_and_location,
+                Transactions.list_spend_txs_by(%{
                   recipient_id: a.addr,
                   date_from: Timex.shift(update_start, days: -1 * show_period_in_days()),
                   amount_at_least: suspicious_deposits_threshold()
@@ -229,7 +210,7 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
             deposits =
               d
               |> Enum.filter(
-                &(Date.compare(DateTime.to_date(&1.location.micro_time), seven_days_ago) != :lt)
+                &(Date.compare(DateTime.to_date(&1.micro_time), seven_days_ago) != :lt)
               )
 
             case Enum.empty?(deposits) and Enum.empty?(over_the_boundaries) do
@@ -257,8 +238,6 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
     %{exchanges: exchanges, alerts_for_past_days: alerts_for_past_days}
   end
 
-  defp one_day_in_blocks(), do: 20 * 24
-
   def show_period_in_days(), do: config(:stats_interval_in_days, 30)
 
   def alert_interval_in_days(), do: config(:show_alerts_interval_in_days, 7)
@@ -278,8 +257,6 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
       {:ok, v} -> Keyword.get(v, key, default)
     end
   end
-
-  defp refresh_period_in_blocks(), do: one_day_in_blocks() * show_period_in_days()
 
   defp upper_boundaries(list0) do
     list =
