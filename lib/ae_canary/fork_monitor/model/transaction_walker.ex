@@ -22,7 +22,7 @@ defmodule AeCanary.ForkMonitor.Model.TransactionWalker do
   def update_spend_transactions_from_chain_end(chainEnd) do
     topBlock = Model.get_block!(chainEnd)
     topHeight = topBlock.height
-    alwaysSyncAbove = topHeight - 101
+    alwaysSyncAbove = max(0, topHeight - 101)
 
     ## Get the 100 blocks below the chosen chainEnd and delete all blocks
     ## within the same height range that are not one of the chosen.
