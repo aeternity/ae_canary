@@ -31,6 +31,8 @@ defmodule AeCanary.ForkMonitor.Model do
     keyblocks_above_height(hash, height, [])
   end
 
+  defp keyblocks_above_height(nil, _, acc), do: Enum.reverse(acc)
+
   defp keyblocks_above_height(hash, height, acc) do
     block = get_block!(hash)
 

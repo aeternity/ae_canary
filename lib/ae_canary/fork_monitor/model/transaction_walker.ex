@@ -2,6 +2,8 @@ defmodule AeCanary.ForkMonitor.Model.TransactionWalker do
   require Logger
   alias AeCanary.ForkMonitor.Model
 
+  @always_sync_height 101
+
   @doc """
    Pull down SpendTx transactions from an aeternity node starting at the
    chain end and stopping when:
@@ -19,10 +21,10 @@ defmodule AeCanary.ForkMonitor.Model.TransactionWalker do
 
   Then sync the transactions in each keyblock to match the latest view of the node, deleting and adding as needed
   """
-  def update_spend_transactions_from_chain_end(chainEnd) do
+  def update_spend_transactions_from_chain_end(chainEnd, sync_height \\ @always_sync_height) do
     topBlock = Model.get_block!(chainEnd)
     topHeight = topBlock.height
-    alwaysSyncAbove = max(0, topHeight - 101)
+    alwaysSyncAbove = max(0, topHeight - sync_height)
 
     ## Get the 100 blocks below the chosen chainEnd and delete all blocks
     ## within the same height range that are not one of the chosen.
@@ -30,18 +32,15 @@ defmodule AeCanary.ForkMonitor.Model.TransactionWalker do
     |> Enum.map(fn b -> b.keyHash end)
     |> AeCanary.Transactions.delete_unattached_transactions_above_height(alwaysSyncAbove)
 
-    IO.inspect(topBlock, label: "insert_sync_transactions")
     insert_spend_transactions(topBlock, alwaysSyncAbove)
   end
 
   defp insert_spend_transactions(block, alwaysSyncAbove) do
     if block.height > alwaysSyncAbove do
-      IO.inspect(block.height, label: "insert_sync_transactionsX")
       sync_spend_transactions(block)
 
       if not is_nil(block.lastKeyHash) do
         nextBlock = Model.get_block!(block.lastKeyHash)
-        IO.inspect(nextBlock.keyHash, label: "insert_sync_transactionsY")
         insert_spend_transactions(nextBlock, alwaysSyncAbove)
       end
     else
@@ -50,11 +49,9 @@ defmodule AeCanary.ForkMonitor.Model.TransactionWalker do
       ## (this has the side effect of updating records with the old schema)
       case AeCanary.Transactions.any_transactions_in_keyblock?(block.keyHash) do
         true ->
-          IO.inspect(true, label: "any_transactions_in_keyblock? #{block.keyHash}")
           :ok
 
         false ->
-          IO.inspect(false, label: "create_spend_transactions")
           create_spend_transactions(block)
 
           if not is_nil(block.lastKeyHash) do
@@ -77,7 +74,6 @@ defmodule AeCanary.ForkMonitor.Model.TransactionWalker do
 
       Enum.each(spend_txs, fn tx ->
         spend_tx = AeCanary.Transactions.decode_spend!(tx, block.timestamp, block.keyHash)
-        ## IO.inspect(spend_tx, label: "Spend TX")
         {:ok, _} = AeCanary.Transactions.insert_spend(spend_tx)
       end)
     end)
@@ -116,7 +112,6 @@ defmodule AeCanary.ForkMonitor.Model.TransactionWalker do
 
       Enum.each(previously_unseen_txs, fn tx ->
         spend_tx = AeCanary.Transactions.decode_spend!(tx, block.timestamp, block.keyHash)
-        ## IO.inspect(spend_tx, label: "Spend TX")
         {:ok, _} = AeCanary.Transactions.insert_spend(spend_tx)
       end)
     end)
