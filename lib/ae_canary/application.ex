@@ -36,4 +36,8 @@ defmodule AeCanary.Application do
     AeCanaryWeb.Endpoint.config_change(changed, removed)
     :ok
   end
+
+  def build() do
+    Application.fetch_env!(:ae_canary, :build)
+  end
 end
