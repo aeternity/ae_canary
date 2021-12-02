@@ -70,12 +70,6 @@ defmodule AeCanaryWeb.Router do
         get "/addresses/new/:exchange_id", AddressController, :new_by_exchange
       end
 
-      scope "/transactions", Transactions, as: :transactions do
-        resources "/spend", SpendController
-        resources "/location", LocationController
-        get "/delete", SpendController, :delete_all
-      end
-
       scope "/tainted", TaintedAccounts, as: :tainted_accounts do
         resources "/accounts", AccountController
       end
