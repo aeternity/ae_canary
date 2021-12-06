@@ -9,7 +9,6 @@ use Mix.Config
 
 config :ae_canary,
   ecto_repos: [AeCanary.Repo],
-  mdw_url: "http://mdw.mainnet.aeternity.io/mdw/",
   node_url: "https://mainnet.aeternity.io/",
   site_address: "localhost"
 
