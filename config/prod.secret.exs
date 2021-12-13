@@ -37,13 +37,6 @@ guardian_secret_key =
     Please run mix guardian.gen.secret
     """
 
-mdw_url =
-  System.get_env("MDW_URL") ||
-    raise """
-    environment variable MDW_URL is missing.
-    This is the address of the Aeternity MDW to be used for data fetching
-    """
-
 site_address =
   System.get_env("EMAIL_SITE_ADDRESS") ||
     raise """
@@ -100,7 +93,6 @@ config :ae_canary, AeCanaryWeb.Endpoint,
 config :ae_canary, AeCanary.Accounts.Guardian, secret_key: guardian_secret_key
 
 config :ae_canary,
-  mdw_url: mdw_url,
   site_address: site_address
 
 config :ae_canary, AeCanary.Mailer,

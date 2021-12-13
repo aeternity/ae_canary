@@ -40,7 +40,7 @@ defmodule AeCanary.AccountsTest do
 
     test "get_user!/1 returns the user with given id" do
       user = user_fixture()
-      assert Accounts.get_user!(user.id) == reset_virtual_fields(user)
+      assert Accounts.get_user!(user.id) == reset_virtual_fields(reset_associated_field(user))
     end
 
     test "create_user/1 with valid data creates a user" do
@@ -87,7 +87,7 @@ defmodule AeCanary.AccountsTest do
     test "update_user/2 with invalid data returns error changeset" do
       user = user_fixture()
       assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, @invalid_attrs)
-      assert reset_virtual_fields(user) == Accounts.get_user!(user.id)
+      assert reset_virtual_fields(reset_associated_field(user)) == Accounts.get_user!(user.id)
     end
 
     test "delete_user/1 deletes the user" do
@@ -108,5 +108,9 @@ defmodule AeCanary.AccountsTest do
 
   defp reset_virtual_fields(user) do
     %{user | password: nil, exchange_view: nil}
+  end
+
+  defp reset_associated_field(user) do
+    %{user | exchange_view: nil}
   end
 end

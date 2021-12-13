@@ -1,15 +1,5 @@
 # Settings
 
-## AE Middleware
-
-AeCanary consumes the API of [AE MDW](https://github.com/aeternity/ae_mdw). It
-relies on having a MDW service talking to a synced node. If there is any issue
-with the MDW or the node it relies on, this would impact the service of
-AeCanary as well.
-
-The service is configurable via a setting `MDW_URL`. It should include the
-scheme (`http://` or `https://`).
-
 ## Secrets
 
 ### Guardian secret key

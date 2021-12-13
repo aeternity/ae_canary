@@ -1,7 +1,7 @@
 <h2>Internal dashboard</h2>
 
-<% mdw = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Status.cache_handle) %>
-<%= if mdw do %>
+<% node_status = AeCanary.Mdw.Cache.Service.Status.get_data() %>
+<%= if node_status do %>
 <div class="row mb-3">
   <div class="col-sm-6">
     <div class="card">
@@ -11,7 +11,7 @@
       <div class="card-body">
         <% start = 437357 %>
         <% hf = 441444 %>
-        <% current = mdw.node_height %>
+        <% current = node_status.height %>
         <%= if (current >= hf) do %>
           Iris had arrived! 🎉🎉🎉
           <p class="text-muted">You should have already upgraded <a href="https://github.com/aeternity/aeternity/releases/tag/v6.0.0"><i class="bi bi-github"></i> your node</a> and <a href="https://github.com/aeternity/aepp-sdk-js"><i class="bi bi-github"></i> the JS SDK</a>.</p>
@@ -67,14 +67,13 @@
         <%= AeCanary.Mdw.Cache.Service.Status.name %>
       </div>
       <div class="card-body">
-        <% mdw = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Status.cache_handle) %>
-        <%= if mdw do %>
-        <p class="text-muted">version <%= mdw.mdw_version %>, sync<%= if mdw.mdw_synced do %>ed<% else %>ing<% end %></p>
-        <p class="text-muted">node version <%= mdw.node_version %>, sync<%= if mdw.node_syncing do %>ing<% else %>ed<% end %></p>
+        <% node_status = AeCanary.Mdw.Cache.Service.Status.get_data() %>
+        <%= if node_status do %>
+        <p class="text-muted">version <%= node_status.version %></p>
+        <p class="text-muted">height <%= node_status.height %></p>
         <% else %>
         <h6 class="card-subtitle mb-2 text-danger">disconnected</h6>
         <% end %>
-        <a href="#" class="btn disabled">More</a>
       </div>
     </div>
   </div>

@@ -7,7 +7,7 @@ defmodule AeCanary.Email do
         %User{email: email, name: name},
         exchange_name,
         addr,
-        %AeCanary.Transactions.Tx{} = tx
+        %AeCanary.Transactions.Spend{} = tx
       ) do
     new_email()
     |> to({name, email})

@@ -75,7 +75,6 @@ You will need the following environment variables:
   * POSTGRES_DB - the database name to be created and used
   * GUARDIAN_SECRET_KEY - the secret to be used for producing JWT.
   * SECRET_KEY_BASE - the secret key for the Phoenix server.
-  * MDW_URL - the url of the AE Middleware
 
 For more detailed explanation of settings you can check the [settings
 document](/docs/settings.md)

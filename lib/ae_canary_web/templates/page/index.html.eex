@@ -1,5 +1,5 @@
-<% mdw = AeCanary.Mdw.Cache.get(AeCanary.Mdw.Cache.Service.Status.cache_handle) %>
-<%= if mdw do %>
+<% node_status = AeCanary.Mdw.Cache.Service.Status.get_data() %>
+<%= if node_status do %>
 <div class="row mb-3">
   <div class="col-sm-6">
     <div class="card">
@@ -9,7 +9,7 @@
       <div class="card-body">
         <% start = 437357 %>
         <% hf = 441444 %>
-        <% current = mdw.node_height %>
+        <% current = node_status.height %>
         <%= if (current >= hf) do %>
           Iris had arrived! 🎉🎉🎉
           <p class="text-muted">You should have already upgraded <a href="https://github.com/aeternity/aeternity/releases/tag/v6.0.0"><i class="bi bi-github"></i> your node</a> and <a href="https://github.com/aeternity/aepp-sdk-js"><i class="bi bi-github"></i> the JS SDK</a>.</p>

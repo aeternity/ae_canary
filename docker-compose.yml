@@ -24,7 +24,6 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-canary_db}
       - POSTGRES_HOST=${POSTGRES_HOST:-canary-postgres}
       ## please consult the docs for details
-      - MDW_URL=${MDW_URL}
       - EMAIL_SITE_ADDRESS=${EMAIL_SITE_ADDRESS}
       - SECRET_KEY_BASE=${SECRET_KEY_BASE}
       - GUARDIAN_SECRET_KEY=${GUARDIAN_SECRET_KEY}
