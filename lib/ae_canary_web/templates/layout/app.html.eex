@@ -79,6 +79,7 @@
             <h5>AeCanary</h5>
             <ul class="list-unstyled text-small">
               <li class="mb-1"><a class="link-secondary text-decoration-none" href="https://github.com/aeternity/ae_canary">GitHub repo</a></li>
+              <li class="mb-1"><a class="link-secondary text-decoration-none" href="https://github.com/aeternity/ae_canary/commit/<%= AeCanary.Application.build() %>">Build: <%= AeCanary.Application.build() |> String.split_at(7) |> elem(0) %></a></li>
             </ul>
           </div>
           <div class="col-6 col-md">

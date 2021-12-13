@@ -7,10 +7,13 @@
 # General application configuration
 use Mix.Config
 
+git_sha = System.cmd("git", ["rev-parse", "HEAD"]) |> elem(0) |> String.trim()
+
 config :ae_canary,
   ecto_repos: [AeCanary.Repo],
   node_url: "https://mainnet.aeternity.io/",
-  site_address: "localhost"
+  site_address: "localhost",
+  build: git_sha
 
 # Configures the endpoint
 config :ae_canary, AeCanaryWeb.Endpoint,
