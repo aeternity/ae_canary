@@ -46,7 +46,8 @@ config :ae_canary, AeCanary.Mdw.Cache.Service.Exchange,
 
 config :ae_canary, AeCanary.ForkMonitor,
   fork_monitor_http_client: HTTPoison,
-  max_sync_depth: 50_000
+  max_sync_depth: 50_000,
+  active_backfill: true
 
 config :ae_canary, AeCanary.Mdw.Cache.Service.IdleDetector,
   alert_idle_minutes: 40,

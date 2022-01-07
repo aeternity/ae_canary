@@ -3,7 +3,15 @@ defmodule AeCanary.ForkMonitor.SyncService do
   require Logger
 
   defmodule State do
-    defstruct [:chain_walker_pid, :chains, :top_height, :max_depth, :sync_status]
+    defstruct [
+      :chain_walker_pid,
+      :chains,
+      :top_height,
+      :max_depth,
+      :sync_status,
+      :backfill,
+      :backfill_pid
+    ]
   end
 
   @refresh_interval 180_000
@@ -13,13 +21,14 @@ defmodule AeCanary.ForkMonitor.SyncService do
     # you may want to register your server with `name: __MODULE__`
     # as a third argument to `start_link`
     max_depth = config(:max_sync_depth, 50_000)
-    GenServer.start_link(__MODULE__, [max_depth], name: __MODULE__)
+    backfill = config(:active_backfill, false)
+    GenServer.start_link(__MODULE__, [max_depth, backfill], name: __MODULE__)
   end
 
-  def init([max_depth]) do
+  def init([max_depth, backfill]) do
     Process.flag(:trap_exit, true)
     Process.send_after(self(), :run_sync, @refresh_interval)
-    {:ok, %State{max_depth: max_depth, sync_status: :waiting}}
+    {:ok, %State{max_depth: max_depth, backfill: backfill, sync_status: :waiting}}
   end
 
   def handle_call(:get_status, _from, state) do
@@ -50,6 +59,11 @@ defmodule AeCanary.ForkMonitor.SyncService do
      }}
   end
 
+  def handle_info(:finished_sync, %State{backfill_pid: nil, backfill: true} = state) do
+    {:ok, pid} = Task.start_link(AeCanary.ForkMonitor.Model.TransactionBackfill, :backfill, [])
+    {:noreply, %{state | sync_status: :synced, backfill_pid: pid}}
+  end
+
   def handle_info(:finished_sync, state) do
     {:noreply, %{state | sync_status: :synced}}
   end
@@ -64,6 +78,11 @@ defmodule AeCanary.ForkMonitor.SyncService do
     Logger.error("Chain walker process crashed #{inspect(err)}")
     Process.send_after(self(), :run_sync, @refresh_interval)
     {:noreply, %{state | sync_status: :error, chain_walker_pid: nil}}
+  end
+
+  def handle_info({:EXIT, pid, _}, %State{backfill_pid: bpid} = state)
+      when pid == bpid do
+    {:noreply, %{state | backfill_pid: nil}}
   end
 
   def handle_info({:progress, topHash, current}, %State{chains: chains} = state) do
