@@ -3,6 +3,7 @@ defmodule AeCanary.ForkMonitor.Model do
 
   alias AeCanary.Repo
   alias AeCanary.ForkMonitor.Model.Block
+  alias AeCanary.Transactions.Spend
 
   def block_exists?(hash) do
     query = from n in Block, where: n.keyHash == ^hash
@@ -13,6 +14,19 @@ defmodule AeCanary.ForkMonitor.Model do
   def count_blocks() do
     query = from n in Block, select: count("*")
     Repo.one(query)
+  end
+
+  def list_empty_blocks() do
+    query =
+      from b in Block,
+        left_join: s in Spend,
+        on: b.keyHash == s.keyblock_hash,
+        where: b.backfill == false,
+        group_by: b.keyHash,
+        having: count(s) == 0,
+        select: b
+
+    Repo.all(query)
   end
 
   def list_blocks() do
