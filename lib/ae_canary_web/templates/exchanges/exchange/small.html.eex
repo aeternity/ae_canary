@@ -42,21 +42,21 @@
         <% labels = hd(exchanges) |> (&(&1.aggregated)).() |> Enum.map(&("#{&1.date.month}/#{&1.date.day}")) |> Enum.reverse() %>
         <% data_sets_txs = Enum.map(exchanges,
           fn(e) -> %{name: e.name,
-                     data: Enum.map(e.aggregated, &(&1.txs)) |> Enum.reverse()}
+                     data: Enum.map(e.aggregated, &(&1.tx_count)) |> Enum.reverse()}
           end) %>
         <% data_sets_exposure = Enum.map(exchanges,
           fn(e) -> %{name: e.name,
-                     data: Enum.map(e.aggregated, &(&1.deposits - &1.withdrawals)) |> Enum.reverse()}
+                     data: Enum.map(e.aggregated, &(&1.exposure)) |> Enum.reverse()}
           end) %>
         <div class="mb-3 row">
           <div class="col-lg-6">
             <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Transactions by date',
-                                                                                labels: labels, 
+                                                                                labels: labels,
                                                                                 data_sets: data_sets_txs}) %>
           </div>
           <div class="col-lg-6">
             <%= render AeCanaryWeb.PageView, "chart.html", Map.merge(assigns, %{ chart_title: 'Exposure by date',
-                                                                                labels: labels, 
+                                                                                labels: labels,
                                                                                 data_sets: data_sets_exposure}) %>
           </div>
         </div>

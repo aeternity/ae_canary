@@ -247,38 +247,26 @@ defmodule AeCanary.Transactions do
     Repo.delete_all(Spend)
   end
 
-  def aggregated_for_addresses(role, addresses, from_date) do
-    query =
-      case role do
-        :sender_id ->
-          from(s in Spend,
-            as: :spend,
-            where: s.sender_id in ^addresses and fragment("date(?)", s.micro_time) >= ^from_date,
-            group_by: [s.sender_id, fragment("date(?)", s.micro_time)],
-            select: %{
-              address: s.sender_id,
-              date: fragment("date(?)", s.micro_time),
-              txs: count(),
-              sum: sum(s.amount)
-            }
-          )
-
-        :recipient_id ->
-          from(s in Spend,
-            as: :spend,
-            where:
-              s.recipient_id in ^addresses and fragment("date(?)", s.micro_time) >= ^from_date,
-            group_by: [s.recipient_id, fragment("date(?)", s.micro_time)],
-            select: %{
-              address: s.recipient_id,
-              date: fragment("date(?)", s.micro_time),
-              txs: count(),
-              sum: sum(s.amount)
-            }
-          )
-      end
-
-    query
+  def aggregated_for_address(:sender_id, address, from_date) do
+    from(s in Spend,
+      as: :spend,
+      where: s.sender_id == ^address,
+      where: fragment("date(?)", s.micro_time) >= ^from_date,
+      group_by: fragment("date(?)", s.micro_time),
+      select: {fragment("date(?)", s.micro_time), %{count: count(), sum: sum(s.amount)}}
+    )
     |> Repo.all()
+    |> Enum.into(%{})
+  end
+
+  def aggregated_for_address(:recipient_id, address, from_date) do
+    from(s in Spend,
+      where: s.recipient_id == ^address,
+      where: fragment("date(?)", s.micro_time) >= ^from_date,
+      group_by: fragment("date(?)", s.micro_time),
+      select: {fragment("date(?)", s.micro_time), %{count: count(), sum: sum(s.amount)}}
+    )
+    |> Repo.all()
+    |> Enum.into(%{})
   end
 end
