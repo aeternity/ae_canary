@@ -17,245 +17,135 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
 
   @impl true
   def refresh(_) do
-    all_exchanges_and_addresses = Exchanges.list_exchanges_and_addresses()
     update_start = DateTime.utc_now() |> DateTime.to_date()
-    updates = refresh_from_db(update_start, all_exchanges_and_addresses)
+    alerts_start = alerts_start(update_start)
+    dates = get_dates(update_start)
+
+    all = Exchanges.list_exchanges_and_addresses()
+    exchanges = exchanges_data(all, dates)
+    alerts = alerts(exchanges, alerts_start)
+
     users = AeCanary.Accounts.list_users()
-    AeCanary.Mdw.Notifier.send_notifications(updates.alerts_for_past_days, users)
-    updates
+    AeCanary.Mdw.Notifier.send_notifications(alerts, users)
+
+    %{
+      exchanges: exchanges,
+      alerts_for_past_days: alerts
+    }
   end
 
-  defp refresh_from_db(update_start, all_exchanges_and_addresses) do
-    all_dates =
-      0..show_period_in_days()
-      |> Enum.map(&Timex.shift(update_start, days: -1 * &1))
+  def exchanges_data(exchanges, dates) do
+    exchanges
+    |> Enum.map(fn %{addresses: addrs} = exchange ->
+      data = addresses_data(addrs, dates)
+      Map.merge(exchange, data)
+    end)
+    |> Enum.sort(&(&1.txs >= &2.txs))
+  end
 
-    ## fetch from DB
-    addresses =
-      all_exchanges_and_addresses
-      |> (fn exchanges_and_addresses ->
-            for %{addresses: addrs} <- exchanges_and_addresses, do: addrs
-          end).()
-      |> List.flatten()
-      |> (fn addrs -> for a <- addrs, do: a.addr end).()
-
-    from_date = Timex.shift(update_start, days: -1 * show_period_in_days())
-
-    default_addresses_data =
-      Enum.map(all_dates, fn date ->
-        Enum.map(addresses, fn addr -> {{date, addr}, %{sum: 0, txs: 0}} end)
+  def addresses_data(addresses, dates) do
+    {addrs, aggregated} =
+      addresses
+      |> Enum.map_reduce(nil, fn address, acc ->
+        data = address_data(address.addr, dates)
+        new_acc = merge_dataset_data(acc, data.dataset)
+        {Map.merge(address, data), new_acc}
       end)
-      |> List.flatten()
-      |> Enum.into(%{})
 
-    to_map = fn records ->
-      found_data =
-        records
-        |> Enum.map(fn %{address: addr, date: date, sum: sum, txs: txs_cnt} ->
-          {{date, addr}, %{sum: sum, txs: txs_cnt}}
-        end)
-        |> Enum.into(%{})
+    has_txs_past_days =
+      aggregated
+      |> Enum.slice(0..(has_transactions_in_the_past_days_interval() - 1))
+      |> Enum.any?(&(&1.tx_count > 0))
 
-      Map.merge(default_addresses_data, found_data)
-    end
+    txs_total = aggregated |> Enum.reduce(0, &(&1.tx_count + &2))
+    upper_boundaries = boundaries(aggregated)
+
+    %{
+      upper_boundaries: upper_boundaries,
+      addresses: addrs,
+      aggregated: aggregated,
+      has_txs_past_days: has_txs_past_days,
+      txs: txs_total
+    }
+  end
+
+  def address_data(address, [from_date | _] = dates) do
+    deposits =
+      :recipient_id
+      |> Transactions.aggregated_for_address(address, from_date)
 
     withdrawals =
-      Transactions.aggregated_for_addresses(:sender_id, addresses, from_date) |> to_map.()
+      :sender_id
+      |> Transactions.aggregated_for_address(address, from_date)
 
-    deposits =
-      Transactions.aggregated_for_addresses(:recipient_id, addresses, from_date) |> to_map.()
+    has_txs = map_size(withdrawals) + map_size(deposits) > 0
 
-    {true, _, _, _} =
-      {map_size(withdrawals) == map_size(deposits), map_size(withdrawals), map_size(deposits),
-       map_size(default_addresses_data)}
+    dataset =
+      dates
+      |> Enum.reverse()
+      |> Enum.map(fn date ->
+        deposit = Map.get(deposits, date, %{sum: 0, count: 0})
+        withdrawal = Map.get(withdrawals, date, %{sum: 0, count: 0})
 
-    addresses_and_data =
-      Map.merge(deposits, withdrawals, fn {date, addr}, d, w ->
-        {addr, %{date: date, deposits: d, withdrawals: w}}
+        %{
+          date: date,
+          exposure: deposit.sum - withdrawal.sum,
+          tx_count: deposit.count + withdrawal.count,
+          deposits_sum: deposit.sum,
+          deposits_count: deposit.count,
+          withdrawals_sum: withdrawal.sum,
+          withdrawals_count: withdrawal.count
+        }
       end)
-      |> Map.values()
-      |> Enum.reduce(
-        %{},
-        fn {addr, data}, accum ->
-          old_data = Map.get(accum, addr, [])
-          Map.put(accum, addr, [data | old_data])
-        end
-      )
-      |> Enum.map(fn {address, data} ->
-        {address, Enum.sort(data, &(Date.compare(&1.date, &2.date) != :lt))}
-      end)
-      |> Enum.map(fn {address, data} ->
-        {address,
-         %{data: data, has_txs: Enum.any?(data, &(&1.deposits.txs > 0 || &1.withdrawals.txs > 0))}}
-      end)
-      |> Enum.into(%{})
 
-    exchanges =
-      Enum.map(
-        all_exchanges_and_addresses,
-        fn %{addresses: addrs0} = e ->
-          addrs =
-            addrs0
-            |> Enum.map(fn a ->
-              %{data: data, has_txs: has_txs} = Map.fetch!(addresses_and_data, a.addr)
+    big_deposits = suspicious_deposits(address, from_date)
+    upper_boundaries = boundaries(dataset)
+    over_the_boundaries = over_the_boundaries(dataset, from_date, upper_boundaries)
 
-              suspicious_deposits =
-                Transactions.list_spend_txs_by(%{
-                  recipient_id: a.addr,
-                  date_from: Timex.shift(update_start, days: -1 * show_period_in_days()),
-                  amount_at_least: suspicious_deposits_threshold()
-                })
-
-              boundaries =
-                data
-                |> Enum.map(&(&1.deposits.sum - &1.withdrawals.sum))
-                |> upper_boundaries()
-
-              [lower_boundary, upper_boundary] =
-                boundaries
-                |> Enum.sort()
-
-              last_day_in_alert_scope =
-                Timex.shift(update_start, days: -1 * alert_interval_in_days())
-
-              over_the_boundaries =
-                data
-                ## :gt or :eq
-                |> Enum.filter(&(Date.compare(&1.date, last_day_in_alert_scope) != :lt))
-                |> Enum.filter(
-                  &(&1.deposits.sum - &1.withdrawals.sum >= lower_boundary and
-                      &1.deposits.sum - &1.withdrawals.sum > 0)
-                )
-                |> Enum.map(fn %{date: date, deposits: deposits, withdrawals: withdrawals} ->
-                  message =
-                    case deposits.sum - withdrawals.sum do
-                      exposure when exposure > upper_boundary ->
-                        %{boundary: "upper", exposure: exposure, limit: upper_boundary}
-
-                      exposure ->
-                        %{boundary: "lower", exposure: exposure, limit: lower_boundary}
-                    end
-
-                  %{date: date, message: message}
-                end)
-
-              Map.merge(a, %{
-                data: data,
-                has_txs: has_txs,
-                big_deposits: suspicious_deposits,
-                upper_boundaries: boundaries,
-                over_the_boundaries: over_the_boundaries
-              })
-            end)
-
-          aggregated =
-            addrs
-            |> Enum.map(& &1.data)
-            |> Enum.zip()
-            |> Enum.map(fn tuple ->
-              tuple
-              |> Tuple.to_list()
-              |> Enum.reduce(
-                %{deposits: 0, txs: 0, withdrawals: 0},
-                fn %{date: date, deposits: d1, withdrawals: w1},
-                   %{txs: accum_txs, deposits: accum_d, withdrawals: accum_w} ->
-                  %{
-                    date: date,
-                    txs: d1.txs + w1.txs + accum_txs,
-                    deposits: d1.sum + accum_d,
-                    withdrawals: w1.sum + accum_w
-                  }
-                end
-              )
-            end)
-
-          has_txs_past_days =
-            aggregated
-            |> Enum.slice(0..(has_transactions_in_the_past_days_interval() - 1))
-            |> Enum.any?(&(&1.txs > 0))
-
-          txs_total =
-            aggregated
-            |> Enum.reduce(0, &(&1.txs + &2))
-
-          upper_boundaries =
-            upper_boundaries(aggregated |> Enum.map(&(&1.deposits - &1.withdrawals)))
-
-          Map.merge(e, %{
-            upper_boundaries: upper_boundaries,
-            addresses: addrs,
-            aggregated: aggregated,
-            has_txs_past_days: has_txs_past_days,
-            txs: txs_total
-          })
-        end
-      )
-      |> Enum.sort(&(&1.txs >= &2.txs))
-
-    seven_days_ago =
-      update_start
-      |> Timex.shift(days: -1 * alert_interval_in_days())
-
-    alerts_for_past_days =
-      exchanges
-      |> Enum.map(fn %{name: name, id: id, addresses: addresses} ->
-        interesting_addresses =
-          addresses
-          |> Enum.map(fn %{
-                           addr: addr,
-                           big_deposits: d,
-                           id: id,
-                           over_the_boundaries: over_the_boundaries
-                         } ->
-            deposits =
-              d
-              |> Enum.filter(
-                &(Date.compare(DateTime.to_date(&1.micro_time), seven_days_ago) != :lt)
-              )
-
-            case Enum.empty?(deposits) and Enum.empty?(over_the_boundaries) do
-              true ->
-                :skip
-
-              false ->
-                %{
-                  id: id,
-                  addr: addr,
-                  big_deposits: deposits,
-                  over_the_boundaries: over_the_boundaries
-                }
-            end
-          end)
-          |> Enum.filter(&(&1 != :skip))
-
-        case Enum.empty?(interesting_addresses) do
-          true -> :skip
-          false -> %{name: name, id: id, addresses: interesting_addresses}
-        end
-      end)
-      |> Enum.filter(&(&1 != :skip))
-
-    %{exchanges: exchanges, alerts_for_past_days: alerts_for_past_days}
+    %{
+      dataset: dataset,
+      has_txs: has_txs,
+      big_deposits: big_deposits,
+      upper_boundaries: upper_boundaries,
+      over_the_boundaries: over_the_boundaries
+    }
   end
 
-  def show_period_in_days(), do: config(:stats_interval_in_days, 30)
+  defp merge_dataset_data(nil, dataset), do: dataset
 
-  def alert_interval_in_days(), do: config(:show_alerts_interval_in_days, 7)
+  defp merge_dataset_data(acc, dataset) do
+    acc
+    |> Enum.zip(dataset)
+    |> Enum.map(fn {
+                     %{date: date} = acc,
+                     %{date: date} = datapoint
+                   } ->
+      %{
+        date: date,
+        exposure: datapoint_sum(:exposure, acc, datapoint),
+        tx_count: datapoint_sum(:tx_count, acc, datapoint),
+        deposits_sum: datapoint_sum(:deposits_sum, acc, datapoint),
+        deposits_count: datapoint_sum(:deposits_count, acc, datapoint),
+        withdrawals_sum: datapoint_sum(:withdrawals_sum, acc, datapoint),
+        withdrawals_count: datapoint_sum(:withdrawals_count, acc, datapoint)
+      }
+    end)
+  end
 
-  def has_transactions_in_the_past_days_interval(),
-    do: config(:has_transactions_in_the_past_days_interval, 7)
+  defp datapoint_sum(key, l, r), do: l[key] + r[key]
 
-  def suspicious_deposits_threshold(), do: config(:suspicious_deposits_threshold, 500_000)
+  def suspicious_deposits(addr, from_date) do
+    Transactions.list_spend_txs_by(%{
+      recipient_id: addr,
+      date_from: from_date,
+      amount_at_least: suspicious_deposits_threshold()
+    })
+  end
 
-  def iqr_use_positive_exposure_only(), do: config(:iqr_use_positive_exposure_only, false)
-  def iqr_lower_boundary_multiplier(), do: config(:iqr_lower_boundary_multiplier, 1.5)
-  def iqr_upper_boundary_multiplier(), do: config(:iqr_upper_boundary_multiplier, 3)
-
-  defp config(key, default) do
-    case Application.fetch_env(:ae_canary, AeCanary.Mdw.Cache.Service.Exchange) do
-      :error -> default
-      {:ok, v} -> Keyword.get(v, key, default)
-    end
+  def boundaries(dataset) do
+    dataset
+    |> Enum.map(& &1.exposure)
+    |> upper_boundaries()
   end
 
   defp upper_boundaries(list0) do
@@ -278,6 +168,98 @@ defmodule AeCanary.Mdw.Cache.Service.Exchange do
             IR.q3_fence(q3, iqr, multiplier)
           end
         )
+        |> Enum.sort()
+    end
+  end
+
+  def over_the_boundaries(dataset, time, [lower, upper]) do
+    last_day_in_alert_scope = Timex.shift(time, days: -1 * alert_interval_in_days())
+
+    dataset
+    |> Enum.filter(&(Date.compare(&1.date, last_day_in_alert_scope) != :lt))
+    |> Enum.filter(&(&1.exposure > lower and &1.exposure > 0))
+    |> Enum.map(fn %{date: date, exposure: exposure} ->
+      message =
+        if exposure > upper do
+          %{boundary: "upper", exposure: exposure, limit: upper}
+        else
+          %{boundary: "lower", exposure: exposure, limit: lower}
+        end
+
+      %{date: date, message: message}
+    end)
+  end
+
+  def alerts(exchanges, from_date),
+    do:
+      exchanges
+      |> Enum.flat_map(fn exchange -> exchange_alerts(exchange, from_date) end)
+
+  defp exchange_alerts(%{name: name, id: id, addresses: addresses}, from_date) do
+    addresses
+    |> Enum.flat_map(fn address -> address_alerts(address, from_date) end)
+    |> maybe_exchange_alert(id, name)
+  end
+
+  defp maybe_exchange_alert([], _, _), do: []
+  defp maybe_exchange_alert(data, id, name), do: [%{name: name, id: id, addresses: data}]
+
+  defp address_alerts(addr, from_date) do
+    deposits = filter_deposits(addr.big_deposits, from_date)
+    boundaries = filter_boundaries(addr.over_the_boundaries, from_date)
+
+    maybe_address_alert(deposits, boundaries, addr.id, addr.addr)
+  end
+
+  def filter_deposits(deposits, from_date) do
+    deposits
+    |> Enum.filter(&(Date.compare(DateTime.to_date(&1.micro_time), from_date) != :lt))
+  end
+
+  def filter_boundaries(boundaries, from_date) do
+    boundaries
+    |> Enum.filter(&(Date.compare(&1.date, from_date) != :lt))
+  end
+
+  defp maybe_address_alert([], [], _, _), do: []
+
+  defp maybe_address_alert(deposits, boundaries, id, addr),
+    do: [
+      %{
+        id: id,
+        addr: addr,
+        big_deposits: deposits,
+        over_the_boundaries: boundaries
+      }
+    ]
+
+  defp get_dates(today),
+    do:
+      show_period_in_days()..0
+      |> Enum.map(&Timex.shift(today, days: -1 * &1))
+
+  defp alerts_start(today),
+    do:
+      today
+      |> Timex.shift(days: -1 * alert_interval_in_days())
+
+  def show_period_in_days(), do: config(:stats_interval_in_days, 30)
+
+  def alert_interval_in_days(), do: config(:show_alerts_interval_in_days, 7)
+
+  def has_transactions_in_the_past_days_interval(),
+    do: config(:has_transactions_in_the_past_days_interval, 7)
+
+  def suspicious_deposits_threshold(), do: config(:suspicious_deposits_threshold, 500_000)
+
+  def iqr_use_positive_exposure_only(), do: config(:iqr_use_positive_exposure_only, false)
+  def iqr_lower_boundary_multiplier(), do: config(:iqr_lower_boundary_multiplier, 1.5)
+  def iqr_upper_boundary_multiplier(), do: config(:iqr_upper_boundary_multiplier, 3)
+
+  defp config(key, default) do
+    case Application.fetch_env(:ae_canary, AeCanary.Mdw.Cache.Service.Exchange) do
+      :error -> default
+      {:ok, v} -> Keyword.get(v, key, default)
     end
   end
 end
